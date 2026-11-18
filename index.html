@@ -379,7 +379,7 @@ dialog .tiers b{width:52px}
   <h2>Como se joga</h2>
   <ol>
     <li>Aparece uma pergunta de futebol com várias respostas certas (por exemplo, "uma seleção que já foi campeã do mundo").</li>
-    <li>Escreve e escolhe a resposta na lista. Tens <b>25 segundos</b>. Se errares, o guarda-redes defende e podes tentar outra vez, mas <b>perdes 5 segundos</b>.</li>
+    <li>Escreve e escolhe a resposta na lista. Tens <b>25 segundos</b>. Se errares, o guarda-redes defende e <b>podes tentar outra vez</b> enquanto houver tempo.</li>
     <li>Qualquer resposta certa marca. Mas <b>quanto menos óbvia for, mais longe é o remate</b> — e mais pontos. Dizer "Brasil" é um penálti; dizer "Uruguai" é do meio-campo.</li>
   </ol>
   <div class="tiers">
@@ -695,7 +695,7 @@ function startTimer() {
   timerId = setInterval(() => { left = Math.max(0, Math.ceil((S.tEnd - Date.now()) / 1000)); $('#tnum').textContent = left; tm.classList.toggle('low', left <= 5); if (left <= 0) { clearInterval(timerId); answer(null, true); } }, 200);
 }
 // resposta errada: menos 5 segundos (o anel do relógio salta para a frente)
-const PENALTY = 5;
+const PENALTY = 0;   // segundos perdidos por resposta errada (0 = nenhum)
 function penalize() {
   S.tEnd -= PENALTY * 1000; const ms = Math.max(0, S.tEnd - Date.now()), fg = $('#tfg'), tm = $('#timer');
   fg.style.transition = 'none'; fg.style.strokeDashoffset = (113.1 * (1 - ms / (QTIME * 1000))).toFixed(1); void fg.getBoundingClientRect();
@@ -705,14 +705,15 @@ function penalize() {
 }
 function keeperSave() { const side = Math.random() < .5 ? -1 : 1; keeper(side * 14, side * 65, 200); setTimeout(() => { const k = document.getElementById('kbody'); if (k) tween(300, t => k.setAttribute('transform', `translate(${(side * 14 * (1 - t)).toFixed(1)},${(4 * (1 - t)).toFixed(1)}) rotate(${(side * 65 * (1 - t)).toFixed(0)} 0 -8)`), easeOut); }, 380); }
 function wrongTry(p) {
-  S.tries.push(p); penalize(); keeperSave();
-  flash('DEFENDIDO', `−${PENALTY} s · tenta outra vez`, '#ff5d6c');
+  S.tries.push(p); if (PENALTY) penalize(); keeperSave();
+  flash('DEFENDIDO', PENALTY ? `−${PENALTY} s · tenta outra vez` : 'tenta outra vez', '#ff5d6c');
   try { navigator.vibrate && navigator.vibrate([20, 30, 20]); } catch (e) {}
   const m = $('#tryMsg'), st = stOf(S.q, p);
-  m.innerHTML = `✕ ${esc(p.nome)} não conta${st ? ` <small>(${esc(st)})</small>` : ''} · −${PENALTY} s`;
+  m.innerHTML = `✕ ${esc(p.nome)} não conta${st ? ` <small>(${esc(st)})</small>` : ''} · tenta outra vez`;
   m.hidden = false; m.classList.remove('go'); void m.offsetWidth; m.classList.add('go');
   $('#answer').classList.add('wrong'); setTimeout(() => $('#answer').classList.remove('wrong'), 700);
   const inp = $('#resp'); inp.value = ''; hideSug(); try { inp.focus({preventScroll:true}); } catch (e) {}
+  $('#answer').scrollIntoView({block:'nearest'});
 }
 function stopTimer() { clearInterval(timerId); const fg = $('#tfg'); const cs = getComputedStyle(fg).strokeDashoffset; fg.style.transition = 'none'; fg.style.strokeDashoffset = cs; $('#timer').classList.remove('low'); }
 
@@ -743,7 +744,7 @@ function hideSug() { sugList = []; sugSel = 0; $('#sug').classList.remove('on');
 async function answer(p, timeout = false) {
   if (!S || S.answered) return;
   if (p && !S.q.ok(p)) {   // errou: perde 5 s e tenta outra vez (se ainda houver tempo)
-    if (S.tEnd - Date.now() > PENALTY * 1000) { wrongTry(p); return; }
+    if (S.tEnd - Date.now() > Math.max(PENALTY, 1) * 1000) { wrongTry(p); return; }
     S.tries.push(p); p = null; timeout = true;   // sem tempo para mais: acaba a pergunta
   }
   S.answered = true; busy = true;
@@ -782,7 +783,7 @@ function renderReveal(q, p, tier, pts, timeout, lifeBack) {
   if (tier) h += `<div class="badge" style="background:${t.hex}">${t.m}<br>m</div><div><b>${t.nome}</b><span>${esc(p.nome)}${stOf(q, p) ? ' · ' + esc(stOf(q, p)) : ''}</span></div><div class="pts" style="color:${t.hex}">+${pts}</div>`;
   else h += `<div class="badge miss">✕</div><div><b>${timeout ? 'Acabou o tempo' : 'Passaste'}</b><span>Havia ${v.length} respostas certas</span></div><div class="pts" style="color:var(--mute)">0</div>`;
   h += '</div>';
-  if (S.tries.length) h += `<p class="tries">${S.tries.length === 1 ? 'Tentativa falhada' : 'Tentativas falhadas'} (−${PENALTY} s cada): ${S.tries.map(x => `<b>${esc(x.nome)}</b>${stOf(q, x) ? ' (' + esc(stOf(q, x)) + ')' : ''}`).join(', ')}</p>`;
+  if (S.tries.length) h += `<p class="tries">${S.tries.length === 1 ? 'Tentativa falhada' : 'Tentativas falhadas'}${PENALTY ? ` (−${PENALTY} s cada)` : ''}: ${S.tries.map(x => `<b>${esc(x.nome)}</b>${stOf(q, x) ? ' (' + esc(stOf(q, x)) + ')' : ''}`).join(', ')}</p>`;
   if (tier) {
     const i = v.indexOf(p);
     h += `<p class="why">${i === 0 ? '<b>Era a resposta mais óbvia</b>' : `Era a <b>${i + 1}.ª</b> resposta mais óbvia`} de ${v.length} possíveis${q.cat === 'pl' ? ` (popularidade entre os adeptos: ${String(p.popular).replace('.', ',')}%)` : ''}.</p>`;
@@ -1050,6 +1051,8 @@ inp.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { if (sugList[sugSel]) answer(sugList[sugSel]); e.preventDefault(); }
   else if (e.key === 'Escape') hideSug();
 });
+// no iPhone o teclado fecha-se se o toque na lista tirar o foco à caixa: impedir isso
+['touchstart', 'mousedown'].forEach(ev => $('#sug').addEventListener(ev, e => { if (e.target.closest('li')) e.preventDefault(); }, {passive:false}));
 $('#sug').addEventListener('pointerdown', e => { const li = e.target.closest('li[data-i]'); if (!li) return; e.preventDefault(); answer(sugList[Number(li.dataset.i)]); });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
