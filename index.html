@@ -576,9 +576,10 @@ function genQ(r, used, per, cat) {
   if (cat === 'ligapt') return ligapt(false);
   if (cat === 'historia') return tira(HQ);
   if (cat === 'portugal' || cat === 'mundo') return tira(BQ.filter(q => q.cat === cat));
-  // "Tudo" e "liga": mistura de todas; a "liga" (dos amigos) não usa perguntas desta época, que mudam com os dados
-  const semAtual = cat === 'liga';
-  const fontes = [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', semAtual ? 0 : .18]];
+  // "Tudo" e "liga" (os jogos da Liga dos Amigos): mistura de TODAS as perguntas, incluindo as desta época.
+  // Os dados mudam só de madrugada (Action dados.yml), por isso o jogo n de cada dia é igual para os quatro.
+  const semAtual = false;
+  const fontes = [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', .18]];
   let x = r() * fontes.reduce((s, f) => s + f[1], 0), q = null;
   for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
   return q || tira(BQ) || tira(HQ) || ligapt(semAtual);
