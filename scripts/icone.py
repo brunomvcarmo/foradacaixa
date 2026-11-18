@@ -106,6 +106,58 @@ D = {
 }
 
 
+# ---------- variantes com referência à distância ou ao conhecimento (sempre com a bola) ----------
+TICKS = lambda x0, x1, y, n, h, c: ''.join(f'<line x1="{x0 + (x1 - x0) * i / n:.1f}" y1="{y}" x2="{x0 + (x1 - x0) * i / n:.1f}" y2="{y - (h if i % 5 == 0 else h * .5)}" stroke="{c}" stroke-width="{5 if i % 5 == 0 else 3}"/>' for i in range(n + 1))
+D.update({
+    # A. ponto de interrogação: a bola é o ponto (conhecimento)
+    'pergunta': (f".i{{background:repeating-linear-gradient(110deg,#226640 0 46px,{VERDE} 46px 92px)}}"
+                 ".q{position:absolute;inset:0}"
+                 ".ball{position:absolute;left:176px;top:318px;width:164px;height:164px;filter:drop-shadow(-4px 12px 12px rgba(29,43,34,.5))}"
+                 f".tag{{position:absolute;right:30px;bottom:44px;background:{MOSTARDA};color:{ESCURO};font:800 46px 'Barlow Semi Condensed';padding:2px 16px;border-radius:12px;border:5px solid {ESCURO};box-shadow:6px 6px 0 {ESCURO};transform:rotate(-6deg)}}",
+                 '<svg class="q" viewBox="0 0 512 512"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="66">'
+                 f'<path d="M148 176C148 66 364 58 364 170C364 246 258 236 258 300" stroke="{ESCURO}" transform="translate(12 12)"/>'
+                 f'<path d="M148 176C148 66 364 58 364 170C364 246 258 236 258 300" stroke="{CREME}"/></g></svg>'
+                 + bola_3d() + '<div class="tag">50 m</div>'),
+    # B. remate de longe: relvado em perspetiva com as distâncias e a bola a voar para a baliza
+    'distancia': (f".i{{background:{CREME}}}"
+                  ".p{position:absolute;inset:0}"
+                  ".ball{position:absolute;left:286px;top:92px;width:150px;height:150px;filter:drop-shadow(-4px 14px 12px rgba(29,43,34,.45))}",
+                  '<svg class="p" viewBox="0 0 512 512"><defs><linearGradient id="rv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a6f43"/><stop offset="1" stop-color="#1e5a37"/></linearGradient></defs>'
+                  '<path d="M150 120H362L512 512H0Z" fill="url(#rv)"/>'
+                  + ''.join(f'<path d="M{150 - 150 * t:.0f} {120 + 392 * t:.0f}H{362 + 150 * t:.0f}" stroke="{CREME}" stroke-width="{3 + 5 * t:.1f}" opacity=".9"/>'
+                            f'<text x="{170 - 150 * t:.0f}" y="{110 + 392 * t:.0f}" font-family="Alfa Slab One" font-size="{30 + 30 * t:.0f}" fill="{CREME}" stroke="{ESCURO}" stroke-width="{5 + 4 * t:.1f}" paint-order="stroke" stroke-linejoin="round">{lbl}</text>'
+                            for t, lbl in ((.12, '11'), (.36, '25'), (.78, '50 m')))
+                  + f'<rect x="206" y="64" width="100" height="56" fill="none" stroke="{ESCURO}" stroke-width="11" transform="translate(5 5)"/>'
+                  f'<rect x="206" y="64" width="100" height="56" fill="none" stroke="#fffaf0" stroke-width="11"/>'
+                  f'<path d="M330 480C300 330 300 230 340 175" fill="none" stroke="{VERMELHO}" stroke-width="13" stroke-dasharray="4 26" stroke-linecap="round"/></svg>'
+                  + bola_3d()),
+    # C. lâmpada: a bola é a ideia (conhecimento)
+    'ideia': (f".i{{background:radial-gradient(circle at 50% 38%,#2a7a4c 0,{VERDE} 45%,#123824 100%)}}"
+              ".r{position:absolute;inset:0}"
+              ".ball{position:absolute;left:136px;top:66px;width:240px;height:240px;filter:drop-shadow(0 0 30px rgba(232,179,58,.75))}",
+              '<svg class="r" viewBox="0 0 512 512">'
+              + ''.join(f'<line x1="{256 + 150 * math.cos(math.radians(a)):.0f}" y1="{183 + 150 * math.sin(math.radians(a)):.0f}" x2="{256 + 192 * math.cos(math.radians(a)):.0f}" y2="{183 + 192 * math.sin(math.radians(a)):.0f}" stroke="{MOSTARDA}" stroke-width="18" stroke-linecap="round"/>' for a in (-155, -122, -90, -58, -25))
+              + f'<path d="M206 300H306L298 332H214Z" fill="{CREME}" stroke="{ESCURO}" stroke-width="6"/>'
+              + ''.join(f'<rect x="{212 + i * 3}" y="{336 + i * 28}" width="{88 - i * 6}" height="22" rx="8" fill="#c9bd9c" stroke="{ESCURO}" stroke-width="6"/>' for i in range(3))
+              + f'<path d="M232 420H280L268 446H244Z" fill="{ESCURO}"/></svg>' + bola_3d()),
+    # D. como o da FPL, mas o corte é uma fita métrica até aos 50 m (distância)
+    'fita': (f".i{{background:linear-gradient(150deg,#fbf4e3 0%,{CREME} 60%,#e9dcc0 100%)}}"
+             ".f{position:absolute;inset:0}"
+             f".t{{position:absolute;left:36px;top:52px;color:{VERDE};font-family:'Alfa Slab One',serif;font-size:196px;line-height:.9;letter-spacing:-4px;text-shadow:8px 8px 0 {VERMELHO}}}"
+             ".tr{position:absolute;height:13px;border-radius:7px;background:#1d2b22;transform:rotate(-13.5deg);transform-origin:100% 50%}"
+             ".ball{position:absolute;left:318px;top:150px;width:170px;height:170px;filter:drop-shadow(-4px 12px 12px rgba(29,43,34,.45))}",
+             '<div class="t">FdC</div>'
+             + ''.join(f'<div class="tr" style="left:{x}px;top:{y}px;width:{w}px;opacity:{o}"></div>' for x, y, w, o in [(196, 210, 140, .95), (150, 238, 186, .6), (216, 266, 120, .32)])
+             + '<svg class="f" viewBox="0 0 512 512"><g transform="rotate(-13.5 256 400)">'
+             f'<rect x="-40" y="352" width="600" height="104" fill="{ESCURO}" transform="translate(0 10)"/>'
+             f'<rect x="-40" y="352" width="600" height="104" fill="{MOSTARDA}" stroke="{ESCURO}" stroke-width="6"/>'
+             + TICKS(10, 500, 456, 50, 34, ESCURO)
+             + ''.join(f'<text x="{10 + 490 * v / 50:.0f}" y="410" text-anchor="middle" font-family="Alfa Slab One" font-size="{40 if v == 50 else 30}" fill="{VERMELHO if v == 50 else ESCURO}">{v}</text>' for v in (10, 20, 30))
+             + f'<text x="452" y="412" text-anchor="middle" font-family="Alfa Slab One" font-size="44" fill="{VERMELHO}">50m</text></g></svg>'
+             + bola_3d()),
+})
+
+
 def html(k):
     css, body = D[k]
     return f'<!doctype html><html><head><meta charset="utf-8">{FONT}<style>html,body{{margin:0}}{BASE}{css}</style></head><body><div class="i">{body}</div></body></html>'
