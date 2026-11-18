@@ -1,0 +1,29 @@
+# Atualiza as perguntas da Premier League (dados.json) duas vezes por semana, sozinho.
+name: Atualizar perguntas da Premier League
+
+on:
+  schedule:
+    - cron: '17 8 * * 2'   # terça 08:17 UTC
+    - cron: '17 8 * * 5'   # sexta 08:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dados:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Descarregar as estatísticas da época
+        run: python scripts/quiz_dados.py
+      - name: Guardar dados.json
+        run: |
+          git config user.name "fora-da-caixa-bot"
+          git config user.email "fora-da-caixa-bot@users.noreply.github.com"
+          git add dados.json
+          if git diff --staged --quiet; then echo "Sem alterações."; else git commit -m "Perguntas da Premier League $(date -u +'%Y-%m-%d')" && git pull --rebase && git push; fi
