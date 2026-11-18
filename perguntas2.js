@@ -144,8 +144,6 @@
     ['Mohamed Salah','Harry Kane','Erling Haaland','Thierry Henry','Alan Shearer','Cristiano Ronaldo','Sergio Agüero','Didier Drogba','Robin van Persie','Luis Suárez','Jamie Vardy','Michael Owen','Son Heung-min','Sadio Mané','Pierre-Emerick Aubameyang','Ruud van Nistelrooy','Andy Cole','Teddy Sheringham','Jimmy Floyd Hasselbaink','Nicolas Anelka','Dimitar Berbatov','Carlos Tevez','Dwight Yorke','Kevin Phillips','Dion Dublin','Chris Sutton']);
   add('liga-nacoes','mundo','pais','Uma seleção que ganhou a Liga das Nações','Até à edição de 2025',['Portugal','França','Espanha']);
   add('pt-finais-eur','portugal','clube','Um clube português que já jogou a final de uma competição europeia da UEFA','Taça dos Campeões/Liga dos Campeões, Taça UEFA/Liga Europa ou Taça das Taças, até 2025',['Benfica','FC Porto','Sporting','Braga']);
-  add('pt-liga-2425','portugal','clube','Um clube que jogou a 1.ª Liga portuguesa em 2024/25','As 18 equipas',
-    ['Benfica','Sporting','FC Porto','Braga','Vitória de Guimarães','Boavista','Rio Ave','Famalicão','Gil Vicente','Estoril','Casa Pia','Moreirense','Arouca','Santa Clara','Nacional','Farense','Estrela da Amadora','AVS']);
   add('pt-euro04-estadios','portugal','estadio','Um estádio que recebeu jogos do Euro 2004','Os 10 estádios do torneio em Portugal',
     ['Estádio da Luz','Estádio do Dragão','Estádio José Alvalade','Estádio Municipal de Braga','Estádio do Bessa','Estádio D. Afonso Henriques','Estádio Cidade de Coimbra','Estádio Algarve','Estádio Municipal de Aveiro','Estádio Dr. Magalhães Pessoa']);
 

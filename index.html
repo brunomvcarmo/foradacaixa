@@ -279,7 +279,7 @@ dialog .tiers b{width:52px}
     <div class="ligacard" id="ligaCard"></div>
     <div class="cats" id="cats" role="group" aria-label="Perguntas">
       <span>Perguntas:</span>
-      <button data-c="tudo">Tudo</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2025</button>
+      <button data-c="tudo">Tudo</button><button data-c="ligapt">Liga Portuguesa</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2025</button>
     </div>
     <div class="modes">
       <button class="mode friend" id="m-friend" hidden>
@@ -443,7 +443,7 @@ const TIERS = [
   {m:50, nome:'Do meio-campo', pts:50, hex:'#d6452f', emo:'🟥'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025', liga:'Liga'};
+const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025', liga:'Liga'};
 const TEAMPT = {"Man City":"Manchester City","Man Utd":"Manchester United","Nott'm Forest":"Nottingham Forest","Spurs":"Tottenham"};
 const POSN = {gk:'guarda-redes', def:'defesa', mid:'médio', fwd:'avançado'};
 const POSA = {gk:'GR', def:'DEF', mid:'MED', fwd:'AV'};
@@ -476,8 +476,9 @@ let ST = loadStats();
 const ENT = {};   // tipo → nome → entidade (as opções da caixa de resposta)
 function getEnt(tipo, nome, extra) {
   ENT[tipo] = ENT[tipo] || {};
-  if (!ENT[tipo][nome]) { const al = (window.ALIASES || {})[nome] || []; ENT[tipo][nome] = Object.assign({nome, tipo, nWeb:norm(nome), nAll:norm([nome, ...al].join(' ')), fama:0}, extra || {}); }
-  return ENT[tipo][nome];
+  const k = tipo === 'plh' ? nome : norm(nome);   // o mesmo nome com ou sem acentos é a mesma resposta (Eder = Éder)
+  if (!ENT[tipo][k]) { const al = (window.ALIASES || {})[nome] || []; ENT[tipo][k] = Object.assign({nome, tipo, nWeb:norm(nome), nAll:norm([nome, ...al].join(' ')), fama:0}, extra || {}); }
+  return ENT[tipo][k];
 }
 function buildPools() { for (const tipo in ENT) POOL[tipo] = Object.values(ENT[tipo]).sort((a, b) => a.nome.localeCompare(b.nome, 'pt')); }
 function buildBank() {
@@ -488,6 +489,17 @@ function buildBank() {
   });
   for (const tipo in EX) EX[tipo].forEach(n => getEnt(tipo, n));
   buildPools();
+}
+// perguntas geradas por scripts: seleções (selecoes.json) e Liga Portuguesa (liga_pt.json)
+let LQ = [];
+function buildGen(G, cat0) {
+  const out = G.perguntas.map(h => {
+    const tipo = h.tipo || 'clube', stats = new Map();
+    const valid = h.r.map(([n, st]) => { const e = getEnt(tipo, n); stats.set(e, st); return e; });
+    const set = new Set(valid);
+    return {key:'g:' + h.id, cat:cat0 || h.cat, per:h.per, tipo, txt:h.txt, sub:h.sub, valid, ok:e => set.has(e), st:e => stats.get(e) || ''};
+  }).filter(q => new Set(q.valid).size === q.valid.length && q.valid.length >= 2);
+  buildPools(); return out;
 }
 // épocas passadas da Premier League (historia.json, gerado por scripts/historia_pl.py a partir dos dados oficiais)
 let HQ = [];
@@ -551,17 +563,25 @@ function genPL(r, used, perTpl) {
   return null;
 }
 // uma pergunta da categoria: do banco (sem repetir no jogo) ou gerada da Premier League
+// Liga Portuguesa: 20% desta época, 50% de 2010/11 até à época passada, 30% de antes de 2010/11
+const LIGAPT_MIX = [['atual', .2], ['recente', .5], ['antiga', .3]];
 function genQ(r, used, per, cat) {
-  const plShare = cat === 'pl' ? 1 : cat === 'tudo' && TPL.length ? .2 : 0;
-  if (r() < plShare) { const q = genPL(r, used, per); if (q) return q; }
-  // "Tudo": metade das vezes do banco escrito à mão, metade das épocas passadas (que têm muitas mais)
-  // "liga": como "Tudo" mas sem as perguntas desta época (mudam com os dados e os jogos têm de ser iguais para todos)
-  const mix = cat === 'tudo' || cat === 'liga';
-  const src = cat === 'historia' ? HQ : mix ? (HQ.length && r() < .45 ? HQ : BQ) : BQ;
-  let pool = src.filter(q => (mix || q.cat === cat) && !used.has(q.key));
-  if (!pool.length && mix) pool = [...BQ, ...HQ].filter(q => !used.has(q.key));
-  if (pool.length) { const q = pick(r, pool); used.add(q.key); return q; }
-  return cat !== 'pl' && plShare ? genPL(r, used, per) : null;
+  const livre = arr => arr.filter(q => !used.has(q.key));
+  const tira = arr => { const p = livre(arr); if (!p.length) return null; const q = pick(r, p); used.add(q.key); return q; };
+  const ligapt = (semAtual) => {
+    let x = r(); for (const [p, w] of LIGAPT_MIX) { x -= w; if (x < 0) { if (!(semAtual && p === 'atual')) { const q = tira(LQ.filter(q => q.per === p)); if (q) return q; } break; } }
+    return tira(LQ.filter(q => !semAtual || q.per !== 'atual'));
+  };
+  if (cat === 'pl') return genPL(r, used, per);
+  if (cat === 'ligapt') return ligapt(false);
+  if (cat === 'historia') return tira(HQ);
+  if (cat === 'portugal' || cat === 'mundo') return tira(BQ.filter(q => q.cat === cat));
+  // "Tudo" e "liga": mistura de todas; a "liga" (dos amigos) não usa perguntas desta época, que mudam com os dados
+  const semAtual = cat === 'liga';
+  const fontes = [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', semAtual ? 0 : .18]];
+  let x = r() * fontes.reduce((s, f) => s + f[1], 0), q = null;
+  for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
+  return q || tira(BQ) || tira(HQ) || ligapt(semAtual);
 }
 function genSet(seed, cat) { const r = rng(seed), used = new Set(), per = {}, out = []; while (out.length < NQ) { const q = genQ(r, used, per, cat); if (!q) break; out.push(q); } return out; }
 // semente nova cujas perguntas repetem o menos possível as dos últimos jogos (a semente e a categoria refazem o jogo, para os desafios)
@@ -665,7 +685,7 @@ function show(id) { document.querySelectorAll('.screen').forEach(s => s.classLis
 
 function startGame(mode, seed, cat) {
   cat = cat || (mode === 'dia' ? 'tudo' : ST.cat);
-  if (!CATS[cat] || (cat === 'pl' && !TPL.length) || (cat === 'historia' && !HQ.length)) cat = 'tudo';
+  if (!CATS[cat] || (cat === 'pl' && !TPL.length) || (cat === 'historia' && !HQ.length) || (cat === 'ligapt' && !LQ.length)) cat = 'tudo';
   if (mode === 'dia') seed = hashStr('dia:' + today());
   let qs = [];
   if (mode === 'fim') { if (seed == null) seed = (Math.random() * 2**32) >>> 0; }
@@ -1015,8 +1035,8 @@ function renderHome() {
   renderMe(); renderLigaCard();
   $('#st-jogos').textContent = ST.jogos; $('#st-best').textContent = ST.best; $('#st-fim').textContent = ST.bestFim; $('#st-golacos').textContent = ST.golacos;
   const d = ST.dia[today()]; $('#diaTxt').textContent = d != null ? `Hoje fizeste ${d} · podes repetir` : 'As mesmas 7 para toda a gente hoje';
-  if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length) || (ST.cat === 'historia' && !HQ.length)) ST.cat = 'tudo';
-  document.querySelectorAll('#cats button').forEach(b => { b.classList.toggle('on', b.dataset.c === ST.cat); b.hidden = (b.dataset.c === 'pl' && !TPL.length) || (b.dataset.c === 'historia' && !HQ.length); });
+  if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length) || (ST.cat === 'historia' && !HQ.length) || (ST.cat === 'ligapt' && !LQ.length)) ST.cat = 'tudo';
+  document.querySelectorAll('#cats button').forEach(b => { b.classList.toggle('on', b.dataset.c === ST.cat); b.hidden = (b.dataset.c === 'pl' && !TPL.length) || (b.dataset.c === 'historia' && !HQ.length) || (b.dataset.c === 'ligapt' && !LQ.length); });
 }
 function heroAnim() {
   const v = {W:360, H:230, Y0:66, Y1:230, D:57, K0:9, K1:18}; const svg = $('#heroPitch'); drawPitch(svg, v, {ball:false});
@@ -1039,7 +1059,8 @@ function heroAnim() {
 
 async function boot() {
   buildBank();
-  const hist = fetch('historia.json').then(r => r.ok ? r.json() : null).catch(() => null);
+  const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ('historia.json'), selP = getJ('selecoes.json'), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1047,7 +1068,9 @@ async function boot() {
     if (G >= 1 && P.length) buildTemplates();
   } catch (e) { console.warn('Sem dados da Premier League:', e); }
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
-  $('#dataFoot').textContent = `${BQ.length + HQ.length} perguntas de futebol português, mundial e da Premier League desde 2016/17` + (TPL.length ? ` + perguntas da época ${EPOCA} sempre novas (até à jornada ${G})` : '');
+  try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
+  try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
+  $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
   renderHome(); heroAnim();
   if (!ME) askWho();
   refreshLiga();
