@@ -471,8 +471,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118174322"></script>
-<script src="perguntas2.js?v=20261118174322"></script>
+<script src="perguntas.js?v=20261118180959"></script>
+<script src="perguntas2.js?v=20261118180959"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -482,7 +482,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118174322';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118180959';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -552,7 +552,7 @@ function buildBank() {
   BQ = B.map(b => {
     const valid = b.r.map(n => getEnt(b.tipo, n)), set = new Set(valid);
     return {key:'b:' + b.id, cat:b.cat, tipo:b.tipo, txt:b.txt, sub:b.sub || '', valid, ok:e => set.has(e)};
-  });
+  }).filter(q => q.valid.length >= 5);
   for (const tipo in EX) EX[tipo].forEach(n => getEnt(tipo, n));
   buildPools();
 }
@@ -564,7 +564,7 @@ function buildGen(G, cat0) {
     const valid = h.r.map(([n, st]) => { const e = getEnt(tipo, n); stats.set(e, st); return e; });
     const set = new Set(valid);
     return {key:'g:' + h.id, cat:cat0 || h.cat, per:h.per, tipo, txt:h.txt, sub:h.sub, valid, ok:e => set.has(e), st:e => stats.get(e) || ''};
-  }).filter(q => new Set(q.valid).size === q.valid.length && q.valid.length >= 2);
+  }).filter(q => new Set(q.valid).size === q.valid.length && q.valid.length >= 5);   // regra do jogo: pelo menos 5 respostas
   buildPools(); return out;
 }
 // épocas passadas da Premier League (historia.json, gerado por scripts/historia_pl.py a partir dos dados oficiais)
@@ -577,7 +577,7 @@ function buildHistory(H) {
     const valid = h.r.map(([c, st]) => { const e = tipo === 'clube' ? getEnt('clube', c) : byCode[c]; stats.set(e, st); return e; }).filter(Boolean);
     const set = new Set(valid);
     return {key:'h:' + h.id, cat:'historia', tipo, txt:h.txt, sub:h.sub, valid, ok:e => set.has(e), st:e => stats.get(e) || ''};
-  });
+  }).filter(q => q.valid.length >= 5);
   buildPools();
 }
 
@@ -588,27 +588,27 @@ function buildTemplates() {
   const teams = Object.keys(TEAMS).map(Number);
   const gws = Array.from({length: G}, (_, i) => i + 1);
   const T = (o) => TPL.push(Object.assign({w:1, min:5, max:60}, o));
-  T({id:'eqGolo', w:3, min:4, make: r => { const t = pick(r, teams); return {key:'eqGolo'+t, txt:`Um jogador ${doT(t)} que já marcou esta época`, ok:p => p.equipa===t && p.golos>0, st:p => pl(p.golos,'golo')}; }});
-  T({id:'eqAssist', w:2, min:4, make: r => { const t = pick(r, teams); return {key:'eqAss'+t, txt:`Um jogador ${doT(t)} com pelo menos uma assistência esta época`, ok:p => p.equipa===t && p.assist>0, st:p => pl(p.assist,'assistência')}; }});
+  T({id:'eqGolo', w:3, min:5, make: r => { const t = pick(r, teams); return {key:'eqGolo'+t, txt:`Um jogador ${doT(t)} que já marcou esta época`, ok:p => p.equipa===t && p.golos>0, st:p => pl(p.golos,'golo')}; }});
+  T({id:'eqAssist', w:2, min:5, make: r => { const t = pick(r, teams); return {key:'eqAss'+t, txt:`Um jogador ${doT(t)} com pelo menos uma assistência esta época`, ok:p => p.equipa===t && p.assist>0, st:p => pl(p.assist,'assistência')}; }});
   T({id:'posGolos', w:2, make: r => { const pos = pick(r, ['def','mid','fwd']); const k = pos==='def' ? 1 : pos==='mid' ? randInt(r,1,3) : randInt(r,2,5);
       return {key:'posG'+pos+k, txt: k===1 ? `Um ${POSN[pos]} da Premier League que já marcou esta época` : `Um ${POSN[pos]} da Premier League com pelo menos ${k} golos esta época`, ok:p => p.pos===pos && p.golos>=k, st:p => `${POSA[p.pos]} · ${pl(p.golos,'golo')}`}; }});
   T({id:'assistK', w:1, make: r => { const k = randInt(r,3,5); return {key:'assK'+k, txt:`Um jogador da Premier League com pelo menos ${k} assistências esta época`, ok:p => p.assist>=k, st:p => pl(p.assist,'assistência')}; }});
   T({id:'golJ', w:3, make: r => { const g = pick(r, gws); return {key:'golJ'+g, txt:`Um jogador que marcou na jornada ${g} da Premier League`, ok:p => p.jGolos[g-1]>0, st:p => `${pl(p.jGolos[g-1],'golo')} na J${g}`}; }});
   T({id:'assJ', w:1, make: r => { const g = pick(r, gws); return {key:'assJ'+g, txt:`Um jogador que fez uma assistência na jornada ${g} da Premier League`, ok:p => p.jAssist[g-1]>0, st:p => `${pl(p.jAssist[g-1],'assistência')} na J${g}`}; }});
-  T({id:'verm', w:1, min:3, make: () => ({key:'verm', txt:'Um jogador que já viu um cartão vermelho na Premier League esta época', ok:p => p.vermelhos>0, st:p => pl(p.vermelhos,'vermelho')})});
-  T({id:'autogolo', w:1, min:3, make: () => ({key:'og', txt:'Um jogador que já marcou um autogolo na Premier League esta época', ok:p => p.autogolos>0, st:p => pl(p.autogolos,'autogolo')})});
-  T({id:'penFalh', w:1, min:3, make: () => ({key:'penF', txt:'Um jogador que já falhou um penálti na Premier League esta época', ok:p => p.penFalh>0, st:p => `${pl(p.penFalh,'penálti')} falhado${p.penFalh===1?'':'s'}`})});
-  T({id:'gkCs', w:1, min:4, make: r => { const k = randInt(r,2,4); return {key:'gkcs'+k, txt:`Um guarda-redes da Premier League com pelo menos ${k} jogos sem sofrer golos esta época`, ok:p => p.pos==='gk' && p.cs>=k, st:p => `${pl(p.cs,'jogo')} sem sofrer`}; }});
-  T({id:'gkDef', w:1, min:4, make: r => { const k = pick(r,[20,25,30]); return {key:'gkdef'+k, txt:`Um guarda-redes da Premier League com pelo menos ${k} defesas esta época`, ok:p => p.pos==='gk' && p.defesas>=k, st:p => pl(p.defesas,'defesa')}; }});
-  T({id:'eqPosMin', w:2, min:3, make: r => { const t = pick(r, teams), pos = pick(r, ['def','mid','fwd','mid','def']); const k = pos==='fwd' ? 180 : 360;
+  T({id:'verm', w:1, min:5, make: () => ({key:'verm', txt:'Um jogador que já viu um cartão vermelho na Premier League esta época', ok:p => p.vermelhos>0, st:p => pl(p.vermelhos,'vermelho')})});
+  T({id:'autogolo', w:1, min:5, make: () => ({key:'og', txt:'Um jogador que já marcou um autogolo na Premier League esta época', ok:p => p.autogolos>0, st:p => pl(p.autogolos,'autogolo')})});
+  T({id:'penFalh', w:1, min:5, make: () => ({key:'penF', txt:'Um jogador que já falhou um penálti na Premier League esta época', ok:p => p.penFalh>0, st:p => `${pl(p.penFalh,'penálti')} falhado${p.penFalh===1?'':'s'}`})});
+  T({id:'gkCs', w:1, min:5, make: r => { const k = randInt(r,2,4); return {key:'gkcs'+k, txt:`Um guarda-redes da Premier League com pelo menos ${k} jogos sem sofrer golos esta época`, ok:p => p.pos==='gk' && p.cs>=k, st:p => `${pl(p.cs,'jogo')} sem sofrer`}; }});
+  T({id:'gkDef', w:1, min:5, make: r => { const k = pick(r,[20,25,30]); return {key:'gkdef'+k, txt:`Um guarda-redes da Premier League com pelo menos ${k} defesas esta época`, ok:p => p.pos==='gk' && p.defesas>=k, st:p => pl(p.defesas,'defesa')}; }});
+  T({id:'eqPosMin', w:2, min:5, make: r => { const t = pick(r, teams), pos = pick(r, ['def','mid','fwd','mid','def']); const k = pos==='fwd' ? 180 : 360;
       return {key:'epm'+t+pos, txt:`Um ${POSN[pos]} ${doT(t)} com pelo menos ${k} minutos jogados esta época`, ok:p => p.equipa===t && p.pos===pos && p.minutos>=k, st:p => `${POSA[p.pos]} · ${p.minutos} min`}; }});
   T({id:'eqJogouJ', w:2, make: r => { const t = pick(r, teams), g = pick(r, gws); return {key:'ejj'+t+'-'+g, txt:`Um jogador ${doT(t)} que entrou em campo na jornada ${g}`, ok:p => p.equipa===t && p.jMinutos[g-1]>0, st:p => `${p.jMinutos[g-1]} min na J${g}`}; }});
   T({id:'amarelos', w:1, make: r => { const k = randInt(r,3,4); return {key:'yc'+k, txt:`Um jogador da Premier League com pelo menos ${k} cartões amarelos esta época`, ok:p => p.amarelos>=k, st:p => pl(p.amarelos,'amarelo')}; }});
   T({id:'maisAss', w:1, make: () => ({key:'maisAss', txt:'Um jogador da Premier League com mais assistências do que golos esta época (e pelo menos 2 assistências)', ok:p => p.assist>=2 && p.assist>p.golos, st:p => `${pl(p.golos,'golo')}, ${pl(p.assist,'assistência')}`})});
-  T({id:'seca', w:1, min:4, make: () => ({key:'seca', txt:'Um avançado da Premier League com 300+ minutos que ainda não marcou esta época', ok:p => p.pos==='fwd' && p.minutos>=300 && p.golos===0, st:p => `${p.minutos} min, ${pl(p.golos,'golo')}`})});
+  T({id:'seca', w:1, min:5, make: () => ({key:'seca', txt:'Um avançado da Premier League com 300+ minutos que ainda não marcou esta época', ok:p => p.pos==='fwd' && p.minutos>=300 && p.golos===0, st:p => `${p.minutos} min, ${pl(p.golos,'golo')}`})});
   T({id:'bis', w:2, make: () => ({key:'bis', txt:'Um jogador que bisou (2+ golos) num só jogo da Premier League esta época', ok:p => p.jGolos.some(x => x>=2), st:p => { const i = p.jGolos.findIndex(x => x>=2); return i<0 ? 'nunca bisou' : `${pl(p.jGolos[i],'golo')} na J${i+1}`; }})});
   T({id:'golAss', w:1, make: () => ({key:'golAss', txt:'Um jogador que marcou e assistiu na mesma jornada da Premier League esta época', ok:p => p.jGolos.some((x,i) => x>0 && p.jAssist[i]>0), st:p => { const i = p.jGolos.findIndex((x,j) => x>0 && p.jAssist[j]>0); return i<0 ? 'nunca o fez' : `golo e assistência na J${i+1}`; }})});
-  T({id:'eqTodas', w:1, min:3, make: r => { const t = pick(r, teams); return {key:'eqT'+t, txt:`Um jogador ${doT(t)} que jogou em todas as ${G} jornadas desta época`, ok:p => p.equipa===t && p.jMinutos.every(x => x>0), st:p => `jogou em ${p.jMinutos.filter(x => x>0).length} de ${G}`}; }});
+  T({id:'eqTodas', w:1, min:5, make: r => { const t = pick(r, teams); return {key:'eqT'+t, txt:`Um jogador ${doT(t)} que jogou em todas as ${G} jornadas desta época`, ok:p => p.equipa===t && p.jMinutos.every(x => x>0), st:p => `jogou em ${p.jMinutos.filter(x => x>0).length} de ${G}`}; }});
   T({id:'defAss', w:1, make: () => ({key:'defAss', txt:'Um defesa da Premier League com pelo menos uma assistência esta época', ok:p => p.pos==='def' && p.assist>0, st:p => `${POSA[p.pos]} · ${pl(p.assist,'assistência')}`})});
 }
 function weighted(r) { const tot = TPL.reduce((s, t) => s + t.w, 0); let x = r() * tot; for (const t of TPL) { x -= t.w; if (x < 0) return t; } return TPL[TPL.length - 1]; }
@@ -620,7 +620,7 @@ function genPL(r, used, perTpl) {
     const q = t.make(r);
     if (!q || used.has(q.key)) continue;
     const valid = P.filter(q.ok);
-    if (valid.length < t.min || valid.length > t.max) continue;
+    if (valid.length < Math.max(5, t.min) || valid.length > t.max) continue;   // regra do jogo: pelo menos 5 respostas
     valid.sort((a, b) => b.fama - a.fama);
     Object.assign(q, {valid, cat:'pl', tipo:'pl', sub:`Premier League ${EPOCA}, até à jornada ${G}`});
     used.add(q.key); perTpl[t.id] = (perTpl[t.id] || 0) + 1;

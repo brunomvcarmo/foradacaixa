@@ -87,11 +87,11 @@ def main():
         sub = f'Premier League {label}'
         for t, tn in sorted(teams.items()):
             g = [(el, pl(d[t]['golos'], 'golo')) for el, d in st.items() if d[t]['golos'] > 0]
-            if 4 <= len(g) <= 30: q(f'gol{t}', f'Um jogador que marcou pelo {tn} na Premier League {label}', sub + ' (autogolos não contam)', g)
+            if 5 <= len(g) <= 30: q(f'gol{t}', f'Um jogador que marcou pelo {tn} na Premier League {label}', sub + ' (autogolos não contam)', g)
             a = [(el, pl(d[t]['assist'], 'assistência')) for el, d in st.items() if d[t]['assist'] > 0]
-            if 4 <= len(a) <= 30: q(f'ass{t}', f'Um jogador que fez uma assistência pelo {tn} na Premier League {label}', sub + ' (estatísticas oficiais da liga)', a)
+            if 5 <= len(a) <= 30: q(f'ass{t}', f'Um jogador que fez uma assistência pelo {tn} na Premier League {label}', sub + ' (estatísticas oficiais da liga)', a)
             j = [(el, pl(d[t]['jogos'], 'jogo')) for el, d in st.items() if d[t]['jogos'] >= 25]
-            if 4 <= len(j) <= 30: q(f'jog{t}', f'Um jogador que fez pelo menos 25 jogos pelo {tn} na Premier League {label}', sub + ' (titular ou suplente utilizado)', j)
+            if 5 <= len(j) <= 30: q(f'jog{t}', f'Um jogador que fez pelo menos 25 jogos pelo {tn} na Premier League {label}', sub + ' (titular ou suplente utilizado)', j)
         allg = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if d['golos'] >= 10]
         if len(allg) >= 5: q('g10', f'Um jogador que marcou 10 ou mais golos na Premier League {label}', sub, allg)
         alla = [(el, pl(d['assist'], 'assistência')) for el, d in tot.items() if d['assist'] >= 8]
@@ -103,11 +103,11 @@ def main():
         pm = [(el, f"{pl(d['penalties_missed'], 'penálti')} falhado{'s' if d['penalties_missed'] > 1 else ''}") for el, d in tot.items() if d['penalties_missed'] > 0]
         if len(pm) >= 5: q('penf', f'Um jogador que falhou um penálti na Premier League {label}', sub, pm)
         ht = [(el, 'hat-trick') for el in hat]
-        if len(ht) >= 4: q('hat', f'Um jogador que marcou 3 ou mais golos num só jogo da Premier League {label}', sub, ht)
+        if len(ht) >= 5: q('hat', f'Um jogador que marcou 3 ou mais golos num só jogo da Premier League {label}', sub, ht)
         gk = [(el, pl(d['clean_sheets'], 'jogo') + ' sem sofrer') for el, d in tot.items() if pos.get(el) == 1 and d['clean_sheets'] >= 10]
-        if len(gk) >= 4: q('gk10', f'Um guarda-redes com 10 ou mais jogos sem sofrer golos na Premier League {label}', sub, gk)
+        if len(gk) >= 5: q('gk10', f'Um guarda-redes com 10 ou mais jogos sem sofrer golos na Premier League {label}', sub, gk)
         df = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if pos.get(el) == 2 and d['golos'] >= 3]
-        if len(df) >= 4: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição oficial do jogador)', df)
+        if len(df) >= 5: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição oficial do jogador)', df)
         # clubes da época (os mais óbvios são os que somaram mais pontos FPL, ou seja, as equipas mais fortes)
         forca = defaultdict(int)
         for el, d in st.items():

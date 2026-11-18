@@ -93,8 +93,8 @@ def main():
         if r['tournament'] in TORNEIOS:
             for t in (r['home_team'], r['away_team']): fama_p[pais(t, r['date'])] += {'FIFA World Cup': 3, 'UEFA Euro': 2, 'Copa América': 1}[r['tournament']]
     perguntas = []
-    def add(pid, cat, tipo, txt, sub, itens, mn=4, mx=45):
-        if not (mn <= len(itens) <= mx): return
+    def add(pid, cat, tipo, txt, sub, itens, mn=5, mx=45):
+        if not (max(mn, 5) <= len(itens) <= mx): return   # regra do jogo: pelo menos 5 respostas
         fama = fama_j if tipo == 'jogador' else fama_p
         itens = sorted(itens, key=lambda x: (-x[2], -fama[x[0]], x[0]))
         perguntas.append({'id': pid, 'cat': cat, 'tipo': tipo, 'txt': txt, 'sub': sub, 'r': [[n, s] for n, s, _ in itens]})
@@ -178,6 +178,24 @@ def main():
                 top = [(n, f'{v} golos · {p}', v) for (n, p), v in tot.items() if v >= lim]
                 if 3 <= len(top) <= 14:
                     add(f's-top-{tour[:4]}-{ano}', 'mundo', 'jogador', f'Um jogador que marcou {lim} ou mais golos no {ed}', f'Fase final{nota} (autogolos não contam)', top, mn=3, mx=14); break
+    # 7. marcadores das grandes seleções em todos os Mundiais/Euros recentes juntos (listas maiores)
+    for tour, de, nome in (('FIFA World Cup', '2002', 'num Mundial (de 2002 a {ult})'), ('UEFA Euro', '2004', 'num Euro (de 2004 a {ult})')):
+        ult = max(a for (t, a, p) in golos if t == tour)
+        for p in ['Portugal', 'Brasil', 'Argentina', 'Alemanha', 'França', 'Espanha', 'Itália', 'Inglaterra', 'Países Baixos', 'Bélgica', 'Croácia']:
+            c = Counter()
+            for (t, a, pp), cc in golos.items():
+                if t == tour and pp == p and a >= de: c.update(cc)
+            add(f's-rec-{tour[:4]}-{p}', 'portugal' if p == 'Portugal' else 'mundo', 'jogador', f'Um jogador que marcou {do_(p)} {nome.format(ult=ult if tour != "UEFA Euro" or ult != "2021" else "2020")}',
+                'Fases finais (autogolos não contam)', [(n, f'{v} golo' + ('s' if v > 1 else ''), v) for n, v in c.items()], mx=60)
+    # 8. Portugal: quem marcou pelo menos 10 golos pela seleção (todos os jogos) — só se todos os golos de Portugal tiverem marcador
+    pj = [r for r in R if 'Portugal' in (r['home_team'], r['away_team'])]
+    gol_pt = sum(int(r['home_score']) if r['home_team'] == 'Portugal' else int(r['away_score']) for r in pj)
+    com_marc = [g for g in G if g['team'] == 'Portugal']
+    if len(com_marc) == gol_pt:
+        c = Counter(NOMES.get(g['scorer'], g['scorer']) for g in com_marc if g['own_goal'] != 'TRUE')
+        add('s-pt-10golos', 'portugal', 'jogador', 'Um jogador que marcou pelo menos 10 golos pela seleção portuguesa', f'Todos os jogos, até {max(r["date"] for r in pj)[:4]}', [(n, f'{v} golos', v) for n, v in c.items() if v >= 10], mx=40)
+    else:
+        print(f'  (Portugal: {gol_pt} golos, {len(com_marc)} com marcador — pergunta dos 10 golos não feita)')
     data = {'fonte': 'martj42/international_results', 'perguntas': perguntas}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
     print(f'selecoes.json: {len(perguntas)} perguntas ({OUT.stat().st_size // 1024} KB)', Counter(q["cat"] for q in perguntas))

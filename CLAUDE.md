@@ -26,6 +26,7 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 
 ## Perguntas
 - **Banco (`perguntas.js`)**, categorias `portugal` e `mundo`: `{id, cat, tipo, txt, sub, r}`; `r` ORDENADO da resposta mais óbvia para a mais rara. Tipos: `jogador`, `clube`, `pais`, `treinador`. Nomes alternativos em `ALIASES`; opções que só servem para a lista de sugestões não denunciar as certas em `EXTRAS`.
+  - **Cada pergunta tem pelo menos 5 respostas certas** (regra do utilizador). Os geradores (`liga_pt.py`, `selecoes.py`, `historia_pl.py`, `buildTemplates`) só criam perguntas com ≥ 5, o `perguntas2.js` tira do banco as que tenham menos, e o jogo deita fora qualquer uma abaixo disso. Edições com poucas respostas juntam-se (ex.: "meias-finais de um Mundial entre 1990 e 2022", "venceu o Benfica entre 2010/11 e 2014/15").
   - Regra de ouro: **só factos fechados e de que se tem a certeza**, e listas completas (uma resposta certa que falte é dada como errada ao jogador). Quando há edições recentes, pôr o limite no `sub` ("até 2025"). Na dúvida, não pôr a pergunta.
   - Para acrescentar: uma linha nova no `BANCO` com `id` único; nomes iguais aos que já existem para a mesma entidade (ex.: "FC Porto", "Manchester United").
 - **Mais perguntas à mão (`perguntas2.js`)**: junta-se ao `BANCO` (Mundiais e Euros edição a edição, adversários de Portugal, participantes, onzes de finais, treinadores, Bolas de Ouro, carreiras). Tipo extra `estadio`.

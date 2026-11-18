@@ -31,7 +31,13 @@
     [2018,'na Rússia',['França','Croácia','Bélgica','Inglaterra']],
     [2022,'no Catar',['Argentina','França','Croácia','Marrocos']],
   ];
-  WC.forEach(([y, onde, r, nota]) => add(`wc${y}-top4`, 'mundo', 'pais', `Uma seleção que ficou nos 4 primeiros do Mundial ${y}`, `Disputado ${onde}` + (nota ? ` · ${nota}` : '') + (y < 1991 && r.includes('Alemanha') ? ' · Alemanha = RFA' : ''), r));
+  // (cada edição só tem 4 respostas: juntam-se várias edições numa pergunta, para haver pelo menos 5)
+  const uniao = (lista, de, ate) => { const out = []; lista.filter(e => e[0] >= de && e[0] <= ate).forEach(e => e[2].forEach(p => { if (!out.includes(p)) out.push(p); })); return out; };
+  add('wc-top4-1930-1962', 'mundo', 'pais', 'Uma seleção que ficou nos 4 primeiros de um Mundial entre 1930 e 1962', 'Campeões, finalistas, 3.º e 4.º lugar · Alemanha = RFA · em 1930 contam os 4 semifinalistas', uniao(WC, 1930, 1962));
+  add('wc-top4-1966-1986', 'mundo', 'pais', 'Uma seleção que ficou nos 4 primeiros de um Mundial entre 1966 e 1986', 'Campeões, finalistas, 3.º e 4.º lugar · Alemanha = RFA', uniao(WC, 1966, 1986));
+  add('wc-top4-1990-2022', 'mundo', 'pais', 'Uma seleção que chegou às meias-finais de um Mundial entre 1990 e 2022', 'Campeões, finalistas, 3.º e 4.º lugar', uniao(WC, 1990, 2022));
+  add('wc-finais-perdidas', 'mundo', 'pais', 'Uma seleção que perdeu uma final do Mundial', 'De 1930 a 2022 (em 1950 conta o Brasil, 2.º na fase final) · Alemanha = RFA',
+    ['Argentina', 'Alemanha', 'Países Baixos', 'Brasil', 'Itália', 'França', 'Hungria', 'Checoslováquia', 'Croácia', 'Suécia']);
 
   // ---------- Europeus: os 4 primeiros de cada edição ----------
   const EU = [
@@ -53,7 +59,11 @@
     [2020,'(jogado em 2021, em 11 países)',['Itália','Inglaterra','Espanha','Dinamarca']],
     [2024,'na Alemanha',['Espanha','Inglaterra','França','Países Baixos']],
   ];
-  EU.forEach(([y, onde, r]) => add(`eu${y}-top4`, 'mundo', 'pais', `Uma seleção que ficou nos 4 primeiros do Euro ${y}`, `Disputado ${onde}` + (y < 1991 && r.includes('Alemanha') ? ' · Alemanha = RFA' : '') + (y === 1980 ? ' · finalistas e jogo do 3.º lugar' : y >= 1984 ? ' · finalistas e meias-finalistas' : ''), r));
+  add('eu-top4-1960-1988', 'mundo', 'pais', 'Uma seleção que ficou nos 4 primeiros de um Euro entre 1960 e 1988', 'Finalistas e meias-finalistas (em 1980: jogo do 3.º lugar) · Alemanha = RFA', uniao(EU, 1960, 1988));
+  add('eu-top4-1992-2024', 'mundo', 'pais', 'Uma seleção que chegou às meias-finais de um Euro entre 1992 e 2024', 'Finalistas e meias-finalistas (o Euro 2020 jogou-se em 2021)', uniao(EU, 1992, 2024));
+  add('eu-organizou', 'mundo', 'pais', 'Um país que organizou (sozinho ou com outro) uma fase final do Euro', 'De 1960 a 2016 (o Euro 2020, em 11 países, não conta) · Alemanha = RFA em 1988',
+    ['França', 'Portugal', 'Alemanha', 'Espanha', 'Itália', 'Inglaterra', 'Países Baixos', 'Bélgica', 'Suíça', 'Áustria', 'Polónia', 'Ucrânia', 'Suécia', 'Jugoslávia']);
+  add('confed', 'mundo', 'pais', 'Uma seleção que ganhou a Taça das Confederações', 'Todas as edições (1992-2017)', ['Brasil', 'Alemanha', 'França', 'Argentina', 'México', 'Dinamarca']);
 
   // ---------- Portugal: adversários em cada fase final ----------
   const PT = [
@@ -74,6 +84,10 @@
     ['eu2024','no Euro 2024',['França','Turquia','Chéquia','Geórgia','Eslovénia']],
   ];
   PT.forEach(([k, t, r]) => add(`pt-adv-${k}`, 'portugal', 'pais', `Uma seleção que Portugal defrontou ${t}`, 'Fase de grupos e eliminatórias (inclui jogo do 3.º lugar)', r));
+  // edições com poucos adversários: juntar todas
+  const juntaPT = pre => { const out = []; PT.filter(e => e[0].startsWith(pre)).forEach(e => e[2].forEach(p => { if (!out.includes(p)) out.push(p); })); return out; };
+  add('pt-adv-wc-todos', 'portugal', 'pais', 'Uma seleção que Portugal defrontou numa fase final do Mundial', 'Mundiais de 1966 a 2022', juntaPT('wc'));
+  add('pt-adv-eu-todos', 'portugal', 'pais', 'Uma seleção que Portugal defrontou numa fase final do Euro', 'Euros de 1984 a 2024', juntaPT('eu'));
 
   // ---------- Participantes de fases finais ----------
   add('wc2022-part','mundo','pais','Uma seleção que jogou o Mundial 2022','As 32 seleções do Catar',
@@ -136,7 +150,15 @@
     ['Lionel Messi','Diego Maradona','Zinedine Zidane','Ronaldo Nazário','Luka Modrić','Oliver Kahn','Romário','Diego Forlán','Paolo Rossi','Salvatore Schillaci','Mario Kempes']);
   add('bo-fra','mundo','jogador','Um francês que ganhou a Bola de Ouro','Até 2025',['Zinedine Zidane','Michel Platini','Karim Benzema','Ousmane Dembélé','Jean-Pierre Papin','Raymond Kopa']);
   add('bo-ale','mundo','jogador','Um alemão que ganhou a Bola de Ouro','Até 2025',['Franz Beckenbauer','Lothar Matthäus','Gerd Müller','Karl-Heinz Rummenigge','Matthias Sammer']);
-  add('bo-ned','mundo','jogador','Um holandês que ganhou a Bola de Ouro','Até 2025',['Johan Cruyff','Marco van Basten','Ruud Gullit']);
+  add('bo-1990','mundo','jogador','Um jogador que ganhou a Bola de Ouro entre 1990 e 2025','Da France Football (de 2010 a 2015 foi a "FIFA Bola de Ouro")',
+    ['Lionel Messi','Cristiano Ronaldo','Luka Modrić','Karim Benzema','Zinedine Zidane','Ronaldinho','Kaká','Ronaldo Nazário','Rodri','Ousmane Dembélé','Luís Figo','Rivaldo',
+     'Andriy Shevchenko','Fabio Cannavaro','Michael Owen','Pavel Nedvěd','Roberto Baggio','George Weah','Marco van Basten','Lothar Matthäus','Hristo Stoichkov','Jean-Pierre Papin','Matthias Sammer']);
+  add('bo-paises','mundo','pais','Um país com um jogador que ganhou a Bola de Ouro','Pela nacionalidade desportiva do vencedor, até 2025',
+    ['Argentina','Portugal','França','Alemanha','Brasil','Países Baixos','Itália','Inglaterra','Espanha','Croácia','Ucrânia','Bulgária','Libéria','Dinamarca','Escócia','Irlanda do Norte','Chéquia','Checoslováquia','União Soviética','Hungria']);
+  add('ucl-finalistas','mundo','clube','Um clube que jogou uma final da Liga dos Campeões','De 1993 a 2025 (desde que tem este nome)',
+    ['Real Madrid','Barcelona','Bayern','Liverpool','Manchester United','Milan','Juventus','Chelsea','Inter','Manchester City','PSG','Borussia Dortmund','Atlético de Madrid','Ajax','FC Porto','Arsenal','Valência','Tottenham','Marseille','Monaco','Bayer Leverkusen']);
+  add('ucl-perdeu','mundo','clube','Um clube que perdeu uma final da Liga dos Campeões','De 1993 a 2025',
+    ['Juventus','Bayern','Liverpool','Atlético de Madrid','Manchester United','Inter','Milan','Borussia Dortmund','Valência','Barcelona','Chelsea','Arsenal','PSG','Manchester City','Tottenham','Ajax','Monaco','Bayer Leverkusen']);
   add('bo-bra','mundo','jogador','Um brasileiro que ganhou a Bola de Ouro','Até 2025',['Ronaldinho','Kaká','Ronaldo Nazário','Rivaldo']);
   add('bo-ita','mundo','jogador','Um jogador da seleção italiana que ganhou a Bola de Ouro','Até 2025',['Roberto Baggio','Fabio Cannavaro','Paolo Rossi','Gianni Rivera','Omar Sívori']);
   add('bo-ing','mundo','jogador','Um inglês que ganhou a Bola de Ouro','Até 2025',['Michael Owen','Bobby Charlton','Kevin Keegan','Stanley Matthews']);
@@ -223,4 +245,6 @@
     'Estádio dos Barreiros','Estádio do Bonfim','Estádio da Mata Real','Estádio Capital do Móvel','Estádio Municipal de Portimão','Estádio do Fontelo',
     'Estádio de São Miguel','Estádio da Madeira','Estádio do Mar','Estádio das Antas','Estádio de Alvalade (antigo)','Estádio 1.º de Maio','Estádio Marcolino de Castro',
     'Estádio dos Arcos','Estádio Municipal 22 de Junho','Estádio Comendador Joaquim de Almeida Freitas','Estádio do Clube Desportivo Nacional','Estádio José Gomes'];
+  // regra do jogo: cada pergunta tem pelo menos 5 respostas certas
+  for (let i = B.length - 1; i >= 0; i--) if (B[i].r.length < 5) B.splice(i, 1);
 })();
