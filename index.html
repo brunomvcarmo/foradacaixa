@@ -231,6 +231,44 @@ details.all .chips{margin-top:6px}
 .lg-day i{font-style:normal;min-width:38px;text-align:center;padding:3px 6px;border-radius:8px;background:var(--bg2);color:var(--mute);font-weight:700;font-size:13px}
 .lg-day i.done{background:rgba(30,90,55,.12);color:var(--acc)}
 .lg-day i.live{background:rgba(255,176,32,.15);color:var(--warn)}
+/* ---------- estatísticas ---------- */
+.lg-links{display:flex;gap:12px;align-items:center}
+.st-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:15px}
+.tabs.sm button{padding:8px;font-size:14px}
+.sc{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px 10px;margin-bottom:10px;animation:qIn .35s both}
+.sc-h{margin-bottom:8px}
+.sc-h b{font-family:var(--display);font-weight:400;font-size:18px;display:block}
+.sc-h span{font-size:12px;color:var(--mute)}
+.sb{display:grid;grid-template-columns:96px 1fr 58px;align-items:center;gap:8px;padding:4px 0}
+.sb-n{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.sb-n i,.ct th i,.ev-leg i,.ev-tip i,.rec-t small i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.sb-t{height:12px;background:#f1e8d4;border-radius:0 4px 4px 0;overflow:hidden}
+.sb-f{display:block;height:100%;border-radius:0 4px 4px 0;transition:width .7s cubic-bezier(.2,.9,.2,1)}
+.sb-v{text-align:right;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.ct-w{overflow-x:auto;margin:0 -4px}
+.ct{border-collapse:separate;border-spacing:3px;width:100%;font-size:13px}
+.ct th{font-weight:600;text-align:left;color:var(--mute);font-size:12px;padding:2px 4px}
+.ct thead th{text-align:center;color:var(--ink);white-space:nowrap}
+.ct thead th i{margin-right:4px;vertical-align:1px}
+.ct td{text-align:center;border-radius:8px;padding:6px 2px;font-weight:700;min-width:54px}
+.ct td small{display:block;font-weight:500;font-size:10px;opacity:.75}
+.ct td.ct-e{background:var(--panel2);color:var(--mute)}
+.ev-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:600;margin-bottom:4px}
+.ev-leg span{display:flex;align-items:center;gap:5px}
+.ev-w{position:relative}
+.ev{display:block;width:100%;height:auto;touch-action:pan-y}
+.ev-a{font:500 10px var(--sans);fill:var(--mute)}
+.ev-l{font:700 11px var(--sans);fill:var(--ink)}
+.ev-tip{position:absolute;top:4px;width:150px;background:var(--dark);color:#fffaf0;border-radius:10px;padding:8px 10px;font-size:12px;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.ev-tip b{display:block;margin-bottom:4px;text-transform:capitalize}
+.ev-tip div{display:flex;align-items:center;gap:6px}
+.ev-tip span{margin-left:auto;font-weight:700}
+.rec-r{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.rec-r:first-of-type{border-top:0}
+.rec-i{font-size:20px}
+.rec-t{flex:1;font-weight:600;font-size:14px}
+.rec-t small{display:flex;align-items:center;gap:5px;font-weight:500;color:var(--mute);font-size:12px}
+.rec-r>b{font-family:var(--display);font-weight:400;font-size:17px}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);padding:20px;max-width:440px;width:calc(100% - 32px)}
 dialog::backdrop{background:rgba(5,8,18,.7);backdrop-filter:blur(3px)}
 dialog h2{font-family:var(--display);margin:0 0 10px;font-size:24px}
@@ -352,10 +390,18 @@ dialog .tiers b{width:52px}
 
   <!-- ===================== LIGA ===================== -->
   <div id="s-liga" class="screen">
-    <div class="lg-head"><button class="iconbtn" id="lgBack" aria-label="Voltar">‹</button><h2>🏆 Classificação</h2><button class="iconbtn" id="lgRefresh" aria-label="Atualizar">↻</button></div>
+    <div class="lg-head"><button class="iconbtn" id="lgBack" aria-label="Voltar">‹</button><h2>🏆 Classificação</h2><button class="iconbtn" id="lgStats" aria-label="Estatísticas">📊</button><button class="iconbtn" id="lgRefresh" aria-label="Atualizar">↻</button></div>
     <div class="tabs" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Esta semana</button><button data-t="total">Total</button></div>
     <div id="lgBody"></div>
     <p class="foot">3 jogos por dia contam (o dia muda à meia-noite de Lisboa). Os jogos 1, 2 e 3 de cada dia têm as mesmas perguntas para todos.</p>
+  </div>
+
+  <!-- ===================== ESTATÍSTICAS ===================== -->
+  <div id="s-stats" class="screen">
+    <div class="lg-head"><button class="iconbtn" id="stBack" aria-label="Voltar">‹</button><h2>📊 Estatísticas</h2><button class="iconbtn" id="stRefresh" aria-label="Atualizar">↻</button></div>
+    <div class="tabs" id="stScope"><button data-v="liga">Só a liga</button><button data-v="tudo">Tudo</button></div>
+    <div class="tabs sm" id="stPer"><button data-v="semana">Esta semana</button><button data-v="mes">Este mês</button><button data-v="sempre">Sempre</button></div>
+    <div id="stBody"></div>
   </div>
 
   <!-- ===================== FIM ===================== -->
@@ -843,6 +889,7 @@ function endGame() {
   clearInterval(timerId);
   const fim = S.mode === 'fim', golos = S.shots.filter(s => s.tier).length;
   ST.jogos++; S.ended = true;
+  registarJogo();
   ST.recent = [...S.shots.map(s => s.q.key), ...ST.recent].slice(0, 70);
   let rec = false;
   if (fim) { if (S.score > ST.bestFim) { ST.bestFim = S.score; rec = true; } }
@@ -957,7 +1004,9 @@ function renderLigaCard() {
     else if (falta > 0) h += `<button class="btn" id="lgPlay">Jogo da liga ${feitos + 1} de ${LIGA.porDia} ›</button><p class="lg-sub">7 perguntas · as mesmas para os ${LIGA.jogadores.length} · conta mesmo que saias a meio</p>`;
     else h += `<p class="lg-done">✅ Já fizeste os ${LIGA.porDia} jogos de hoje. Amanhã há mais!</p>`;
   }
+  if (LG.dados) h += `<button class="st-btn" id="lgSt">📊 Estatísticas: compara-te com os outros</button>`;
   c.innerHTML = h;
+  $('#lgSt') && ($('#lgSt').onclick = openStats);
   $('#lgVer') && ($('#lgVer').onclick = openLiga); $('#lgRetry') && ($('#lgRetry').onclick = refreshLiga);
   $('#lgWho') && ($('#lgWho').onclick = askWho); $('#lgPlay') && ($('#lgPlay').onclick = startLiga);
 }
@@ -966,6 +1015,7 @@ async function refreshLiga() {
   await ligaGet(); renderLigaCard();
   if ($('#s-liga').classList.contains('on')) renderLiga();
   if ($('#s-end').classList.contains('on') && S?.liga) renderEndLiga();
+  if ($('#s-stats').classList.contains('on')) { await statsGet(); renderStats(); }
 }
 
 // ---------- jogar um jogo da liga ----------
@@ -986,7 +1036,7 @@ let ligaSyncT = null;
 function ligaSync(final) {
   if (!S?.liga) return;
   const r = S.liga.rec;
-  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
+  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, tiros:tirosDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
   if (!final) r.fim = null;
   const path = `jogos/${ME}/${S.liga.dia}/j${S.liga.n}`, body = JSON.parse(JSON.stringify(r));
   const go = (k = 0) => ligaPut(path, body).catch(() => { if (k < 4) return new Promise(res => setTimeout(res, 2000 * (k + 1))).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
@@ -1006,7 +1056,7 @@ function renderEndLiga() {
   $('#endLgVer').onclick = openLiga;
 }
 // atualiza sozinha: a cada 15 s com o início ou a classificação abertos, e ao voltar à app
-setInterval(() => { if (LIGA.db && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-liga').classList.contains('on') || $('#s-end').classList.contains('on'))) refreshLiga(); }, 15000);
+setInterval(() => { if (LIGA.db && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-liga').classList.contains('on') || $('#s-end').classList.contains('on') || $('#s-stats').classList.contains('on'))) refreshLiga(); }, 15000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && LIGA.db) refreshLiga(); });
 
 // ---------- classificação ----------
@@ -1031,6 +1081,150 @@ function renderLiga() {
   }
   $('#lgBody').innerHTML = h;
 }
+
+
+// ======================================================================
+// ESTATÍSTICAS — comparar os quatro: só a Liga, ou Tudo (liga + Jogo rápido + Sem fim + Desafio do dia)
+// Jogos fora da liga: ligas/<id>/todos/<nome>/<id> (POST no fim de cada jogo, ver registarJogo)
+// ======================================================================
+// uma cor fixa por jogador (pela ordem de LIGA.jogadores; validadas contra o fundo creme; o nome vai sempre escrito ao lado)
+const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
+const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
+const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', historia:'Premier League 2016-25', pl:'Premier League desta época'};
+let ST_TODOS = null, STAB = {scope:'liga', per:'semana'};
+const tirosDe = () => S.shots.map(s => [s.q.cat, s.tier, s.tries.length]);
+async function statsGet() {
+  if (!LIGA.db) return;
+  try { const r = await fetch(ligaUrl('todos'), {cache:'no-store'}); if (r.ok) ST_TODOS = (await r.json()) || {}; } catch (e) {}
+}
+// guarda no Firebase um jogo que não é da liga (para as estatísticas de "Tudo")
+function registarJogo() {
+  if (!LIGA.db || !ME || !S || S.liga || !S.shots.length) return;
+  const rec = {modo:S.mode, cat:S.cat, dia:lisDate(), fim:Date.now(), pontos:S.score, golos:S.shots.filter(s => s.tier).length,
+               golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, serie:S.bestStreak, tiros:tirosDe()};
+  const go = (k = 0) => fetch(ligaUrl(`todos/${ME}`), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(rec)})
+    .then(r => { if (!r.ok) throw new Error(r.status); }).catch(() => { if (k < 3) setTimeout(() => go(k + 1), 2000 * (k + 1)); });
+  go();
+}
+function statsJogos() {
+  const out = [];
+  for (const n of LIGA.jogadores) {
+    for (const dia in (LG.dados?.[n] || {})) for (const g of Object.values(LG.dados[n][dia] || {})) if (g) out.push({...g, nome:n, dia, modo:'liga'});
+    if (STAB.scope === 'tudo') for (const g of Object.values(ST_TODOS?.[n] || {})) if (g) out.push({...g, nome:n});
+  }
+  const hoje = lisDate(), wk = weekStart(hoje), mes = hoje.slice(0, 7);
+  const f = {semana: d => weekStart(d) === wk, mes: d => d.slice(0, 7) === mes, sempre: () => true}[STAB.per];
+  return out.filter(g => g.dia && f(g.dia));
+}
+function statsPor(js) {
+  return LIGA.jogadores.map(n => {
+    const g = js.filter(x => x.nome === n), soma = k => g.reduce((s, x) => s + (x[k] || 0), 0);
+    const per = soma('perguntas'), tiros = g.flatMap(x => Array.isArray(x.tiros) ? x.tiros : []), gol = tiros.filter(t => t[1] > 0);
+    const sete = g.filter(x => x.modo !== 'fim');
+    const cat = {};
+    for (const [c, t, e] of tiros) { const k = cat[c] = cat[c] || {n:0, golos:0, m:0}; k.n++; if (t > 0) { k.golos++; k.m += TIERS[t].m; } }
+    return {nome:n, jogos:g.length, pts:soma('pontos'), perguntas:per, golacos:soma('golacos'),
+      ppp: per ? soma('pontos') / per : null, acerto: per ? soma('golos') / per : null,
+      dist: gol.length ? gol.reduce((s, t) => s + TIERS[t[1]].m, 0) / gol.length : null,
+      erros: tiros.length ? tiros.reduce((s, t) => s + (t[2] || 0), 0) / tiros.length : null,
+      melhor: sete.length ? Math.max(...sete.map(x => x.pontos || 0)) : null,
+      serie: Math.max(0, ...g.filter(x => x.modo === 'fim').map(x => x.serie || 0)) || null, cat};
+  });
+}
+const fmt1 = v => v == null ? '—' : String(Math.round(v * 10) / 10).replace('.', ',');
+const pct = v => v == null ? '—' : Math.round(v * 100) + '%';
+function barCard(titulo, sub, rows, key, fmt, menosMelhor) {
+  const vals = rows.map(r => r[key]).filter(v => v != null);
+  if (!vals.length) return '';
+  const max = Math.max(...vals, 0) || 1, best = menosMelhor ? Math.min(...vals) : Math.max(...vals);
+  const ord = [...rows].sort((a, b) => (b[key] ?? -1e9) * (menosMelhor ? -1 : 1) - (a[key] ?? -1e9) * (menosMelhor ? -1 : 1));
+  return `<div class="sc"><div class="sc-h"><b>${titulo}</b>${sub ? `<span>${sub}</span>` : ''}</div>${ord.map(r => {
+    const v = r[key], w = v == null ? 0 : Math.max(2, 100 * v / max);
+    const lider = v != null && v === best && vals.filter(x => x === best).length < vals.length ? ' 👑' : '';
+    return `<div class="sb" title="${esc(r.nome)}: ${fmt(v)}"><span class="sb-n"><i style="background:${pcor(r.nome)}"></i>${esc(r.nome)}${lider}</span><span class="sb-t"><span class="sb-f" style="width:${w}%;background:${pcor(r.nome)}"></span></span><span class="sb-v">${fmt(v)}</span></div>`;
+  }).join('')}</div>`;
+}
+function catTable(rows) {
+  const cats = Object.keys(CAT_NOME).filter(c => rows.some(r => r.cat[c]));
+  if (!cats.length) return '';
+  const cell = k => { if (!k || !k.n) return '<td class="ct-e">—</td>'; const v = k.golos / k.n;
+    const bg = `color-mix(in oklab, #1e5a37 ${Math.round(12 + v * 78)}%, #fbf6ea)`; return `<td style="background:${bg};color:${v > .55 ? '#fffaf0' : '#1d2b22'}" title="${k.golos} golos em ${k.n} perguntas">${Math.round(v * 100)}%<small>${k.n}</small></td>`; };
+  return `<div class="sc"><div class="sc-h"><b>Golos por categoria</b><span>% de perguntas com golo · em baixo, quantas jogou</span></div>
+    <div class="ct-w"><table class="ct"><thead><tr><th></th>${rows.map(r => `<th><i style="background:${pcor(r.nome)}"></i>${esc(r.nome)}</th>`).join('')}</tr></thead>
+    <tbody>${cats.map(c => `<tr><th>${CAT_NOME[c]}</th>${rows.map(r => cell(r.cat[c])).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+function evolucao(js) {
+  const dias = [...new Set(js.map(g => g.dia))].sort();
+  if (dias.length < 2) return '';
+  const W = 340, H = 190, L = 34, R = 86, T = 14, B = 26;
+  const ac = {}; for (const n of LIGA.jogadores) { let s = 0; ac[n] = dias.map(d => (s += js.filter(g => g.nome === n && g.dia === d).reduce((t, g) => t + (g.pontos || 0), 0))); }
+  const maxY = Math.max(10, ...Object.values(ac).flat()), x = i => L + (W - L - R) * i / (dias.length - 1), y = v => T + (H - T - B) * (1 - v / maxY);
+  const ticks = [0, .5, 1].map(f => Math.round(maxY * f));
+  let s = `<svg class="ev" viewBox="0 0 ${W} ${H}" role="img" aria-label="Pontos acumulados por dia">`;
+  s += ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="#ddd0b3" stroke-width="1"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end" class="ev-a">${t}</text>`).join('');
+  const lab = d => new Date(d + 'T12:00:00Z').toLocaleDateString('pt-PT', {day:'numeric', month:'short'});
+  s += `<text x="${L}" y="${H - 6}" class="ev-a">${lab(dias[0])}</text><text x="${W - R}" y="${H - 6}" text-anchor="end" class="ev-a">${lab(dias.at(-1))}</text>`;
+  for (const n of LIGA.jogadores) s += `<polyline fill="none" stroke="${pcor(n)}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${ac[n].map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')}"/>`;
+  // rótulos no fim de cada linha, afastados para não se sobreporem
+  const ends = LIGA.jogadores.map(n => ({n, v:ac[n].at(-1), yy:y(ac[n].at(-1))})).sort((a, b) => a.yy - b.yy);
+  for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 13) ends[i].yy = ends[i - 1].yy + 13;
+  for (const e of ends) s += `<circle cx="${x(dias.length - 1)}" cy="${y(e.v)}" r="4" fill="${pcor(e.n)}" stroke="#fffaf0" stroke-width="2"/><text x="${W - R + 8}" y="${e.yy + 4}" class="ev-l">${esc(e.n)} ${e.v}</text>`;
+  s += `<line class="ev-x" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#1d2b22" stroke-width="1" opacity="0"/><rect class="ev-hit" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
+  window.__ev = {dias, ac, x, L, W, R};
+  return `<div class="sc"><div class="sc-h"><b>Evolução</b><span>pontos somados, dia a dia</span></div>
+    <div class="ev-leg">${LIGA.jogadores.map(n => `<span><i style="background:${pcor(n)}"></i>${esc(n)}</span>`).join('')}</div>
+    <div class="ev-w">${s}<div class="ev-tip" hidden></div></div></div>`;
+}
+function evHover() {
+  const svg = document.querySelector('#stBody .ev'); if (!svg) return;
+  const tip = document.querySelector('#stBody .ev-tip'), xl = svg.querySelector('.ev-x'), {dias, ac, x} = window.__ev;
+  const move = e => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * 340;
+    let i = 0, best = 1e9; dias.forEach((d, k) => { const dd = Math.abs(x(k) - px); if (dd < best) { best = dd; i = k; } });
+    xl.setAttribute('x1', x(i)); xl.setAttribute('x2', x(i)); xl.setAttribute('opacity', '.35');
+    const linhas = LIGA.jogadores.map(n => [n, ac[n][i]]).sort((a, b) => b[1] - a[1]);
+    tip.innerHTML = `<b>${new Date(dias[i] + 'T12:00:00Z').toLocaleDateString('pt-PT', {weekday:'short', day:'numeric', month:'short'})}</b>` + linhas.map(([n, v]) => `<div><i style="background:${pcor(n)}"></i>${esc(n)}<span>${v}</span></div>`).join('');
+    tip.hidden = false; const left = x(i) / 340 * r.width; tip.style.left = Math.min(r.width - 150, Math.max(0, left - 75)) + 'px';
+  };
+  svg.addEventListener('pointermove', move); svg.addEventListener('pointerdown', move);
+  svg.addEventListener('pointerleave', () => { tip.hidden = true; xl.setAttribute('opacity', '0'); });
+}
+function recordes(js) {
+  const sete = js.filter(g => g.modo !== 'fim' && g.estado !== 'a jogar');
+  const top = (arr, k) => arr.reduce((b, g) => (g[k] || 0) > (b?.[k] || 0) ? g : b, null);
+  const dia = d => new Date(d + 'T12:00:00Z').toLocaleDateString('pt-PT', {day:'numeric', month:'short'});
+  const items = [];
+  const a = top(sete, 'pontos'); if (a?.pontos) items.push(['🏆', 'Melhor jogo', `${a.pontos} pontos`, a]);
+  const b = top(js, 'golacos'); if (b?.golacos) items.push(['🚀', 'Mais golos do meio-campo num jogo', `${b.golacos}`, b]);
+  const c = top(js.filter(g => g.modo === 'fim'), 'serie'); if (c?.serie) items.push(['🔥', 'Maior série no Sem fim', `${c.serie} seguidos`, c]);
+  const pg = sete.filter(g => g.perguntas >= 7).map(g => ({...g, ac:g.golos / g.perguntas})); const d = top(pg, 'ac'); if (d) items.push(['🎯', 'Mais golos num jogo de 7', `${d.golos} de ${d.perguntas}`, d]);
+  if (!items.length) return '';
+  return `<div class="sc"><div class="sc-h"><b>Recordes</b></div>${items.map(([ic, t, v, g]) => `<div class="rec-r"><span class="rec-i">${ic}</span><span class="rec-t">${t}<small><i style="background:${pcor(g.nome)}"></i>${esc(g.nome)} · ${dia(g.dia)}${g.modo !== 'liga' && STAB.scope === 'tudo' ? ' · ' + ({'7':'jogo rápido', fim:'sem fim', dia:'desafio do dia'}[g.modo] || g.modo) : ''}</small></span><b>${v}</b></div>`).join('')}</div>`;
+}
+function renderStats() {
+  document.querySelectorAll('#stScope button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.scope));
+  document.querySelectorAll('#stPer button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.per));
+  const el = $('#stBody');
+  if (!LIGA.db) { el.innerHTML = '<p class="lg-note">A liga ainda não está ligada à base de dados.</p>'; return; }
+  if (!LG.dados || (STAB.scope === 'tudo' && !ST_TODOS)) { el.innerHTML = '<p class="lg-note">A carregar…</p>'; return; }
+  const js = statsJogos();
+  if (!js.length) { el.innerHTML = `<p class="lg-note">Ainda não há jogos ${STAB.per === 'semana' ? 'esta semana' : STAB.per === 'mes' ? 'este mês' : ''}${STAB.scope === 'liga' ? ' da liga' : ''}.</p>`; return; }
+  const rows = statsPor(js);
+  let h = '';
+  if (STAB.scope === 'liga') h += barCard('Pontos', 'soma dos jogos da liga', rows, 'pts', v => v ?? '—');
+  h += barCard('Pontos por pergunta', 'a medida mais justa entre modos', rows, 'ppp', fmt1);
+  h += barCard('Golos', '% de perguntas acertadas', rows, 'acerto', pct);
+  h += barCard('Remate médio', 'distância média dos golos (mais longe = respostas mais raras)', rows, 'dist', v => v == null ? '—' : fmt1(v) + ' m');
+  h += barCard('Golos do meio-campo', 'respostas mais raras (50 m)', rows, 'golacos', v => v ?? '—');
+  h += barCard('Erros por pergunta', 'menos é melhor', rows, 'erros', fmt1, true);
+  h += barCard('Melhor jogo', 'jogos de 7 perguntas', rows, 'melhor', v => v ?? '—');
+  if (STAB.scope === 'tudo') h += barCard('Melhor série no Sem fim', 'golos seguidos', rows, 'serie', v => v ?? '—');
+  h += barCard('Jogos', '', rows, 'jogos', v => v ?? '—');
+  h += catTable(rows) + evolucao(js) + recordes(js);
+  h += `<p class="foot">Distâncias, erros e categorias contam a partir de 19 nov 2026 (os jogos anteriores só guardaram os pontos).</p>`;
+  el.innerHTML = h; evHover();
+}
+async function openStats() { show('s-stats'); renderStats(); await Promise.all([ligaGet(), statsGet()]); renderStats(); }
 
 function renderHome() {
   renderMe(); renderLigaCard();
@@ -1093,6 +1287,11 @@ $('#howBtn').onclick = () => $('#how').showModal();
 $('#again').onclick = () => { if (S.liga) { if (S.liga.n < LIGA.porDia) startLiga(); else openLiga(); return; } startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat); };
 $('#lgBack').onclick = () => { renderHome(); show('s-home'); };
 $('#lgRefresh').onclick = refreshLiga;
+$('#lgStats').onclick = openStats;
+$('#stBack').onclick = () => { renderHome(); show('s-home'); };
+$('#stRefresh').onclick = async () => { await Promise.all([ligaGet(), statsGet()]); renderStats(); };
+$('#stScope').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.scope = b.dataset.v; renderStats(); };
+$('#stPer').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.per = b.dataset.v; renderStats(); };
 $('#lgTabs').onclick = e => { const b = e.target.closest('button[data-t]'); if (!b) return; LTAB = b.dataset.t; renderLiga(); };
 $('#home').onclick = () => { renderHome(); show('s-home'); };
 $('#share').onclick = share;
