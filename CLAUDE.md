@@ -11,6 +11,13 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 - Modos: Jogo rápido (7), Sem fim (3 vidas, multiplicador a cada 3 golos seguidos, golo de 50 m devolve uma vida), Desafio do dia (semente = data), Desafiar amigo (`?jogo=<semente base36>&c=<categoria>&p=<pontos>` refaz as mesmas 7).
 - Recordes ficam só no browser (`localStorage` `fora-da-caixa-v1`).
 
+## Liga dos Amigos
+- Jogadores em `LIGA.jogadores` (no `index.html`, bloco "LIGA DOS AMIGOS"); para juntar um amigo, acrescentar o nome. `LIGA.porDia` = 3 jogos por dia que contam.
+- Cada pessoa escolhe quem é na 1.ª visita (`localStorage` `fora-da-caixa-eu`; "trocar" no início).
+- Jogo da liga = 7 perguntas da categoria `liga` (banco + épocas passadas, sem as desta época), semente `liga:<id>:<dia de Lisboa>:<n>` → o jogo n de cada dia é igual para todos. Conta logo que começa e guarda os pontos a cada resposta (sair a meio conta com o que tinha).
+- Resultados no Firebase Realtime Database (API REST, sem biblioteca): `LIGA.db` = endereço da base de dados; dados em `ligas/<id>/jogos/<nome>/<AAAA-MM-DD>/j<n>` = {pontos, golos, golacos, perguntas, estado, inicio, fim}. A classificação (Hoje / Esta semana / Total) atualiza-se sozinha a cada 15 s e ao voltar à app.
+- Testar sem Firebase: `window.__LIGA_DB = 'http://127.0.0.1:8767'` antes de a página carregar, com um servidor que imite a API REST (GET/PUT em `/caminho.json`, com CORS).
+
 ## Perguntas
 - **Banco (`perguntas.js`)**, categorias `portugal` e `mundo`: `{id, cat, tipo, txt, sub, r}`; `r` ORDENADO da resposta mais óbvia para a mais rara. Tipos: `jogador`, `clube`, `pais`, `treinador`. Nomes alternativos em `ALIASES`; opções que só servem para a lista de sugestões não denunciar as certas em `EXTRAS`.
   - Regra de ouro: **só factos fechados e de que se tem a certeza**, e listas completas (uma resposta certa que falte é dada como errada ao jogador). Quando há edições recentes, pôr o limite no `sub` ("até 2025"). Na dúvida, não pôr a pergunta.

@@ -176,6 +176,54 @@ details.all .chips{margin-top:6px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;transition:all .3s;z-index:50;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* ---------- liga ---------- */
+.mebar{font-size:13px;color:var(--mute);margin:-2px 0 8px}
+.mebar b{color:var(--ink)}
+.mebar .linkbtn{padding:2px 4px;font-size:13px}
+.ligacard{background:linear-gradient(160deg,#1d2a55,var(--panel));border:1px solid #33407a;border-radius:var(--r);padding:14px 16px 16px;margin-bottom:14px}
+.ligacard:empty{display:none}
+.lg-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lg-top b{font-family:var(--display);font-size:19px;font-weight:800}
+.lg-top .linkbtn{font-size:14px;padding:4px 0}
+.lg-mini{display:grid;gap:4px;margin:10px 0 4px}
+.lg-mini div{display:grid;grid-template-columns:22px 1fr auto 44px;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(11,16,32,.35);font-size:15px}
+.lg-mini div.me{background:rgba(215,255,58,.12);outline:1px solid rgba(215,255,58,.35)}
+.lg-mini span{color:var(--mute);font-size:13px}
+.lg-mini em{font-style:normal;font-weight:800;font-family:var(--display);text-align:right;font-size:17px}
+.dots{display:flex;gap:4px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--t0)}
+.dots i.on{background:var(--acc)}
+.lg-sub{font-size:12px;color:var(--mute);margin:6px 0 0;text-align:center}
+.lg-note{font-size:14px;color:var(--mute);margin:8px 0 0}
+.lg-pos{margin:8px 0 2px;font-size:15px}
+#endLiga{margin:14px 0 0}
+.lg-done{margin:12px 0 0;font-weight:600;text-align:center}
+.ligacard .btn{margin-top:12px}
+.who-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.who-b{padding:18px 10px;border-radius:14px;background:var(--panel2);border:2px solid var(--line);font-family:var(--display);font-weight:800;font-size:20px;transition:all .15s}
+.who-b:hover{border-color:var(--acc)}
+.who-b.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.lg-head{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.lg-head h2{font-family:var(--display);font-size:24px;margin:0;flex:1}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:600;color:var(--mute)}
+.tabs button.on{background:var(--ink);color:var(--bg)}
+.lg-table{display:grid;gap:8px}
+.lg-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;animation:qIn .4s both}
+.lg-row.me{border-color:var(--acc)}
+.lg-row .pos{width:30px;font-size:22px;text-align:center;font-weight:800}
+.lg-row .nm{flex:1}
+.lg-row .nm b{display:block;font-size:17px}
+.lg-row .nm small{color:var(--mute);font-size:12px}
+.lg-row .pts{font-family:var(--display);font-weight:800;font-size:26px}
+.lg-h{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:20px 0 8px}
+.lg-day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+.lg-day>b{display:block;margin-bottom:6px;text-transform:capitalize}
+.lg-day div{display:flex;align-items:center;gap:6px;padding:2px 0}
+.lg-day div span{flex:1;color:var(--mute)}
+.lg-day i{font-style:normal;min-width:38px;text-align:center;padding:3px 6px;border-radius:8px;background:var(--bg2);color:var(--mute);font-weight:700;font-size:13px}
+.lg-day i.done{background:rgba(215,255,58,.14);color:var(--acc)}
+.lg-day i.live{background:rgba(255,176,32,.15);color:var(--warn)}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);padding:20px;max-width:440px;width:calc(100% - 32px)}
 dialog::backdrop{background:rgba(5,8,18,.7);backdrop-filter:blur(3px)}
 dialog h2{font-family:var(--display);margin:0 0 10px;font-size:24px}
@@ -207,6 +255,7 @@ dialog .tiers b{width:52px}
       <svg viewBox="0 0 40 40"><use href="#ballsym"/></svg>
       <h1>Fora da <em>Caixa</em></h1>
     </div>
+    <div class="mebar" id="meBar" hidden></div>
     <p class="tag">O óbvio não marca. Responde certo, mas <b>com a resposta que mais ninguém se lembra</b>: quanto mais rara, mais longe o remate e mais pontos.</p>
 
     <div class="hero" aria-hidden="true">
@@ -220,6 +269,7 @@ dialog .tiers b{width:52px}
       </div>
     </div>
 
+    <div class="ligacard" id="ligaCard"></div>
     <div class="cats" id="cats" role="group" aria-label="Perguntas">
       <span>Perguntas:</span>
       <button data-c="tudo">Tudo</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2025</button>
@@ -293,6 +343,14 @@ dialog .tiers b{width:52px}
     <div class="reveal" id="reveal"></div>
   </div>
 
+  <!-- ===================== LIGA ===================== -->
+  <div id="s-liga" class="screen">
+    <div class="lg-head"><button class="iconbtn" id="lgBack" aria-label="Voltar">‹</button><h2>🏆 Classificação</h2><button class="iconbtn" id="lgRefresh" aria-label="Atualizar">↻</button></div>
+    <div class="tabs" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Esta semana</button><button data-t="total">Total</button></div>
+    <div id="lgBody"></div>
+    <p class="foot">3 jogos por dia contam (o dia muda à meia-noite de Lisboa). Os jogos 1, 2 e 3 de cada dia têm as mesmas perguntas para todos.</p>
+  </div>
+
   <!-- ===================== FIM ===================== -->
   <div id="s-end" class="screen">
     <div class="endhead">
@@ -302,6 +360,7 @@ dialog .tiers b{width:52px}
       <div class="shots" id="endShots"></div>
       <div class="lbl" id="endSub"></div>
     </div>
+    <div class="ligacard" id="endLiga" hidden></div>
     <button class="btn" id="again">Jogar outra vez</button>
     <div class="row2">
       <button class="btn friend" id="share">Desafiar amigo</button>
@@ -311,6 +370,11 @@ dialog .tiers b{width:52px}
   </div>
 </div>
 
+<dialog id="who">
+  <h2>Quem és?</h2>
+  <p style="color:var(--mute);margin:0">Fica guardado neste telemóvel. Podes trocar no início, em "trocar".</p>
+  <div class="who-grid" id="whoBtns"></div>
+</dialog>
 <dialog id="how">
   <h2>Como se joga</h2>
   <ol>
@@ -366,7 +430,7 @@ const TIERS = [
   {m:50, nome:'Do meio-campo', pts:50, hex:'#c084fc', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025'};
+const CATS = {tudo:'Tudo', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025', liga:'Liga'};
 const TEAMPT = {"Man City":"Manchester City","Man Utd":"Manchester United","Nott'm Forest":"Nottingham Forest","Spurs":"Tottenham"};
 const POSN = {gk:'guarda-redes', def:'defesa', mid:'médio', fwd:'avançado'};
 const POSA = {gk:'GR', def:'DEF', mid:'MED', fwd:'AV'};
@@ -478,9 +542,11 @@ function genQ(r, used, per, cat) {
   const plShare = cat === 'pl' ? 1 : cat === 'tudo' && TPL.length ? .2 : 0;
   if (r() < plShare) { const q = genPL(r, used, per); if (q) return q; }
   // "Tudo": metade das vezes do banco escrito à mão, metade das épocas passadas (que têm muitas mais)
-  const src = cat === 'historia' ? HQ : cat === 'tudo' ? (HQ.length && r() < .45 ? HQ : BQ) : BQ;
-  let pool = src.filter(q => (cat === 'tudo' || q.cat === cat) && !used.has(q.key));
-  if (!pool.length && cat === 'tudo') pool = [...BQ, ...HQ].filter(q => !used.has(q.key));
+  // "liga": como "Tudo" mas sem as perguntas desta época (mudam com os dados e os jogos têm de ser iguais para todos)
+  const mix = cat === 'tudo' || cat === 'liga';
+  const src = cat === 'historia' ? HQ : mix ? (HQ.length && r() < .45 ? HQ : BQ) : BQ;
+  let pool = src.filter(q => (mix || q.cat === cat) && !used.has(q.key));
+  if (!pool.length && mix) pool = [...BQ, ...HQ].filter(q => !used.has(q.key));
   if (pool.length) { const q = pick(r, pool); used.add(q.key); return q; }
   return cat !== 'pl' && plShare ? genPL(r, used, per) : null;
 }
@@ -688,6 +754,7 @@ async function answer(p, timeout = false) {
   else { S.streak = 0; if (S.mode === 'fim') { S.lives--; renderLives(S.lives); } }
   if (S.mode === 'fim' && tier === 5 && S.lives < 3) { S.lives++; lifeBack = true; }
   S.score += pts;
+  if (S.liga) ligaSync(false);
   S.shots.push({q, p, tier, pts, timeout, tries:S.tries.slice()});
   if (tier === 5) { ST.golacos++; saveStats(ST); }
   $('#pitchBox').scrollIntoView({behavior:'smooth', block:'center'});
@@ -740,20 +807,22 @@ function renderReveal(q, p, tier, pts, timeout, lifeBack) {
 function endGame() {
   clearInterval(timerId);
   const fim = S.mode === 'fim', golos = S.shots.filter(s => s.tier).length;
-  ST.jogos++;
+  ST.jogos++; S.ended = true;
   ST.recent = [...S.shots.map(s => s.q.key), ...ST.recent].slice(0, 70);
   let rec = false;
   if (fim) { if (S.score > ST.bestFim) { ST.bestFim = S.score; rec = true; } }
   else { if (S.score > ST.best) { ST.best = S.score; rec = S.score > 0; } }
   if (S.mode === 'dia') { const k = today(); ST.dia[k] = Math.max(ST.dia[k] || 0, S.score); const ks = Object.keys(ST.dia).sort().slice(-10); ST.dia = Object.fromEntries(ks.map(x => [x, ST.dia[x]])); }
   saveStats(ST);
-  $('#endLbl').textContent = fim ? `Sem fim · ${CATS[S.cat]}` : S.mode === 'dia' ? 'Desafio do dia · ' + new Date().toLocaleDateString('pt-PT', {day:'numeric', month:'long'}) : S.friend ? 'Desafio de um amigo' : `Jogo rápido · ${CATS[S.cat]}`;
+  $('#endLbl').textContent = S.liga ? `${LIGA.nome} · jogo ${S.liga.n} de ${LIGA.porDia} de hoje` : fim ? `Sem fim · ${CATS[S.cat]}` : S.mode === 'dia' ? 'Desafio do dia · ' + new Date().toLocaleDateString('pt-PT', {day:'numeric', month:'long'}) : S.friend ? 'Desafio de um amigo' : `Jogo rápido · ${CATS[S.cat]}`;
   $('#endRec').innerHTML = rec ? '<span class="rec">Novo recorde!</span>' : '';
   $('#endShots').innerHTML = fim && S.shots.length > 14 ? '' : S.shots.map((s, i) => `<i style="background:${TIERS[s.tier].hex};animation-delay:${200 + i * 90}ms;${s.tier ? '' : 'color:var(--mute)'}">${s.tier ? TIERS[s.tier].m : '✕'}</i>`).join('');
   const far = Math.max(0, ...S.shots.map(s => TIERS[s.tier].m));
   $('#endSub').textContent = fim ? `${S.shots.length} perguntas · ${golos} golos · melhor série ${S.bestStreak}` : `${golos} de ${S.shots.length} golos` + (far ? ` · remate mais longo: ${far} m` : '') + (S.friend && S.friendScore != null ? ` · o teu amigo fez ${S.friendScore}` : '');
   $('#endScore').textContent = '0'; show('s-end'); countUp($('#endScore'), 0, S.score);
-  $('#share').textContent = fim ? 'Partilhar' : 'Desafiar amigo';
+  $('#share').textContent = fim || S.liga ? 'Partilhar' : 'Desafiar amigo';
+  $('#again').textContent = S.liga ? (S.liga.n < LIGA.porDia ? `Jogo da liga ${S.liga.n + 1} de ${LIGA.porDia} ›` : 'Ver classificação') : 'Jogar outra vez';
+  if (S.liga) { const saved = ligaSync(true); renderEndLiga(); saved.then(refreshLiga); } else $('#endLiga').hidden = true;
   $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
 }
@@ -762,8 +831,8 @@ function confettiEnd() { const c = document.createElement('div'); c.className = 
 async function share() {
   const fim = S.mode === 'fim';
   const row = S.shots.slice(0, 20).map(s => TIERS[s.tier].emo).join('');
-  const url = location.origin + location.pathname + (fim ? '' : S.mode === 'dia' ? `?jogo=dia&p=${S.score}` : `?jogo=${S.seed.toString(36)}&c=${S.cat}&p=${S.score}`);
-  const txt = fim ? `Fora da Caixa ⚽ Sem fim: ${S.score} pontos, série de ${S.bestStreak}\n${row}` : `Fora da Caixa ⚽ ${S.score} pontos${S.mode === 'dia' ? ' no desafio do dia' : ''}\n${row}\nConsegues rematar de mais longe?`;
+  const url = location.origin + location.pathname + (fim || S.liga ? '' : S.mode === 'dia' ? `?jogo=dia&p=${S.score}` : `?jogo=${S.seed.toString(36)}&c=${S.cat}&p=${S.score}`);
+  const txt = S.liga ? `Fora da Caixa ⚽ ${LIGA.nome}: ${S.score} pontos no jogo ${S.liga.n} de hoje\n${row}` : fim ? `Fora da Caixa ⚽ Sem fim: ${S.score} pontos, série de ${S.bestStreak}\n${row}` : `Fora da Caixa ⚽ ${S.score} pontos${S.mode === 'dia' ? ' no desafio do dia' : ''}\n${row}\nConsegues rematar de mais longe?`;
   try { if (navigator.share) { await navigator.share({text: txt, url}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
   try { await navigator.clipboard.writeText(txt + '\n' + url); toast('Copiado! Cola numa conversa'); } catch (e) { prompt('Copia isto:', txt + '\n' + url); }
 }
@@ -771,7 +840,145 @@ async function share() {
 // ======================================================================
 // Arranque
 // ======================================================================
+
+// ======================================================================
+// LIGA DOS AMIGOS — 3 jogos por dia que contam para a classificação.
+// Os resultados ficam numa base de dados Firebase (Realtime Database, pela API REST).
+// Para juntar um amigo: acrescentar o nome em LIGA.jogadores.
+// ======================================================================
+const LIGA = {
+  id: 'amigos',
+  nome: 'Liga dos Amigos',
+  jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas'],
+  porDia: 3,
+  db: '',   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
+};
+if (window.__LIGA_DB) LIGA.db = window.__LIGA_DB;   // só para os testes
+const ME_KEY = 'fora-da-caixa-eu';
+let ME = null, LG = {dados:null, erro:null, aCarregar:false}, LTAB = 'hoje';
+try { ME = localStorage.getItem(ME_KEY); } catch (e) {}
+if (!LIGA.jogadores.includes(ME)) ME = null;
+function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {} renderMe(); renderLigaCard(); }
+// dias e semanas pela hora de Lisboa (para toda a gente mudar de dia à mesma hora)
+function lisDate(d = new Date()) { return new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit'}).format(d); }
+function weekStart(ds) { const d = new Date(ds + 'T12:00:00Z'); const wd = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - wd); return d.toISOString().slice(0, 10); }
+const ligaUrl = path => `${LIGA.db.replace(/\/$/, '')}/ligas/${LIGA.id}/${path}.json`;
+async function ligaGet() {
+  if (!LIGA.db) return null;
+  LG.aCarregar = true;
+  try { const r = await fetch(ligaUrl('jogos'), {cache:'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); LG.dados = (await r.json()) || {}; LG.erro = null; }
+  catch (e) { LG.erro = e.message || 'sem ligação'; }
+  LG.aCarregar = false; return LG.dados;
+}
+async function ligaPut(path, val) { const r = await fetch(ligaUrl(path), {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(val)}); if (!r.ok) throw new Error('HTTP ' + r.status); }
+function jogosDe(nome, dia) { const d = LG.dados?.[nome]?.[dia]; return d ? Object.values(d).filter(Boolean) : []; }
+function feitosHoje(nome) { const d = LG.dados?.[nome]?.[lisDate()]; return d ? Object.keys(d).length : 0; }
+
+// ---------- quem és ----------
+function renderMe() { const el = $('#meBar'); if (!el) return; el.hidden = !ME; el.innerHTML = ME ? `És o <b>${esc(ME)}</b> · <button class="linkbtn" id="meSwap">trocar</button>` : ''; const b = $('#meSwap'); if (b) b.onclick = askWho; }
+function askWho() {
+  const d = $('#who'); $('#whoBtns').innerHTML = LIGA.jogadores.map(n => `<button class="who-b ${n === ME ? 'on' : ''}" data-n="${esc(n)}">${esc(n)}</button>`).join('');
+  $('#whoBtns').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b) return; setMe(b.dataset.n); d.close(); toast(`Olá, ${b.dataset.n}!`); };
+  if (!d.open) d.showModal();
+}
+
+// ---------- cartão da liga no início ----------
+function totals(filtro) {
+  const out = LIGA.jogadores.map(n => ({nome:n, pts:0, jogos:0, melhor:0, golacos:0, golos:0}));
+  for (const o of out) for (const dia in (LG.dados?.[o.nome] || {})) { if (!filtro(dia)) continue; for (const g of jogosDe(o.nome, dia)) { o.pts += g.pontos || 0; o.jogos++; o.melhor = Math.max(o.melhor, g.pontos || 0); o.golacos += g.golacos || 0; o.golos += g.golos || 0; } }
+  return out.sort((a, b) => b.pts - a.pts || b.golacos - a.golacos || a.nome.localeCompare(b.nome));
+}
+function renderLigaCard() {
+  const c = $('#ligaCard'); if (!c) return;
+  if (!LIGA.db) { c.innerHTML = `<div class="lg-top"><b>🏆 ${esc(LIGA.nome)}</b></div><p class="lg-note">A liga está quase pronta: falta ligar a base de dados.</p>`; return; }
+  const feitos = ME ? feitosHoje(ME) : 0, falta = LIGA.porDia - feitos;
+  const hoje = lisDate(), tab = totals(d => weekStart(d) === weekStart(hoje));
+  const dots = n => Array.from({length: LIGA.porDia}, (_, i) => `<i class="${i < feitosHoje(n) ? 'on' : ''}"></i>`).join('');
+  let h = `<div class="lg-top"><b>🏆 ${esc(LIGA.nome)}</b><button class="linkbtn" id="lgVer">Classificação ›</button></div>`;
+  if (LG.erro && !LG.dados) h += `<p class="lg-note">Sem ligação à liga (${esc(LG.erro)}). <button class="linkbtn" id="lgRetry">Tentar outra vez</button></p>`;
+  else {
+    h += `<div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${esc(o.nome)}</b><span class="dots" title="jogos de hoje">${dots(o.nome)}</span><em>${o.pts}</em></div>`).join('')}</div><p class="lg-sub">Pontos desta semana · bolinhas = jogos de hoje</p>`;
+    if (!ME) h += `<button class="btn" id="lgWho">Escolher quem és</button>`;
+    else if (falta > 0) h += `<button class="btn" id="lgPlay">Jogo da liga ${feitos + 1} de ${LIGA.porDia} ›</button><p class="lg-sub">7 perguntas · as mesmas para os ${LIGA.jogadores.length} · conta mesmo que saias a meio</p>`;
+    else h += `<p class="lg-done">✅ Já fizeste os ${LIGA.porDia} jogos de hoje. Amanhã há mais!</p>`;
+  }
+  c.innerHTML = h;
+  $('#lgVer') && ($('#lgVer').onclick = openLiga); $('#lgRetry') && ($('#lgRetry').onclick = refreshLiga);
+  $('#lgWho') && ($('#lgWho').onclick = askWho); $('#lgPlay') && ($('#lgPlay').onclick = startLiga);
+}
+async function refreshLiga() {
+  if (LG.aCarregar) return;
+  await ligaGet(); renderLigaCard();
+  if ($('#s-liga').classList.contains('on')) renderLiga();
+  if ($('#s-end').classList.contains('on') && S?.liga) renderEndLiga();
+}
+
+// ---------- jogar um jogo da liga ----------
+async function startLiga() {
+  if (!ME) return askWho();
+  const b = $('#lgPlay'); if (b) { b.disabled = true; b.textContent = 'A preparar…'; }
+  await ligaGet();
+  if (LG.erro) { toast('Sem ligação à liga: tenta daqui a pouco'); renderLigaCard(); return; }
+  const n = feitosHoje(ME) + 1, dia = lisDate();
+  if (n > LIGA.porDia) { toast(`Já fizeste os ${LIGA.porDia} jogos de hoje`); renderLigaCard(); return; }
+  const rec = {pontos:0, golos:0, golacos:0, perguntas:0, estado:'a jogar', inicio:Date.now()};
+  try { await ligaPut(`jogos/${ME}/${dia}/j${n}`, rec); } catch (e) { toast('Não consegui registar o jogo: tenta outra vez'); renderLigaCard(); return; }
+  LG.dados[ME] = LG.dados[ME] || {}; LG.dados[ME][dia] = LG.dados[ME][dia] || {}; LG.dados[ME][dia]['j' + n] = rec;
+  startGame('liga', hashStr(`liga:${LIGA.id}:${dia}:${n}`), 'liga');
+  S.liga = {n, dia, rec};
+}
+let ligaSyncT = null;
+function ligaSync(final) {
+  if (!S?.liga) return;
+  const r = S.liga.rec;
+  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
+  if (!final) r.fim = null;
+  const path = `jogos/${ME}/${S.liga.dia}/j${S.liga.n}`, body = JSON.parse(JSON.stringify(r));
+  const go = (k = 0) => ligaPut(path, body).catch(() => { if (k < 4) return new Promise(res => setTimeout(res, 2000 * (k + 1))).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
+  clearTimeout(ligaSyncT);
+  if (final) return go();
+  ligaSyncT = setTimeout(go, 300); return Promise.resolve();
+}
+// classificação da semana no ecrã final de um jogo da liga
+function renderEndLiga() {
+  const el = $('#endLiga'); if (!el) return;
+  if (!S?.liga || !LG.dados) { el.hidden = true; return; }
+  const wk = weekStart(lisDate()), tab = totals(d => weekStart(d) === wk), pos = tab.findIndex(o => o.nome === ME) + 1;
+  el.hidden = false;
+  el.innerHTML = `<div class="lg-top"><b>🏆 Esta semana</b><button class="linkbtn" id="endLgVer">Classificação ›</button></div>
+    <p class="lg-pos">Estás em <b>${pos}.º lugar</b>${pos > 1 ? `, a ${tab[pos - 2].pts - tab[pos - 1].pts} pontos do ${esc(tab[pos - 2].nome)}` : tab[1] ? `, com ${tab[0].pts - tab[1].pts} pontos de avanço` : ''}</p>
+    <div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${esc(o.nome)}</b><span class="dots">${Array.from({length: LIGA.porDia}, (_, k) => `<i class="${k < feitosHoje(o.nome) ? 'on' : ''}"></i>`).join('')}</span><em>${o.pts}</em></div>`).join('')}</div>`;
+  $('#endLgVer').onclick = openLiga;
+}
+// atualiza sozinha: a cada 15 s com o início ou a classificação abertos, e ao voltar à app
+setInterval(() => { if (LIGA.db && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-liga').classList.contains('on') || $('#s-end').classList.contains('on'))) refreshLiga(); }, 15000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && LIGA.db) refreshLiga(); });
+
+// ---------- classificação ----------
+function openLiga() { show('s-liga'); renderLiga(); refreshLiga(); }
+function renderLiga() {
+  const hoje = lisDate(), wk = weekStart(hoje);
+  const filtros = {hoje: d => d === hoje, semana: d => weekStart(d) === wk, total: () => true};
+  document.querySelectorAll('#lgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === LTAB));
+  const rows = totals(filtros[LTAB]);
+  let h = '';
+  if (!LIGA.db) h = '<p class="lg-note">A liga ainda não está ligada à base de dados.</p>';
+  else if (!LG.dados && LG.erro) h = `<p class="lg-note">Sem ligação à liga (${esc(LG.erro)}).</p>`;
+  else if (!LG.dados) h = '<p class="lg-note">A carregar…</p>';
+  else {
+    h = `<div class="lg-table">${rows.map((o, i) => `<div class="lg-row ${o.nome === ME ? 'me' : ''}" style="animation-delay:${i * 70}ms">
+      <span class="pos">${['🥇','🥈','🥉'][i] && o.pts ? ['🥇','🥈','🥉'][i] : i + 1}</span>
+      <span class="nm"><b>${esc(o.nome)}</b><small>${o.jogos} ${o.jogos === 1 ? 'jogo' : 'jogos'} · melhor ${o.melhor} · ${o.golacos} do meio-campo</small></span>
+      <span class="pts">${o.pts}</span></div>`).join('')}</div>`;
+    const days = {}; for (const n of LIGA.jogadores) for (const d in (LG.dados[n] || {})) if (filtros[LTAB](d)) days[d] = 1;
+    const ds = Object.keys(days).sort().reverse().slice(0, LTAB === 'total' ? 14 : 7);
+    if (ds.length) h += `<h3 class="lg-h">Jogo a jogo</h3>` + ds.map(d => `<div class="lg-day"><b>${new Date(d + 'T12:00:00Z').toLocaleDateString('pt-PT', {weekday:'short', day:'numeric', month:'short'})}</b>${LIGA.jogadores.map(n => { const gs = Object.entries(LG.dados[n]?.[d] || {}).sort(); return `<div><span>${esc(n)}</span>${Array.from({length: LIGA.porDia}, (_, i) => { const g = gs[i]?.[1]; return `<i class="${g ? (g.estado === 'a jogar' ? 'live' : 'done') : ''}">${g ? g.pontos : '·'}</i>`; }).join('')}</div>`; }).join('')}</div>`).join('');
+  }
+  $('#lgBody').innerHTML = h;
+}
+
 function renderHome() {
+  renderMe(); renderLigaCard();
   $('#st-jogos').textContent = ST.jogos; $('#st-best').textContent = ST.best; $('#st-fim').textContent = ST.bestFim; $('#st-golacos').textContent = ST.golacos;
   const d = ST.dia[today()]; $('#diaTxt').textContent = d != null ? `Hoje fizeste ${d} · podes repetir` : 'As mesmas 7 para toda a gente hoje';
   if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length) || (ST.cat === 'historia' && !HQ.length)) ST.cat = 'tudo';
@@ -808,6 +1015,8 @@ async function boot() {
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
   $('#dataFoot').textContent = `${BQ.length + HQ.length} perguntas de futebol português, mundial e da Premier League desde 2016/17` + (TPL.length ? ` + perguntas da época ${EPOCA} sempre novas (até à jornada ${G})` : '');
   renderHome(); heroAnim();
+  if (!ME) askWho();
+  refreshLiga();
   const qs = new URLSearchParams(location.search), j = qs.get('jogo');
   if (j) {   // desafio de um amigo (?jogo=semente&c=categoria&p=pontos)
     const fp = qs.get('p'), c = CATS[qs.get('c')] ? qs.get('c') : 'tudo', btn = $('#m-friend'); btn.hidden = false;
@@ -823,10 +1032,15 @@ $('#m-fim').onclick = () => startGame('fim');
 $('#m-dia').onclick = () => startGame('dia');
 $('#cats').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; ST.cat = b.dataset.c; saveStats(ST); renderHome(); });
 $('#howBtn').onclick = () => $('#how').showModal();
-$('#again').onclick = () => startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat);
+$('#again').onclick = () => { if (S.liga) { if (S.liga.n < LIGA.porDia) startLiga(); else openLiga(); return; } startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat); };
+$('#lgBack').onclick = () => { renderHome(); show('s-home'); };
+$('#lgRefresh').onclick = refreshLiga;
+$('#lgTabs').onclick = e => { const b = e.target.closest('button[data-t]'); if (!b) return; LTAB = b.dataset.t; renderLiga(); };
 $('#home').onclick = () => { renderHome(); show('s-home'); };
 $('#share').onclick = share;
-$('#quit').onclick = () => { if (busy) return; clearInterval(timerId); if (S && S.shots.length && confirm('Terminar este jogo e ver o resultado?')) { endGame(); return; } renderHome(); show('s-home'); };
+$('#quit').onclick = () => { if (busy) return;
+  if (S?.liga && !S.ended) { if (!confirm('Sair? Este jogo da liga conta com os pontos que já tens.')) return; clearInterval(timerId); endGame(); return; }
+  clearInterval(timerId); if (S && S.shots.length && confirm('Terminar este jogo e ver o resultado?')) { endGame(); return; } renderHome(); show('s-home'); };
 $('#skip').onclick = () => answer(null);
 const inp = $('#resp');
 inp.addEventListener('input', () => { sugList = search(inp.value); sugSel = 0; renderSug(); });
