@@ -43,6 +43,14 @@ def pais(t, date):
 
 # nomes de jogadores escritos como no resto do jogo
 NOMES = {'Eder': 'Éder', 'Eusebio': 'Eusébio', 'Pepe': 'Pepe', 'Ronaldo': 'Ronaldo Nazário'}
+# marcadores por seleção só em fases finais recentes e de seleções conhecidas (as antigas têm perguntas gerais, ver 6)
+CONHECIDAS = {'Portugal', 'Brasil', 'Argentina', 'Alemanha', 'França', 'Espanha', 'Itália', 'Inglaterra', 'Países Baixos', 'Bélgica', 'Croácia',
+              'Uruguai', 'Suíça', 'Dinamarca', 'Suécia', 'Polónia', 'México', 'Estados Unidos', 'Colômbia', 'Marrocos', 'Japão', 'Coreia do Sul',
+              'Senegal', 'Gana', 'Chile', 'Rússia', 'Turquia', 'Grécia', 'Áustria', 'Escócia', 'País de Gales', 'Sérvia', 'Ucrânia', 'Chéquia', 'República Checa'}
+def recente(tour, ano, p):
+    if tour == 'FIFA World Cup': return ano >= '2002' and p in CONHECIDAS
+    if tour == 'UEFA Euro': return ano >= '2004' and p in CONHECIDAS
+    return ano >= '2015' and p in ('Brasil', 'Argentina')   # Copa América
 # participantes destas fases finais já estão escritos à mão em perguntas2.js
 JA_ESCRITAS = {('FIFA World Cup', '2010'), ('FIFA World Cup', '2014'), ('FIFA World Cup', '2018'), ('FIFA World Cup', '2022'), ('UEFA Euro', '2016'), ('UEFA Euro', '2021'), ('UEFA Euro', '2024')}
 TORNEIOS = {'FIFA World Cup': 'Mundial', 'UEFA Euro': 'Euro', 'Copa América': 'Copa América'}
@@ -99,6 +107,7 @@ def main():
         p = pais(g['team'], g['date'])
         if p: golos[(m['tournament'], m['date'][:4], p)][NOMES.get(g['scorer'], g['scorer'])] += 1
     for (tour, ano, p), c in sorted(golos.items()):
+        if not recente(tour, ano, p): continue   # nas fases finais antigas ninguém sabe quem marcou pela Coreia: ver as perguntas gerais (6)
         ed, nota = edicao(tour, ano)
         itens = [(n, f'{v} golo' + ('s' if v > 1 else ''), v) for n, v in c.items()]
         add(f's-{tour[:4]}-{ano}-{p}', 'portugal' if p == 'Portugal' else 'mundo', 'jogador', f'Um jogador que marcou {do_(p)} {"na" if tour == "Copa América" else "no"} {ed}', f'Golos na fase final{nota} (autogolos não contam)', itens, mn=2 if p == 'Portugal' else 4)
@@ -141,6 +150,7 @@ def main():
     # 5. participantes de cada fase final (que ainda não estão escritas à mão)
     for tour in TORNEIOS:
         for ano in sorted({r['date'][:4] for r in R if r['tournament'] == tour}):
+            if tour == 'Copa América' and ano < '2015': continue
             ps = Counter()
             for r in R:
                 if r['tournament'] == tour and r['date'].startswith(ano):
@@ -148,6 +158,26 @@ def main():
             if None in ps or (tour, ano) in JA_ESCRITAS: continue
             ed, nota = edicao(tour, ano)
             add(f's-part-{tour[:4]}-{ano}', 'mundo', 'pais', f'Uma seleção que jogou {"a" if tour == "Copa América" else "o"} {ed}', f'As seleções da fase final{nota}', [(n, f'{v} jogo' + ('s' if v > 1 else ''), fama_p[n]) for n, v in ps.items()], mn=4, mx=48)
+    # 6. fases finais antigas: perguntas gerais (nomes famosos, não marcadores de cada seleção)
+    for tour in ('FIFA World Cup', 'UEFA Euro'):
+        anos = sorted({r['date'][:4] for r in R if r['tournament'] == tour})
+        for ano in anos:
+            ed, nota = edicao(tour, ano)
+            ms = [r for r in R if r['tournament'] == tour and r['date'].startswith(ano)]
+            ven = Counter()
+            for r in ms:
+                hs, as_ = int(r['home_score']), int(r['away_score'])
+                if hs != as_: ven[pais(r['home_team'] if hs > as_ else r['away_team'], r['date'])] += 1
+            if None not in ven:
+                add(f's-ganhou-{tour[:4]}-{ano}', 'mundo', 'pais', f'Uma seleção que ganhou pelo menos um jogo no {ed}', f'Fase final{nota} (desempates por penáltis não contam)', [(n, f'{v} vitória' + ('s' if v > 1 else ''), fama_p[n]) for n, v in ven.items()], mn=4, mx=26)
+            tot = Counter()
+            for (t, a, p), c in golos.items():
+                if t == tour and a == ano:
+                    for n, v in c.items(): tot[(n, p)] += v
+            for lim in (4, 3):
+                top = [(n, f'{v} golos · {p}', v) for (n, p), v in tot.items() if v >= lim]
+                if 3 <= len(top) <= 14:
+                    add(f's-top-{tour[:4]}-{ano}', 'mundo', 'jogador', f'Um jogador que marcou {lim} ou mais golos no {ed}', f'Fase final{nota} (autogolos não contam)', top, mn=3, mx=14); break
     data = {'fonte': 'martj42/international_results', 'perguntas': perguntas}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
     print(f'selecoes.json: {len(perguntas)} perguntas ({OUT.stat().st_size // 1024} KB)', Counter(q["cat"] for q in perguntas))

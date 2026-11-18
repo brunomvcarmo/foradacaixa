@@ -470,8 +470,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js"></script>
-<script src="perguntas2.js"></script>
+<script src="perguntas.js?v=20261118163954"></script>
+<script src="perguntas2.js?v=20261118163954"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -480,6 +480,25 @@ dialog .tiers b{width:52px}
 // desta época geradas sem fim a partir de dados.json (scripts/quiz_dados.py, atualizado pela Action).
 // ======================================================================
 const $ = s => document.querySelector(s);
+// ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
+const APP_VER = '20261118163954';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+let novaVersao = false;
+async function verVersao() {
+  try {
+    const r = await fetch('versao.txt?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return;
+    const v = (await r.text()).trim();
+    if (v && v !== APP_VER) { novaVersao = true; recarregarSePuder(); }
+  } catch (e) {}
+}
+function recarregarSePuder() {
+  if (!novaVersao) return;
+  const aJogar = document.querySelector('#s-game.on') && typeof S !== 'undefined' && S && !S.ended;   // nunca a meio de um jogo
+  if (aJogar) return;
+  const q = new URLSearchParams(location.search); q.set('v', Date.now().toString(36));
+  location.replace(location.pathname + '?' + q.toString());
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') verVersao(); });
+setInterval(verVersao, 5 * 60 * 1000);
 const TIERS = [
   {m:0,  nome:'Falhado', pts:0, hex:'#d9cdb1', emo:'⬛'},
   {m:11, nome:'Penálti', pts:10, hex:'#c9bd9c', emo:'⬜'},
@@ -728,7 +747,7 @@ function confetti(n, colors) { const c = $('#confetti'); c.innerHTML = ''; for (
 // Estado do jogo
 // ======================================================================
 let S = null, timerId = null, sugList = [], sugSel = 0, busy = false;
-function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0, 0); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0, 0); if (id !== 's-game') recarregarSePuder(); }
 
 function startGame(mode, seed, cat) {
   cat = cat || (mode === 'dia' ? 'tudo' : ST.cat);
@@ -1255,7 +1274,7 @@ function heroAnim() {
 async function boot() {
   buildBank();
   const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
-  const hist = getJ('historia.json'), selP = getJ('selecoes.json'), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ(`historia.json?v=${APP_VER}`), selP = getJ(`selecoes.json?v=${APP_VER}`), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1266,7 +1285,7 @@ async function boot() {
   try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
   $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
-  renderHome(); heroAnim();
+  renderHome(); heroAnim(); verVersao();
   if (!ME) askWho();
   refreshLiga();
   const qs = new URLSearchParams(location.search), j = qs.get('jogo');
@@ -1304,7 +1323,14 @@ inp.addEventListener('input', () => { sugList = search(inp.value); sugSel = 0; r
 inp.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { sugSel = Math.min(sugList.length - 1, sugSel + 1); renderSug(); e.preventDefault(); }
   else if (e.key === 'ArrowUp') { sugSel = Math.max(0, sugSel - 1); renderSug(); e.preventDefault(); }
-  else if (e.key === 'Enter') { if (sugList[sugSel]) answer(sugList[sugSel]); e.preventDefault(); }
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (sugList[sugSel]) answer(sugList[sugSel]);
+    else if (inp.value.trim() && S && !S.answered) {   // nome que não está na lista: avisa e deixa continuar a tentar
+      const m = $('#tryMsg'); m.innerHTML = `✕ "${esc(inp.value.trim())}" não está na lista · escreve outro nome`; m.hidden = false;
+      m.classList.remove('go'); void m.offsetWidth; m.classList.add('go'); inp.select();
+    }
+  }
   else if (e.key === 'Escape') hideSug();
 });
 // no iPhone o teclado fecha-se se o toque na lista tirar o foco à caixa: impedir isso
