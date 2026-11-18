@@ -318,7 +318,7 @@ dialog .tiers b{width:52px}
     <div class="ligacard" id="ligaCard"></div>
     <div class="cats" id="cats" role="group" aria-label="Perguntas">
       <span>Perguntas:</span>
-      <button data-c="tudo">Tudo</button><button data-c="ligapt">Liga Portuguesa</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2025</button>
+      <button data-c="tudo">Tudo</button><button data-c="ligapt">Liga Portuguesa</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2026</button>
     </div>
     <div class="modes">
       <button class="mode friend" id="m-friend" hidden>
@@ -473,8 +473,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118192611"></script>
-<script src="perguntas2.js?v=20261118192611"></script>
+<script src="perguntas.js?v=20261118193329"></script>
+<script src="perguntas2.js?v=20261118193329"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -484,7 +484,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118192611';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118193329';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -512,7 +512,7 @@ const TIERS = [
   {m:100, nome:'De baliza a baliza', pts:80, hex:'#6b3fa0', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025', liga:'Liga'};
+const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2026', liga:'Liga'};
 const TEAMPT = {"Man City":"Manchester City","Man Utd":"Manchester United","Nott'm Forest":"Nottingham Forest","Spurs":"Tottenham"};
 const POSN = {gk:'guarda-redes', def:'defesa', mid:'médio', fwd:'avançado'};
 const POSA = {gk:'GR', def:'DEF', mid:'MED', fwd:'AV'};
@@ -1135,7 +1135,7 @@ function renderLiga() {
 // uma cor fixa por jogador (pela ordem de LIGA.jogadores; validadas contra o fundo creme; o nome vai sempre escrito ao lado)
 const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
 const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
-const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', historia:'Premier League 2016-25', pl:'Premier League desta época'};
+const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', historia:'Premier League 2016-26', pl:'Premier League desta época'};
 let ST_TODOS = null, STAB = {scope:'liga', per:'semana'};
 const tirosDe = () => S.shots.map(s => [s.q.cat, s.tier, s.tries.length]);
 async function statsGet() {

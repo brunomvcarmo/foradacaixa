@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'historia.json'
 BASE = 'https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data'
 UA = {'User-Agent': 'Mozilla/5.0', 'Accept': '*/*'}
-EPOCAS = ['2016-17', '2017-18', '2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24', '2024-25']
+EPOCAS = ['2016-17', '2017-18', '2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24', '2024-25', '2025-26']   # os últimos 10 anos
 # nomes dos clubes como no banco de perguntas (perguntas.js)
 NOMES = {'Man City': 'Manchester City', 'Man Utd': 'Manchester United', 'Spurs': 'Tottenham', "Nott'm Forest": 'Nottingham Forest',
          'Sheffield Utd': 'Sheffield United', 'Wolves': 'Wolverhampton', 'West Brom': 'West Bromwich Albion', 'Leicester': 'Leicester',
@@ -50,6 +50,9 @@ def main():
         master[r['season']][int(r['team'])] = r['team_name']
     jogadores, perguntas = {}, []
     contra = defaultdict(Counter)   # código do jogador → clube adversário → golos (todas as épocas)
+    soma = defaultdict(Counter)     # código do jogador → golos, assistências, jogos sem sofrer (GR), golos numa época (máx.)
+    pelo = defaultdict(Counter)     # (clube) → código do jogador → golos por esse clube
+    pos_c = {}
     nome_curto = {}
     GRANDES6 = ['Liverpool', 'Manchester City', 'Arsenal', 'Chelsea', 'Manchester United', 'Tottenham']
     for ep in EPOCAS:
@@ -91,6 +94,15 @@ def main():
         for el, p in raw.items():
             if el in st: jogadores[code[el]] = [p['web_name'], f"{p['first_name']} {p['second_name']}".strip()]
             if el in vs: contra[code[el]].update(vs[el]); nome_curto[code[el]] = (p['first_name'], p['second_name'], p['web_name'])
+        for el in tot:
+            if el not in code: continue
+            c = code[el]; soma[c]['golos'] += tot[el]['golos']; soma[c]['assist'] += tot[el]['assist']; soma[c]['cs'] += tot[el]['clean_sheets']
+            soma[c]['melhor'] = max(soma[c]['melhor'], tot[el]['golos']); soma[c]['epocas'] += 1; pos_c[c] = pos.get(el)
+            if tot[el]['golos'] >= 20: soma[c][f'ep20:{label}'] = tot[el]['golos']
+        for el, d in st.items():
+            if el in code:
+                for t, x in d.items():
+                    if x['golos']: pelo[teams[t]][code[el]] += x['golos']
 
         def q(qid, txt, sub, items):
             items = [(el, s) for el, s in items if el in raw]
@@ -134,6 +146,26 @@ def main():
             if 5 <= len(itens) <= 45:
                 q('vs-' + adv.replace(' ', ''), f'Um jogador que marcou contra o {adv} na Premier League {label}', f'Premier League {label} (autogolos não contam)', itens)
         print(label, len([x for x in perguntas if x['ep'] == label]), 'perguntas')
+    # ---------- os últimos 10 anos juntos ----------
+    ULT = f"{EPOCAS[0][:4]}/{EPOCAS[0][5:]} a {EPOCAS[-1][:4]}/{EPOCAS[-1][5:]}"
+    def agreg(qid, txt, sub, itens):
+        itens = sorted(itens, key=lambda x: -x[2])
+        if 5 <= len(itens) <= 45: perguntas.append({'id': f'h10-{qid}', 'ep': '10anos', 'txt': txt, 'sub': sub, 'r': [[c, st] for c, st, _ in itens]})
+    for lim in (40, 60, 80, 100):
+        agreg(f'golos{lim}', f'Um jogador com pelo menos {lim} golos na Premier League nos últimos 10 anos', f'Épocas {ULT}', [(c, f"{v['golos']} golos", v['golos']) for c, v in soma.items() if v['golos'] >= lim])
+    for lim in (30, 40, 50):
+        agreg(f'assist{lim}', f'Um jogador com pelo menos {lim} assistências na Premier League nos últimos 10 anos', f'Épocas {ULT} (assistências oficiais da liga)', [(c, f"{v['assist']} assistências", v['assist']) for c, v in soma.items() if v['assist'] >= lim])
+    ep20 = [(c, ', '.join(f"{k[5:]}: {v[k]}" for k in v if k.startswith('ep20:')), v['melhor']) for c, v in soma.items() if v['melhor'] >= 20]
+    agreg('epoca20', 'Um jogador que marcou 20 ou mais golos numa só época da Premier League nos últimos 10 anos', f'Épocas {ULT}', ep20)
+    for lim in (60, 50, 40):
+        gr = [(c, f"{v['cs']} jogos sem sofrer", v['cs']) for c, v in soma.items() if pos_c.get(c) == 1 and v['cs'] >= lim]
+        if 5 <= len(gr) <= 20: agreg(f'gr{lim}', f'Um guarda-redes com pelo menos {lim} jogos sem sofrer golos na Premier League nos últimos 10 anos', f'Épocas {ULT} (jogos em que jogou 60 minutos ou mais)', gr); break
+    for clube, cnt in sorted(pelo.items()):
+        for lim in (10, 15, 20, 25, 30, 40):   # o limite mais baixo que dê uma lista jeitosa (mais respostas = mais "Fora da Caixa")
+            itens = [(c, f'{v} golos', v) for c, v in cnt.items() if v >= lim]
+            if 5 <= len(itens) <= 20:
+                agreg(f'pelo-{clube.replace(" ", "")}', f'Um jogador com pelo menos {lim} golos pelo {clube} na Premier League nos últimos 10 anos', f'Épocas {ULT} (só os golos pelo {clube})', itens); break
+    print('últimos 10 anos:', len([q for q in perguntas if q['id'].startswith('h10-')]), 'perguntas')
     # clubes contra os quais cada um dos grandes marcadores marcou, em todas as épocas juntas (muitas respostas)
     PREST = {'Liverpool': 9, 'Manchester City': 9, 'Arsenal': 8, 'Chelsea': 8, 'Manchester United': 8, 'Tottenham': 7, 'Newcastle': 5, 'Everton': 5, 'West Ham': 4, 'Leicester': 4, 'Aston Villa': 4}
     for c, cnt in contra.items():
@@ -142,7 +174,7 @@ def main():
         nome = NOME_JOGADOR.get(c) or (web if first.split()[0] in web else f"{first.split()[0]} {web.split('.')[-1]}")
         r = sorted(cnt.items(), key=lambda x: (-x[1], -PREST.get(x[0], 0), x[0]))
         perguntas.append({'id': f'hcontra-{c}', 'ep': '2016-2025', 'tipo': 'clube', 'txt': f'Um clube contra o qual {nome} marcou na Premier League',
-                          'sub': 'Épocas 2016/17 a 2024/25 (só jogos da Premier League)', 'r': [[t, f'{v} golo' + ('s' if v > 1 else '')] for t, v in r]})
+                          'sub': f'Épocas {EPOCAS[0][:4]}/{EPOCAS[0][5:]} a {EPOCAS[-1][:4]}/{EPOCAS[-1][5:]} (só jogos da Premier League)', 'r': [[t, f'{v} golo' + ('s' if v > 1 else '')] for t, v in r]})
         print(f'  contra: {nome} ({sum(cnt.values())} golos, {len(cnt)} clubes)')
     data = {'fonte': 'FPL oficial (arquivo vaastav/Fantasy-Premier-League)', 'jogadores': jogadores, 'perguntas': perguntas}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
