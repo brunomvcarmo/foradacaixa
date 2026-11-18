@@ -11,6 +11,10 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 - Modos: Jogo rápido (7), Sem fim (3 vidas, multiplicador a cada 3 golos seguidos, golo de 50 m devolve uma vida), Desafio do dia (semente = data), Desafiar amigo (`?jogo=<semente base36>&c=<categoria>&p=<pontos>` refaz as mesmas 7).
 - Recordes ficam só no browser (`localStorage` `fora-da-caixa-v1`).
 
+## Aspeto (estilo "caderneta retro")
+- Cores e letras nos tokens do `:root` (creme `--bg`, verde `--acc`, vermelho `--red`, `--dark`; Alfa Slab One nos títulos, Barlow no texto; `html{font-synthesis:none}` porque a Alfa só tem um peso). Cores dos níveis de remate em `--t0..--t5` E no array `TIERS` (JS) — mudar os dois. Cores do relvado em `drawPitch()`.
+- Ícone: `icones/icone.svg` (símbolo no topo, favicon) + `icone-180/192/512.png` (iPhone e `manifest.webmanifest`). Há 4 variantes em `icones/opcao1..4.svg`; para trocar, copiar a escolhida para `icone.svg` e refazer os PNG (render da SVG a 180, 192 e 512 px).
+
 ## Liga dos Amigos
 - Jogadores em `LIGA.jogadores` (no `index.html`, bloco "LIGA DOS AMIGOS"); para juntar um amigo, acrescentar o nome. `LIGA.porDia` = 3 jogos por dia que contam.
 - Cada pessoa escolhe quem é na 1.ª visita (`localStorage` `fora-da-caixa-eu`; "trocar" no início).

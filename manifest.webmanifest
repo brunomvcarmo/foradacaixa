@@ -1,0 +1,15 @@
+{
+  "name": "Fora da Caixa",
+  "short_name": "Fora da Caixa",
+  "description": "Quiz de futebol: o óbvio não marca. Quanto mais rara a resposta certa, mais longe o remate.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3ead6",
+  "theme_color": "#f3ead6",
+  "icons": [
+    {"src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icones/icone.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}
