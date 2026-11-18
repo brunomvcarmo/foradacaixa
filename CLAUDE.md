@@ -13,13 +13,14 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 
 ## Aspeto (estilo "caderneta retro")
 - Cores e letras nos tokens do `:root` (creme `--bg`, verde `--acc`, vermelho `--red`, `--dark`; Alfa Slab One nos títulos, Barlow no texto; `html{font-synthesis:none}` porque a Alfa só tem um peso). Cores dos níveis de remate em `--t0..--t5` E no array `TIERS` (JS) — mudar os dois. Cores do relvado em `drawPitch()`.
-- Ícone: `icones/icone.svg` (símbolo no topo, favicon) + `icone-180/192/512.png` (iPhone e `manifest.webmanifest`). Há 4 variantes em `icones/opcao1..4.svg`; para trocar, copiar a escolhida para `icone.svg` e refazer os PNG (render da SVG a 180, 192 e 512 px).
+- Ícone: `icones/icone.svg` (símbolo no topo, favicon) + `icone-180/192/512.png` (iPhone e `manifest.webmanifest`). O atual é a versão melhorada da opção 1 (`icones/opcao1b.svg`); há outras variantes em `icones/opcao1..4.svg`; para trocar, copiar a escolhida para `icone.svg` e refazer os PNG (render da SVG a 180, 192 e 512 px).
 
 ## Liga dos Amigos
 - Jogadores em `LIGA.jogadores` (no `index.html`, bloco "LIGA DOS AMIGOS"); para juntar um amigo, acrescentar o nome. `LIGA.porDia` = 3 jogos por dia que contam.
 - Cada pessoa escolhe quem é na 1.ª visita (`localStorage` `fora-da-caixa-eu`; "trocar" no início).
 - Jogo da liga = 7 perguntas da categoria `liga` (banco + épocas passadas, sem as desta época), semente `liga:<id>:<dia de Lisboa>:<n>` → o jogo n de cada dia é igual para todos. Conta logo que começa e guarda os pontos a cada resposta (sair a meio conta com o que tinha).
 - Resultados no Firebase Realtime Database (API REST, sem biblioteca): `LIGA.db` = endereço da base de dados; dados em `ligas/<id>/jogos/<nome>/<AAAA-MM-DD>/j<n>` = {pontos, golos, golacos, perguntas, estado, inicio, fim}. A classificação (Hoje / Esta semana / Total) atualiza-se sozinha a cada 15 s e ao voltar à app.
+- Apagar os jogos de alguém (reset): acrescentar `{id, nome, motivo}` a `LIGA.resets`; o 1.º telemóvel que abrir a página apaga `jogos/<nome>` e marca `resets/<id>` (corre uma só vez). Esta sessão não chega ao Firebase, por isso é sempre feito assim, pela app.
 - Testar sem Firebase: `window.__LIGA_DB = 'http://127.0.0.1:8767'` antes de a página carregar, com um servidor que imite a API REST (GET/PUT em `/caminho.json`, com CORS).
 
 ## Perguntas

@@ -859,6 +859,10 @@ const LIGA = {
   nome: 'Liga dos Amigos',
   jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas'],
   porDia: 3,
+  // apagar os jogos de alguém UMA vez (o 1.º telemóvel que abrir a página faz o reset e marca-o em ligas/<id>/resets/<id do reset>)
+  resets: [
+    {id:'2026-11-18-bruno', nome:'Bruno', motivo:'jogou com a versão que tirava 5 s por erro'},
+  ],
   db: 'https://fora-da-caixa-b1efa-default-rtdb.europe-west1.firebasedatabase.app',   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
 };
 if (window.__LIGA_DB) LIGA.db = window.__LIGA_DB;   // só para os testes
@@ -871,8 +875,24 @@ function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {
 function lisDate(d = new Date()) { return new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit'}).format(d); }
 function weekStart(ds) { const d = new Date(ds + 'T12:00:00Z'); const wd = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - wd); return d.toISOString().slice(0, 10); }
 const ligaUrl = path => `${LIGA.db.replace(/\/$/, '')}/ligas/${LIGA.id}/${path}.json`;
+let resetsP = null;
+function ensureResets() {
+  if (!resetsP) resetsP = (async () => {
+    if (!LIGA.db || !LIGA.resets?.length) return;
+    try {
+      const r = await fetch(ligaUrl('resets'), {cache:'no-store'}); if (!r.ok) return;
+      const feitos = (await r.json()) || {};
+      for (const rs of LIGA.resets) if (!feitos[rs.id]) {
+        await ligaPut(`jogos/${rs.nome}`, null);
+        await ligaPut(`resets/${rs.id}`, {nome:rs.nome, feito:Date.now()});
+      }
+    } catch (e) { resetsP = null; }   // sem ligação: tenta outra vez na próxima atualização
+  })();
+  return resetsP;
+}
 async function ligaGet() {
   if (!LIGA.db) return null;
+  await ensureResets();
   LG.aCarregar = true;
   try { const r = await fetch(ligaUrl('jogos'), {cache:'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); LG.dados = (await r.json()) || {}; LG.erro = null; }
   catch (e) { LG.erro = e.message || 'sem ligação'; }
