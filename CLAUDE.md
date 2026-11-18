@@ -13,7 +13,7 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 
 ## Aspeto (estilo "caderneta retro")
 - Cores e letras nos tokens do `:root` (creme `--bg`, verde `--acc`, vermelho `--red`, `--dark`; Alfa Slab One nos títulos, Barlow no texto; `html{font-synthesis:none}` porque a Alfa só tem um peso). Cores dos níveis de remate em `--t0..--t5` E no array `TIERS` (JS) — mudar os dois. Cores do relvado em `drawPitch()`.
-- Ícone: `icones/icone.svg` (símbolo no topo, favicon) + `icone-180/192/512.png` (iPhone e `manifest.webmanifest`). O atual é a versão melhorada da opção 1 com bola realista (`icones/opcao1c.svg`; a bola vem de `realBall()` e no jogo é o símbolo `ballsym`); há outras variantes em `icones/opcao1..4.svg`; para trocar, copiar a escolhida para `icone.svg` e refazer os PNG (render da SVG a 180, 192 e 512 px).
+- Ícone: mesmo estilo do da app da FPL (letras FdC grandes, corte na diagonal com o nome, bola 3D com riscos). Gerado por `python3 scripts/icone.py <desenho>` → `icones/icone-512/192/180/32.png` (topo da página, favicon, iPhone e `manifest.webmanifest`); desenhos `creme` (atual), `relvado`, `cartaz`; `python3 scripts/icone.py amostra` mostra-os lado a lado. A bola do jogo (relvado) é o símbolo `ballsym` (de `realBall()`).
 
 ## Liga dos Amigos
 - Jogadores em `LIGA.jogadores` (no `index.html`, bloco "LIGA DOS AMIGOS"); para juntar um amigo, acrescentar o nome. `LIGA.porDia` = 3 jogos por dia que contam.
