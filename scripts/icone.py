@@ -158,6 +158,99 @@ D.update({
 })
 
 
+# ---------- mais variantes da "distância" (2) e da "fita" (4) ----------
+def _txt(x, y, t, size, fill, stroke=ESCURO, sw=6, anchor='start', rot=0):
+    return (f'<text x="{x}" y="{y}" text-anchor="{anchor}" font-family="Alfa Slab One" font-size="{size}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}" '
+            f'paint-order="stroke" stroke-linejoin="round"{f' transform="rotate({rot} {x} {y})"' if rot else ''}>{t}</text>')
+
+
+def _fita(x0, x1, y, h, labels, big=None):
+    """fita métrica horizontal de x0 a x1 (topo em y, altura h): ticks em baixo e números"""
+    n = 50; out = (f'<rect x="{x0}" y="{y + 8}" width="{x1 - x0}" height="{h}" fill="{ESCURO}"/>'
+                   f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="{h}" fill="{MOSTARDA}" stroke="{ESCURO}" stroke-width="6"/>')
+    out += TICKS(x0 + 14, x1 - 14, y + h, n, h * .34, ESCURO)
+    for v, x in labels: out += f'<text x="{x}" y="{y + h * .52}" text-anchor="middle" font-family="Alfa Slab One" font-size="{h * .36:.0f}" fill="{ESCURO}">{v}</text>'
+    if big: out += f'<text x="{big[1]}" y="{y + h * .56}" text-anchor="middle" font-family="Alfa Slab One" font-size="{h * .5:.0f}" fill="{VERMELHO}">{big[0]}</text>'
+    return out
+
+
+D.update({
+    # 2b. vista de lado: o voo da bola dos 50 m até à baliza, com a régua das distâncias no chão
+    'd-lado': (f".i{{background:linear-gradient(180deg,#fbf4e3 0%,{CREME} 70%)}}"
+               ".p{position:absolute;inset:0}"
+               ".ball{position:absolute;left:178px;top:78px;width:150px;height:150px;filter:drop-shadow(-4px 14px 12px rgba(29,43,34,.4))}",
+               '<svg class="p" viewBox="0 0 512 512">'
+               f'<rect y="372" width="512" height="140" fill="{VERDE}"/>'
+               + ''.join(f'<rect x="{x}" y="372" width="46" height="140" fill="#226640"/>' for x in range(0, 512, 92))
+               + f'<line x1="0" y1="372" x2="512" y2="372" stroke="{CREME}" stroke-width="8"/>'
+               + ''.join(f'<line x1="{x}" y1="372" x2="{x}" y2="{392 if big else 384}" stroke="{CREME}" stroke-width="{6 if big else 4}"/>' for x, big in [(60 + i * 8, i % 5 == 0) for i in range(0, 51)])
+               + _txt(60, 452, '50', 48, CREME) + _txt(260, 452, '25', 40, CREME, anchor='middle') + _txt(372, 452, '11', 34, CREME, anchor='middle')
+               + f'<path d="M430 372V282H500V372" fill="none" stroke="{ESCURO}" stroke-width="12" transform="translate(5 5)"/><path d="M430 372V282H500V372" fill="none" stroke="#fffaf0" stroke-width="12"/>'
+               + ''.join(f'<line x1="{438 + i * 12}" y1="288" x2="{450 + i * 12}" y2="372" stroke="{ESCURO}" stroke-width="2" opacity=".5"/>' for i in range(5))
+               + f'<path d="M62 360Q170 40 452 318" fill="none" stroke="{VERMELHO}" stroke-width="12" stroke-dasharray="3 24" stroke-linecap="round"/>'
+               + f'<circle cx="62" cy="362" r="10" fill="{ESCURO}"/></svg>' + bola_3d()),
+    # 2c. FdC em cima (como o da FPL) e o relvado em perspetiva com as distâncias em baixo
+    'd-titulo': (f".i{{background:{CREME}}}"
+                 ".p{position:absolute;inset:0}"
+                 f".t{{position:absolute;left:34px;top:30px;color:{VERDE};font-family:'Alfa Slab One',serif;font-size:150px;line-height:.9;letter-spacing:-3px;text-shadow:7px 7px 0 {VERMELHO}}}"
+                 ".ball{position:absolute;left:330px;top:40px;width:150px;height:150px;filter:drop-shadow(-4px 14px 12px rgba(29,43,34,.45))}",
+                 '<svg class="p" viewBox="0 0 512 512"><path d="M120 214H392L512 512H0Z" fill="#245f3b"/>'
+                 + ''.join(f'<path d="M{120 - 120 * t:.0f} {214 + 298 * t:.0f}H{392 + 120 * t:.0f}" stroke="{CREME}" stroke-width="{4 + 5 * t:.1f}"/>'
+                           + _txt(round(140 - 120 * t), round(205 + 298 * t), lbl, round(28 + 26 * t), CREME, sw=round(5 + 3 * t))
+                           for t, lbl in ((.1, '11'), (.38, '25'), (.82, '50 m')))
+                 + f'<path d="M380 500C350 380 360 290 400 196" fill="none" stroke="{VERMELHO}" stroke-width="12" stroke-dasharray="3 24" stroke-linecap="round"/></svg>'
+                 + '<div class="t">FdC</div>' + bola_3d()),
+    # 2d. a mesma ideia do 2, mais forte: perspetiva funda, distâncias em etiquetas e a bola grande a chegar à baliza
+    'd-funda': (f".i{{background:linear-gradient(180deg,#e9dcc0 0,{CREME} 30%)}}"
+                ".p{position:absolute;inset:0}"
+                ".ball{position:absolute;left:292px;top:86px;width:158px;height:158px;filter:drop-shadow(-6px 16px 14px rgba(29,43,34,.45))}",
+                '<svg class="p" viewBox="0 0 512 512"><defs><linearGradient id="rv2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7a4a"/><stop offset="1" stop-color="#1b5232"/></linearGradient></defs>'
+                '<path d="M196 112H316L512 512H0Z" fill="url(#rv2)"/>'
+                + ''.join(f'<path d="M{196 - 196 * t:.0f} {112 + 400 * t:.0f}H{316 + 196 * t:.0f}" stroke="{CREME}" stroke-width="{3 + 6 * t:.1f}"/>'
+                          f'<g transform="translate({190 - 160 * t:.0f} {112 + 400 * t:.0f})"><rect x="-4" y="{-34 - 22 * t:.0f}" width="{56 + 70 * t:.0f}" height="{30 + 20 * t:.0f}" rx="8" fill="{MOSTARDA}" stroke="{ESCURO}" stroke-width="5"/>'
+                          f'<text x="{24 + 35 * t:.0f}" y="{-12 - 12 * t:.0f}" text-anchor="middle" font-family="Alfa Slab One" font-size="{22 + 18 * t:.0f}" fill="{VERMELHO if t > .5 else ESCURO}">{lbl}</text></g>'
+                          for t, lbl in ((.16, '11'), (.42, '25'), (.86, '50 m')))
+                + f'<rect x="222" y="60" width="68" height="52" fill="none" stroke="{ESCURO}" stroke-width="10" transform="translate(4 4)"/><rect x="222" y="60" width="68" height="52" fill="none" stroke="#fffaf0" stroke-width="10"/>'
+                + f'<path d="M440 500C390 380 370 300 360 240" fill="none" stroke="{VERMELHO}" stroke-width="14" stroke-dasharray="3 26" stroke-linecap="round"/></svg>'
+                + bola_3d()),
+    # 4b. a bola é a caixa da fita métrica: a fita sai dela até aos 50 m
+    'f-caixa': (f".i{{background:linear-gradient(150deg,#fbf4e3 0%,{CREME} 60%,#e9dcc0 100%)}}"
+                ".p{position:absolute;inset:0}"
+                f".t{{position:absolute;left:34px;top:34px;color:{VERDE};font-family:'Alfa Slab One',serif;font-size:132px;line-height:.9;letter-spacing:-3px;text-shadow:6px 6px 0 {VERMELHO}}}"
+                ".ball{position:absolute;left:236px;top:170px;width:250px;height:250px;filter:drop-shadow(-6px 14px 14px rgba(29,43,34,.45))}",
+                '<svg class="p" viewBox="0 0 512 512">' + _fita(20, 330, 318, 84, [(10, 222), (30, 154)], ('50m', 82))
+                + f'<path d="M14 306H30V420H14Z" fill="{ESCURO}"/></svg>'
+                + '<div class="t">FdC</div>' + bola_3d()),
+    # 4c. como o da FPL: FdC, a bola com rastos, e o corte é uma fita com o nome escrito
+    'f-faixa': (f".i{{background:linear-gradient(150deg,#fbf4e3 0%,{CREME} 60%,#e9dcc0 100%)}}"
+                ".p{position:absolute;inset:0}"
+                f".t{{position:absolute;left:36px;top:46px;color:{VERDE};font-family:'Alfa Slab One',serif;font-size:190px;line-height:.9;letter-spacing:-4px;text-shadow:8px 8px 0 {VERMELHO}}}"
+                ".tr{position:absolute;height:13px;border-radius:7px;background:#1d2b22;transform:rotate(-13.5deg);transform-origin:100% 50%}"
+                ".ball{position:absolute;left:318px;top:136px;width:170px;height:170px;filter:drop-shadow(-4px 12px 12px rgba(29,43,34,.45))}",
+                '<div class="t">FdC</div>'
+                + ''.join(f'<div class="tr" style="left:{x}px;top:{y}px;width:{w}px;opacity:{o}"></div>' for x, y, w, o in [(196, 198, 140, .95), (150, 226, 186, .6), (216, 254, 120, .32)])
+                + '<svg class="p" viewBox="0 0 512 512"><g transform="rotate(-13.5 256 400)">'
+                f'<rect x="-60" y="340" width="640" height="150" fill="{ESCURO}" transform="translate(0 10)"/>'
+                f'<rect x="-60" y="340" width="640" height="150" fill="{MOSTARDA}" stroke="{ESCURO}" stroke-width="6"/>'
+                + TICKS(-40, 560, 490, 60, 30, ESCURO) + TICKS(-40, 560, 340, 60, -30, ESCURO).replace('y2="', 'y2="')
+                + f'<text x="40" y="436" font-family="Barlow Semi Condensed" font-weight="800" font-size="50" letter-spacing="4" fill="{ESCURO}">FORA DA <tspan fill="{VERMELHO}">CAIXA</tspan></text></g></svg>'
+                + bola_3d()),
+    # 4d. a fita enrolada à volta da bola, com a ponta dos 50 m
+    'f-enrolada': (f".i{{background:radial-gradient(circle at 50% 42%,#2a7a4c 0,{VERDE} 50%,#143d27 100%)}}"
+                   ".p{position:absolute;inset:0;z-index:1}.p2{position:absolute;inset:0;z-index:3}"
+                   ".ball{position:absolute;left:131px;top:110px;width:250px;height:250px;z-index:2;filter:drop-shadow(-6px 14px 14px rgba(0,0,0,.35))}",
+                   '<svg class="p" viewBox="0 0 512 512"><g transform="translate(256 248) rotate(-14)">'
+                   f'<path d="M-205 0A205 64 0 0 1 205 0" fill="none" stroke="{ESCURO}" stroke-width="58"/><path d="M-205 0A205 64 0 0 1 205 0" fill="none" stroke="#c99a2e" stroke-width="46"/></g></svg>'
+                   + bola_3d() +
+                   '<svg class="p2" viewBox="0 0 512 512"><g transform="translate(256 248) rotate(-14)">'
+                   f'<path d="M205 0A205 64 0 0 1 -205 0L-205 150" fill="none" stroke="{ESCURO}" stroke-width="58" stroke-linejoin="round"/>'
+                   f'<path d="M205 0A205 64 0 0 1 -205 0L-205 150" fill="none" stroke="{MOSTARDA}" stroke-width="46" stroke-linejoin="round"/>'
+                   f'<path d="M205 0A205 64 0 0 1 -205 0L-205 150" fill="none" stroke="{ESCURO}" stroke-width="10" stroke-dasharray="3 13" transform="translate(0 15)"/>'
+                   + _txt(-205, 128, '50', 34, VERMELHO, sw=0, anchor='middle', rot=0) + f'<text x="-205" y="160" text-anchor="middle" font-family="Alfa Slab One" font-size="22" fill="{ESCURO}">m</text>'
+                   + '</g></svg>'),
+})
+
+
 def html(k):
     css, body = D[k]
     return f'<!doctype html><html><head><meta charset="utf-8">{FONT}<style>html,body{{margin:0}}{BASE}{css}</style></head><body><div class="i">{body}</div></body></html>'
