@@ -471,8 +471,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118172030"></script>
-<script src="perguntas2.js?v=20261118172030"></script>
+<script src="perguntas.js?v=20261118174322"></script>
+<script src="perguntas2.js?v=20261118174322"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -482,7 +482,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118172030';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118174322';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -630,6 +630,7 @@ function genPL(r, used, perTpl) {
 }
 // uma pergunta da categoria: do banco (sem repetir no jogo) ou gerada da Premier League
 // Liga Portuguesa: 20% desta época, 50% de 2010/11 até à época passada, 30% de antes de 2010/11
+let LIGA_PL_MAX = null;   // posto por startLiga() só enquanto gera as perguntas de um jogo da liga
 const LIGAPT_MIX = [['atual', .2], ['recente', .5], ['antiga', .3]];
 function genQ(r, used, per, cat) {
   const livre = arr => arr.filter(q => !used.has(q.key));
@@ -645,7 +646,10 @@ function genQ(r, used, per, cat) {
   // "Tudo" e "liga" (os jogos da Liga dos Amigos): mistura de TODAS as perguntas, incluindo as desta época.
   // Os dados mudam só de madrugada (Action dados.yml), por isso o jogo n de cada dia é igual para os quatro.
   const semAtual = false;
-  const fontes = [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', .18]];
+  // nos jogos da liga (a partir de 19 nov 2026): poucas perguntas da Premier League desta época, no máximo LIGA.maxPL por jogo
+  const nPL = Object.values(per).reduce((a, b) => a + b, 0), regraPL = cat === 'liga' && LIGA_PL_MAX != null;
+  const fontes = regraPL ? [['banco', .42], ['ligapt', .25], ['historia', .23], ['pl', nPL >= LIGA_PL_MAX ? 0 : .1]]
+                         : [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', .18]];   // (sem a regra: igual a antes)
   let x = r() * fontes.reduce((s, f) => s + f[1], 0), q = null;
   for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
   return q || tira(BQ) || tira(HQ) || ligapt(semAtual);
@@ -954,6 +958,7 @@ const LIGA = {
   nome: 'Liga dos Amigos',
   jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas'],
   porDia: 3,
+  maxPL: 2,   // máximo de perguntas da Premier League desta época em cada jogo da liga (desde 19 nov 2026)
   sal: '2',   // entra na semente dos jogos e do Desafio do dia: mudar para dar perguntas novas no mesmo dia (iguais para todos)
   // apagar os jogos de alguém UMA vez (o 1.º telemóvel que abrir a página faz o reset e marca-o em ligas/<id>/resets/<id do reset>)
   resets: [
@@ -1055,7 +1060,9 @@ async function startLiga() {
   const rec = {pontos:0, golos:0, golacos:0, perguntas:0, estado:'a jogar', inicio:Date.now()};
   try { await ligaPut(`jogos/${ME}/${dia}/j${n}`, rec); } catch (e) { toast('Não consegui registar o jogo: tenta outra vez'); renderLigaCard(); return; }
   LG.dados[ME] = LG.dados[ME] || {}; LG.dados[ME][dia] = LG.dados[ME][dia] || {}; LG.dados[ME][dia]['j' + n] = rec;
+  LIGA_PL_MAX = dia >= '2026-11-19' ? LIGA.maxPL : null;   // regra nova só a partir de amanhã: os jogos de hoje ficam iguais para todos
   startGame('liga', hashStr(`liga:${LIGA.id}:${LIGA.sal}:${dia}:${n}`), 'liga');
+  LIGA_PL_MAX = null;
   S.liga = {n, dia, rec};
 }
 let ligaSyncT = null;
