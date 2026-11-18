@@ -58,8 +58,6 @@ window.BANCO = [
    r:['Brasil','Alemanha','França','Estados Unidos','Catar','Rússia','Itália','Espanha','Inglaterra','México','África do Sul','Japão','Coreia do Sul','Argentina','Canadá','Uruguai','Suécia','Suíça','Chile']},
   {id:'wc-finalistas-sem', cat:'mundo', tipo:'pais', txt:'Uma seleção que já jogou uma final do Mundial mas nunca o ganhou', sub:'Até 2022',
    r:['Países Baixos','Croácia','Hungria','Suécia','Checoslováquia']},
-  {id:'wc22-meias', cat:'mundo', tipo:'pais', txt:'Uma seleção que chegou às meias-finais do Mundial 2022', sub:'No Catar',
-   r:['Argentina','França','Croácia','Marrocos']},
   {id:'copa-america', cat:'mundo', tipo:'pais', txt:'Uma seleção que já ganhou a Copa América', sub:'Até 2024',
    r:['Brasil','Argentina','Uruguai','Chile','Colômbia','Paraguai','Peru','Bolívia']},
   {id:'can', cat:'mundo', tipo:'pais', txt:'Uma seleção que já ganhou a Taça das Nações Africanas', sub:'Até à edição de 2023 (jogada em 2024)',

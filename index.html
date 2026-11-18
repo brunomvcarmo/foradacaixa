@@ -222,7 +222,7 @@ dialog .tiers b{width:52px}
 
     <div class="cats" id="cats" role="group" aria-label="Perguntas">
       <span>Perguntas:</span>
-      <button data-c="tudo">Tudo</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League</button>
+      <button data-c="tudo">Tudo</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2025</button>
     </div>
     <div class="modes">
       <button class="mode friend" id="m-friend" hidden>
@@ -326,7 +326,7 @@ dialog .tiers b{width:52px}
     <div><i style="background:var(--t5)"></i><b>50 m</b>Do meio-campo · 50 (a mais rara)</div>
   </div>
   <p style="color:var(--mute);font-size:14px;margin:12px 0 0"><b style="color:var(--ink)">Sem fim:</b> 3 vidas; cada falhanço tira uma. A cada 3 golos seguidos o multiplicador sobe (×1,5, ×2…). Um golo do meio-campo devolve uma vida.</p>
-  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). As da Premier League são criadas a partir das estatísticas oficiais desta época e mudam todas as semanas; nelas, a resposta óbvia é o jogador mais popular entre os adeptos.</p>
+  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
   <button class="btn" onclick="this.closest('dialog').close()">Bora</button>
 </dialog>
 <div class="toast" id="toast"></div>
@@ -348,6 +348,7 @@ dialog .tiers b{width:52px}
 </svg>
 
 <script src="perguntas.js"></script>
+<script src="perguntas2.js"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -365,11 +366,11 @@ const TIERS = [
   {m:50, nome:'Do meio-campo', pts:50, hex:'#c084fc', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League'};
+const CATS = {tudo:'Tudo', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025'};
 const TEAMPT = {"Man City":"Manchester City","Man Utd":"Manchester United","Nott'm Forest":"Nottingham Forest","Spurs":"Tottenham"};
 const POSN = {gk:'guarda-redes', def:'defesa', mid:'médio', fwd:'avançado'};
 const POSA = {gk:'GR', def:'DEF', mid:'MED', fwd:'AV'};
-const TIPO = {jogador:['⚽','jogador'], clube:['🏟️','clube'], pais:['🏳️','seleção'], treinador:['📋','treinador']};
+const TIPO = {jogador:['⚽','jogador'], clube:['🛡️','clube'], pais:['🏳️','seleção'], treinador:['📋','treinador'], estadio:['🏟️','estádio'], plh:['⚽','jogador']};
 let D = null, P = [], TEAMS = {}, G = 1, EPOCA = '', TPL = [], BQ = [], POOL = {};
 
 // ---------- utilidades ----------
@@ -395,16 +396,34 @@ let ST = loadStats();
 // ======================================================================
 // Banco de perguntas de futebol em geral (perguntas.js)
 // ======================================================================
+const ENT = {};   // tipo → nome → entidade (as opções da caixa de resposta)
+function getEnt(tipo, nome, extra) {
+  ENT[tipo] = ENT[tipo] || {};
+  if (!ENT[tipo][nome]) { const al = (window.ALIASES || {})[nome] || []; ENT[tipo][nome] = Object.assign({nome, tipo, nWeb:norm(nome), nAll:norm([nome, ...al].join(' ')), fama:0}, extra || {}); }
+  return ENT[tipo][nome];
+}
+function buildPools() { for (const tipo in ENT) POOL[tipo] = Object.values(ENT[tipo]).sort((a, b) => a.nome.localeCompare(b.nome, 'pt')); }
 function buildBank() {
-  const B = window.BANCO || [], AL = window.ALIASES || {}, EX = window.EXTRAS || {};
-  const ent = {};   // tipo → nome → entidade
-  const get = (tipo, nome) => { ent[tipo] = ent[tipo] || {}; if (!ent[tipo][nome]) { const al = AL[nome] || []; ent[tipo][nome] = {nome, tipo, nWeb:norm(nome), nAll:norm([nome, ...al].join(' ')), fama:0}; } return ent[tipo][nome]; };
+  const B = window.BANCO || [], EX = window.EXTRAS || {};
   BQ = B.map(b => {
-    const valid = b.r.map(n => get(b.tipo, n)), set = new Set(valid);
+    const valid = b.r.map(n => getEnt(b.tipo, n)), set = new Set(valid);
     return {key:'b:' + b.id, cat:b.cat, tipo:b.tipo, txt:b.txt, sub:b.sub || '', valid, ok:e => set.has(e)};
   });
-  for (const tipo in EX) EX[tipo].forEach(n => get(tipo, n));
-  for (const tipo in ent) POOL[tipo] = Object.values(ent[tipo]).sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
+  for (const tipo in EX) EX[tipo].forEach(n => getEnt(tipo, n));
+  buildPools();
+}
+// épocas passadas da Premier League (historia.json, gerado por scripts/historia_pl.py a partir dos dados oficiais)
+let HQ = [];
+function buildHistory(H) {
+  const byCode = {};
+  for (const code in H.jogadores) { const [web, full] = H.jogadores[code]; byCode[code] = getEnt('plh', code, {nome:web, completo:full, nWeb:norm(web), nAll:norm(full + ' ' + web)}); }
+  HQ = H.perguntas.map(h => {
+    const tipo = h.tipo === 'clube' ? 'clube' : 'plh', stats = new Map();
+    const valid = h.r.map(([c, st]) => { const e = tipo === 'clube' ? getEnt('clube', c) : byCode[c]; stats.set(e, st); return e; }).filter(Boolean);
+    const set = new Set(valid);
+    return {key:'h:' + h.id, cat:'historia', tipo, txt:h.txt, sub:h.sub, valid, ok:e => set.has(e), st:e => stats.get(e) || ''};
+  });
+  buildPools();
 }
 
 // ======================================================================
@@ -456,9 +475,12 @@ function genPL(r, used, perTpl) {
 }
 // uma pergunta da categoria: do banco (sem repetir no jogo) ou gerada da Premier League
 function genQ(r, used, per, cat) {
-  const plShare = cat === 'pl' ? 1 : cat === 'tudo' && TPL.length ? .3 : 0;
+  const plShare = cat === 'pl' ? 1 : cat === 'tudo' && TPL.length ? .2 : 0;
   if (r() < plShare) { const q = genPL(r, used, per); if (q) return q; }
-  const pool = BQ.filter(q => (cat === 'tudo' || q.cat === cat) && !used.has(q.key));
+  // "Tudo": metade das vezes do banco escrito à mão, metade das épocas passadas (que têm muitas mais)
+  const src = cat === 'historia' ? HQ : cat === 'tudo' ? (HQ.length && r() < .45 ? HQ : BQ) : BQ;
+  let pool = src.filter(q => (cat === 'tudo' || q.cat === cat) && !used.has(q.key));
+  if (!pool.length && cat === 'tudo') pool = [...BQ, ...HQ].filter(q => !used.has(q.key));
   if (pool.length) { const q = pick(r, pool); used.add(q.key); return q; }
   return cat !== 'pl' && plShare ? genPL(r, used, per) : null;
 }
@@ -564,7 +586,7 @@ function show(id) { document.querySelectorAll('.screen').forEach(s => s.classLis
 
 function startGame(mode, seed, cat) {
   cat = cat || (mode === 'dia' ? 'tudo' : ST.cat);
-  if (!CATS[cat] || (cat === 'pl' && !TPL.length)) cat = 'tudo';
+  if (!CATS[cat] || (cat === 'pl' && !TPL.length) || (cat === 'historia' && !HQ.length)) cat = 'tudo';
   if (mode === 'dia') seed = hashStr('dia:' + today());
   let qs = [];
   if (mode === 'fim') { if (seed == null) seed = (Math.random() * 2**32) >>> 0; }
@@ -588,13 +610,13 @@ function nextQ() {
   } else q = S.qs[S.i];
   S.q = q; S.answered = false;
   [...$('#prog').children].forEach((e, i) => { e.className = i === S.i ? 'cur' : ''; e.style.background = S.shots[i] ? TIERS[S.shots[i].tier].hex : ''; });
-  const catLbl = q.cat === 'pl' ? 'Premier League' : CATS[q.cat];
+  const catLbl = q.cat === 'pl' || q.cat === 'historia' ? 'Premier League' : CATS[q.cat];
   $('#qnum').textContent = (S.mode === 'fim' ? `Pergunta ${S.i + 1}` + (mult() > 1 ? ` · ×${String(mult()).replace('.', ',')}` : '') : `Pergunta ${S.i + 1} de ${S.qs.length}`) + ` · ${catLbl}`;
   $('#qtxt').textContent = q.txt; $('#qsub').textContent = q.sub;
   const qc = $('#qcard'); qc.classList.remove('enter'); void qc.offsetWidth; qc.classList.add('enter');
   $('#answer').hidden = false; $('#skip').hidden = false; $('#reveal').classList.remove('on'); $('#reveal').innerHTML = '';
   const inp = $('#resp'); inp.value = ''; hideSug(); S.tries = []; $('#tryMsg').hidden = true; $('#answer').classList.remove('wrong');
-  inp.placeholder = {pl:'Escreve o nome de um jogador…', jogador:'Escreve o nome de um jogador…', clube:'Escreve o nome de um clube…', pais:'Escreve o nome de uma seleção…', treinador:'Escreve o nome de um treinador…'}[q.tipo];
+  inp.placeholder = {pl:'Escreve o nome de um jogador…', plh:'Escreve o nome de um jogador…', jogador:'Escreve o nome de um jogador…', clube:'Escreve o nome de um clube…', pais:'Escreve o nome de uma seleção…', treinador:'Escreve o nome de um treinador…', estadio:'Escreve o nome de um estádio…'}[q.tipo];
   drawPitch($('#pitch'), PV); $('#confetti').innerHTML = '';
   setTimeout(() => { try { inp.focus({preventScroll:true}); } catch (e) {} }, 350);
   startTimer();
@@ -642,7 +664,7 @@ function search(txt) {
 }
 function sugLine(p) {
   if (p.equipa) return [esc(TEAMS[p.equipa][1]), `${esc(p.completo)} · ${esc(teamName(p.equipa))} · ${POSA[p.pos]}`];
-  const t = TIPO[p.tipo]; return [t[0], t[1]];
+  const t = TIPO[p.tipo]; return [t[0], p.completo ? esc(p.completo) : t[1]];
 }
 function renderSug() {
   const ul = $('#sug'), typed = $('#resp').value.trim().length >= 2;
@@ -752,8 +774,8 @@ async function share() {
 function renderHome() {
   $('#st-jogos').textContent = ST.jogos; $('#st-best').textContent = ST.best; $('#st-fim').textContent = ST.bestFim; $('#st-golacos').textContent = ST.golacos;
   const d = ST.dia[today()]; $('#diaTxt').textContent = d != null ? `Hoje fizeste ${d} · podes repetir` : 'As mesmas 7 para toda a gente hoje';
-  if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length)) ST.cat = 'tudo';
-  document.querySelectorAll('#cats button').forEach(b => { b.classList.toggle('on', b.dataset.c === ST.cat); b.hidden = b.dataset.c === 'pl' && !TPL.length; });
+  if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length) || (ST.cat === 'historia' && !HQ.length)) ST.cat = 'tudo';
+  document.querySelectorAll('#cats button').forEach(b => { b.classList.toggle('on', b.dataset.c === ST.cat); b.hidden = (b.dataset.c === 'pl' && !TPL.length) || (b.dataset.c === 'historia' && !HQ.length); });
 }
 function heroAnim() {
   const v = {W:360, H:230, Y0:66, Y1:230, D:57, K0:9, K1:18}; const svg = $('#heroPitch'); drawPitch(svg, v, {ball:false});
@@ -776,13 +798,15 @@ function heroAnim() {
 
 async function boot() {
   buildBank();
+  const hist = fetch('historia.json').then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
     P = D.jogadores.map(a => { const o = {}; D.campos.forEach((k, i) => o[k] = a[i]); o.equipa = Number(o.equipa); o.nWeb = norm(o.nome); o.nAll = norm(o.completo + ' ' + o.nome); o.fama = o.popular + o.pontos / 1000 + o.minutos / 1e6; return o; });
     if (G >= 1 && P.length) buildTemplates();
   } catch (e) { console.warn('Sem dados da Premier League:', e); }
-  $('#dataFoot').textContent = `${BQ.length} perguntas de futebol português e mundial` + (TPL.length ? ` + perguntas da Premier League ${EPOCA} sempre novas (até à jornada ${G})` : '');
+  try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
+  $('#dataFoot').textContent = `${BQ.length + HQ.length} perguntas de futebol português, mundial e da Premier League desde 2016/17` + (TPL.length ? ` + perguntas da época ${EPOCA} sempre novas (até à jornada ${G})` : '');
   renderHome(); heroAnim();
   const qs = new URLSearchParams(location.search), j = qs.get('jogo');
   if (j) {   // desafio de um amigo (?jogo=semente&c=categoria&p=pontos)
