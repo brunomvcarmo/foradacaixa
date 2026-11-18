@@ -7,7 +7,7 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 ## Como funciona
 - `index.html` — o jogo todo (HTML + CSS + JS). Ecrãs: início (categorias, modos, recordes), jogo (pergunta, caixa de resposta com sugestões, relvado SVG com o remate animado), fim (pontos, resumo, partilha).
 - Distância do remate = posição da resposta na lista de respostas certas, da mais óbvia para a mais rara, dividida em 5 quintos: 11 m (10 pts), 18 m (20), 25 m (30), 35 m (40), 50 m (50).
-- Resposta errada: o guarda-redes defende e tenta outra vez na mesma pergunta, sem perder tempo (`PENALTY` = 0; o teclado fica aberto: `touchstart`/`mousedown` na lista com `preventDefault`) (`wrongTry`); a pergunta só acaba ao acertar, passar ou acabar o tempo. Errar não tira vidas no Sem fim, só o tempo esgotado ou passar.
+- Resposta errada: o guarda-redes defende e tenta outra vez na mesma pergunta, sem perder tempo (`PENALTY` = 0) (`wrongTry`). No iPhone a sugestão escolhe-se no FIM do toque (`touchend` com `preventDefault`: sem "clique fantasma" no que fica por baixo do dedo, ex. o "Não sei, passar", e o teclado não fecha); no computador `mousedown` (não tira o foco) + `click`. O "passar" ignora toques até 0,7 s depois de um erro. A versão aparece no rodapé do início (`#verFoot`); a pergunta só acaba ao acertar, passar ou acabar o tempo. Errar não tira vidas no Sem fim, só o tempo esgotado ou passar.
 - Modos: Jogo rápido (7), Sem fim (3 vidas, multiplicador a cada 3 golos seguidos, golo de 50 m devolve uma vida), Desafio do dia (semente = data), Desafiar amigo (`?jogo=<semente base36>&c=<categoria>&p=<pontos>` refaz as mesmas 7).
 - Recordes ficam só no browser (`localStorage` `fora-da-caixa-v1`).
 

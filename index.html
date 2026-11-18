@@ -350,6 +350,7 @@ dialog .tiers b{width:52px}
     </div>
     <p class="foot"><button class="linkbtn" id="howBtn">Como se joga</button></p>
     <p class="foot" id="dataFoot"></p>
+    <p class="foot" id="verFoot" style="opacity:.6;margin-top:4px"></p>
   </div>
 
   <!-- ===================== JOGO ===================== -->
@@ -470,8 +471,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118164311"></script>
-<script src="perguntas2.js?v=20261118164311"></script>
+<script src="perguntas.js?v=20261118170852"></script>
+<script src="perguntas2.js?v=20261118170852"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -481,7 +482,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118164311';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118170852';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -804,6 +805,7 @@ function penalize() {
 }
 function keeperSave() { const side = Math.random() < .5 ? -1 : 1; keeper(side * 14, side * 65, 200); setTimeout(() => { const k = document.getElementById('kbody'); if (k) tween(300, t => k.setAttribute('transform', `translate(${(side * 14 * (1 - t)).toFixed(1)},${(4 * (1 - t)).toFixed(1)}) rotate(${(side * 65 * (1 - t)).toFixed(0)} 0 -8)`), easeOut); }, 380); }
 function wrongTry(p) {
+  S.ultimoErro = Date.now();
   S.tries.push(p); if (PENALTY) penalize(); keeperSave();
   flash('DEFENDIDO', PENALTY ? `−${PENALTY} s · tenta outra vez` : 'tenta outra vez', '#f05a3c');
   try { navigator.vibrate && navigator.vibrate([20, 30, 20]); } catch (e) {}
@@ -1286,6 +1288,7 @@ async function boot() {
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
   try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
+  $('#verFoot').textContent = `versão ${APP_VER}`;
   $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
   renderHome(); heroAnim(); verVersao();
   if (!ME) askWho();
@@ -1319,7 +1322,7 @@ $('#share').onclick = share;
 $('#quit').onclick = () => { if (busy) return;
   if (S?.liga && !S.ended) { if (!confirm('Sair? Este jogo da liga conta com os pontos que já tens.')) return; clearInterval(timerId); endGame(); return; }
   clearInterval(timerId); if (S && S.shots.length && confirm('Terminar este jogo e ver o resultado?')) { endGame(); return; } renderHome(); show('s-home'); };
-$('#skip').onclick = () => answer(null);
+$('#skip').onclick = () => { if (S && Date.now() - (S.ultimoErro || 0) < 700) return; answer(null); };   // proteção contra o "clique fantasma" do iPhone logo a seguir a um erro
 const inp = $('#resp');
 inp.addEventListener('input', () => { sugList = search(inp.value); sugSel = 0; renderSug(); });
 inp.addEventListener('keydown', e => {
@@ -1335,9 +1338,21 @@ inp.addEventListener('keydown', e => {
   }
   else if (e.key === 'Escape') hideSug();
 });
-// no iPhone o teclado fecha-se se o toque na lista tirar o foco à caixa: impedir isso
-['touchstart', 'mousedown'].forEach(ev => $('#sug').addEventListener(ev, e => { if (e.target.closest('li')) e.preventDefault(); }, {passive:false}));
-$('#sug').addEventListener('pointerdown', e => { const li = e.target.closest('li[data-i]'); if (!li) return; e.preventDefault(); answer(sugList[Number(li.dataset.i)]); });
+// Escolher uma sugestão. No iPhone a escolha é feita no FIM do toque (touchend, com preventDefault): assim a lista ainda existe
+// durante o toque todo, não há "clique fantasma" no que fica por baixo do dedo (ex.: "Não sei, passar") e o teclado não fecha.
+// No computador: mousedown não tira o foco à caixa e o click escolhe.
+const sugEl = $('#sug'); let sugToque = null;
+const escolher = i => { const p = sugList[i]; if (p && S && !S.answered) answer(p); };
+sugEl.addEventListener('touchstart', e => { const t = e.touches[0]; sugToque = {x: t.clientX, y: t.clientY, mexeu: false}; }, {passive: true});
+sugEl.addEventListener('touchmove', e => { const t = e.touches[0]; if (sugToque && Math.hypot(t.clientX - sugToque.x, t.clientY - sugToque.y) > 10) sugToque.mexeu = true; }, {passive: true});
+sugEl.addEventListener('touchend', e => {
+  const li = e.target.closest('li[data-i]'); if (!li) return;
+  e.preventDefault();                      // nada de rato/click a seguir, nem perder o foco
+  if (sugToque && sugToque.mexeu) return;  // estava a deslizar a lista, não a escolher
+  escolher(Number(li.dataset.i));
+}, {passive: false});
+sugEl.addEventListener('mousedown', e => { if (e.target.closest('li')) e.preventDefault(); });
+sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (!li) return; e.preventDefault(); escolher(Number(li.dataset.i)); });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
