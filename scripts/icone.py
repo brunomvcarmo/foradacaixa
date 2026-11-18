@@ -235,6 +235,18 @@ D.update({
                 + TICKS(-40, 560, 490, 60, 30, ESCURO) + TICKS(-40, 560, 340, 60, -30, ESCURO).replace('y2="', 'y2="')
                 + f'<text x="40" y="436" font-family="Barlow Semi Condensed" font-weight="800" font-size="50" letter-spacing="4" fill="{ESCURO}">FORA DA <tspan fill="{VERMELHO}">CAIXA</tspan></text></g></svg>'
                 + bola_3d()),
+    # 4c sem letras (o escolhido): bola grande com rastos por cima da fita com o nome
+    'f-faixa-bola': (f".i{{background:linear-gradient(150deg,#fbf4e3 0%,{CREME} 60%,#e9dcc0 100%)}}"
+                     ".p{position:absolute;inset:0}"
+                     ".tr{position:absolute;height:17px;border-radius:9px;background:#1d2b22;transform:rotate(-13.5deg);transform-origin:100% 50%}"
+                     ".ball{position:absolute;left:236px;top:48px;width:236px;height:236px;filter:drop-shadow(-6px 14px 14px rgba(29,43,34,.45))}",
+                     ''.join(f'<div class="tr" style="left:{x}px;top:{y}px;width:{w}px;opacity:{o}"></div>' for x, y, w, o in [(70, 132, 200, .95), (20, 172, 250, .6), (100, 212, 170, .32)])
+                     + '<svg class="p" viewBox="0 0 512 512"><g transform="rotate(-13.5 256 400)">'
+                     f'<rect x="-60" y="340" width="640" height="150" fill="{ESCURO}" transform="translate(0 10)"/>'
+                     f'<rect x="-60" y="340" width="640" height="150" fill="{MOSTARDA}" stroke="{ESCURO}" stroke-width="6"/>'
+                     + TICKS(-40, 560, 490, 60, 30, ESCURO) + TICKS(-40, 560, 340, 60, -30, ESCURO)
+                     + f'<text x="40" y="436" font-family="Barlow Semi Condensed" font-weight="800" font-size="50" letter-spacing="4" fill="{ESCURO}">FORA DA <tspan fill="{VERMELHO}">CAIXA</tspan></text></g></svg>'
+                     + bola_3d()),
     # 4d. a fita enrolada à volta da bola, com a ponta dos 50 m
     'f-enrolada': (f".i{{background:radial-gradient(circle at 50% 42%,#2a7a4c 0,{VERDE} 50%,#143d27 100%)}}"
                    ".p{position:absolute;inset:0;z-index:1}.p2{position:absolute;inset:0;z-index:3}"
