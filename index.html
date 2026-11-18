@@ -471,8 +471,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118170852"></script>
-<script src="perguntas2.js?v=20261118170852"></script>
+<script src="perguntas.js?v=20261118172030"></script>
+<script src="perguntas2.js?v=20261118172030"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -482,7 +482,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118170852';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118172030';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -753,7 +753,7 @@ function show(id) { document.querySelectorAll('.screen').forEach(s => s.classLis
 function startGame(mode, seed, cat) {
   cat = cat || (mode === 'dia' ? 'tudo' : ST.cat);
   if (!CATS[cat] || (cat === 'pl' && !TPL.length) || (cat === 'historia' && !HQ.length) || (cat === 'ligapt' && !LQ.length)) cat = 'tudo';
-  if (mode === 'dia') seed = hashStr('dia:' + today());
+  if (mode === 'dia') seed = hashStr(`dia:${typeof LIGA !== 'undefined' ? LIGA.sal : ''}:` + today());
   let qs = [];
   if (mode === 'fim') { if (seed == null) seed = (Math.random() * 2**32) >>> 0; }
   else if (seed == null) { const f = freshSeed(cat); seed = f[0]; qs = f[2]; }
@@ -954,10 +954,12 @@ const LIGA = {
   nome: 'Liga dos Amigos',
   jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas'],
   porDia: 3,
+  sal: '2',   // entra na semente dos jogos e do Desafio do dia: mudar para dar perguntas novas no mesmo dia (iguais para todos)
   // apagar os jogos de alguém UMA vez (o 1.º telemóvel que abrir a página faz o reset e marca-o em ligas/<id>/resets/<id do reset>)
   resets: [
     {id:'2026-11-18-bruno', nome:'Bruno', motivo:'jogou com a versão que tirava 5 s por erro'},
     {id:'2026-11-18b-bruno', nome:'Bruno', todos:true, motivo:'pediu outra vez (classificação e todos os jogos)'},
+    {id:'2026-11-18c-todos', nome:'*', todos:true, motivo:'recomeçar a liga de todos depois de corrigir o "tentar outra vez" no iPhone'},
   ],
   db: 'https://fora-da-caixa-b1efa-default-rtdb.europe-west1.firebasedatabase.app',   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
 };
@@ -979,8 +981,9 @@ function ensureResets() {
       const r = await fetch(ligaUrl('resets'), {cache:'no-store'}); if (!r.ok) return;
       const feitos = (await r.json()) || {};
       for (const rs of LIGA.resets) if (!feitos[rs.id]) {
-        await ligaPut(`jogos/${rs.nome}`, null);
-        if (rs.todos) await ligaPut(`todos/${rs.nome}`, null);   // também os jogos fora da liga (estatísticas de "Tudo")
+        const alvo = rs.nome === '*' ? '' : `/${rs.nome}`;   // '*' = todos os jogadores
+        await ligaPut(`jogos${alvo}`, null);
+        if (rs.todos) await ligaPut(`todos${alvo}`, null);   // também os jogos fora da liga (estatísticas de "Tudo")
         await ligaPut(`resets/${rs.id}`, {nome:rs.nome, feito:Date.now()});
       }
     } catch (e) { resetsP = null; }   // sem ligação: tenta outra vez na próxima atualização
@@ -1052,7 +1055,7 @@ async function startLiga() {
   const rec = {pontos:0, golos:0, golacos:0, perguntas:0, estado:'a jogar', inicio:Date.now()};
   try { await ligaPut(`jogos/${ME}/${dia}/j${n}`, rec); } catch (e) { toast('Não consegui registar o jogo: tenta outra vez'); renderLigaCard(); return; }
   LG.dados[ME] = LG.dados[ME] || {}; LG.dados[ME][dia] = LG.dados[ME][dia] || {}; LG.dados[ME][dia]['j' + n] = rec;
-  startGame('liga', hashStr(`liga:${LIGA.id}:${dia}:${n}`), 'liga');
+  startGame('liga', hashStr(`liga:${LIGA.id}:${LIGA.sal}:${dia}:${n}`), 'liga');
   S.liga = {n, dia, rec};
 }
 let ligaSyncT = null;
