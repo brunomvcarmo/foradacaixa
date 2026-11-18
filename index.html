@@ -112,6 +112,14 @@ details.all .chips{margin-top:6px}
 .sug .nm small{display:block;font-weight:400;color:var(--mute);font-size:12px}
 .sug .empty{color:var(--mute);padding:10px;font-size:14px}
 .skip{display:block;margin:-2px 0 8px auto;font-size:13px;color:var(--mute);padding:4px 2px}
+.trymsg{margin:-4px 0 8px;font-size:14px;color:var(--bad);font-weight:600;display:flex;gap:6px;align-items:center}
+.trymsg.go{animation:shake .45s}
+.trymsg small{color:var(--mute);font-weight:500}
+.answer.wrong input{border-color:var(--bad)}
+.timer.pen b{animation:pen .7s}
+@keyframes pen{0%{transform:scale(1)}30%{transform:scale(1.5);color:var(--bad)}100%{transform:scale(1)}}
+.tries{margin:10px 0 0;font-size:13px;color:var(--mute)}
+.tries b{color:var(--bad);font-weight:600}
 .pitch{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#14532d}
 .pitch svg{display:block;width:100%;height:auto}
 .flash{position:absolute;left:0;right:0;top:26%;text-align:center;pointer-events:none;opacity:0}
@@ -273,6 +281,7 @@ dialog .tiers b{width:52px}
       <input id="resp" type="text" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Escreve o nome de um jogador…" aria-label="Resposta">
       <ul class="sug" id="sug" role="listbox"></ul>
     </div>
+    <div class="trymsg" id="tryMsg" hidden></div>
     <button class="skip" id="skip">Não sei, passar ›</button>
 
     <div class="pitch" id="pitchBox">
@@ -306,7 +315,7 @@ dialog .tiers b{width:52px}
   <h2>Como se joga</h2>
   <ol>
     <li>Aparece uma pergunta de futebol com várias respostas certas (por exemplo, "uma seleção que já foi campeã do mundo").</li>
-    <li>Escreve e escolhe a resposta na lista. Tens <b>25 segundos</b> e um só remate.</li>
+    <li>Escreve e escolhe a resposta na lista. Tens <b>25 segundos</b>. Se errares, o guarda-redes defende e podes tentar outra vez, mas <b>perdes 5 segundos</b>.</li>
     <li>Qualquer resposta certa marca. Mas <b>quanto menos óbvia for, mais longe é o remate</b> — e mais pontos. Dizer "Brasil" é um penálti; dizer "Uruguai" é do meio-campo.</li>
   </ol>
   <div class="tiers">
@@ -584,18 +593,38 @@ function nextQ() {
   $('#qtxt').textContent = q.txt; $('#qsub').textContent = q.sub;
   const qc = $('#qcard'); qc.classList.remove('enter'); void qc.offsetWidth; qc.classList.add('enter');
   $('#answer').hidden = false; $('#skip').hidden = false; $('#reveal').classList.remove('on'); $('#reveal').innerHTML = '';
-  const inp = $('#resp'); inp.value = ''; hideSug();
+  const inp = $('#resp'); inp.value = ''; hideSug(); S.tries = []; $('#tryMsg').hidden = true; $('#answer').classList.remove('wrong');
   inp.placeholder = {pl:'Escreve o nome de um jogador…', jogador:'Escreve o nome de um jogador…', clube:'Escreve o nome de um clube…', pais:'Escreve o nome de uma seleção…', treinador:'Escreve o nome de um treinador…'}[q.tipo];
   drawPitch($('#pitch'), PV); $('#confetti').innerHTML = '';
   setTimeout(() => { try { inp.focus({preventScroll:true}); } catch (e) {} }, 350);
   startTimer();
 }
 function startTimer() {
-  clearInterval(timerId); const fg = $('#tfg'), tm = $('#timer'); let left = QTIME; const end = Date.now() + QTIME * 1000;
+  clearInterval(timerId); const fg = $('#tfg'), tm = $('#timer'); let left = QTIME; S.tEnd = Date.now() + QTIME * 1000;
   fg.style.transition = 'none'; fg.style.strokeDashoffset = '0'; void fg.getBoundingClientRect();
   fg.style.transition = `stroke-dashoffset ${QTIME}s linear`; fg.style.strokeDashoffset = '113.1';
   tm.classList.remove('low'); $('#tnum').textContent = left;
-  timerId = setInterval(() => { left = Math.max(0, Math.ceil((end - Date.now()) / 1000)); $('#tnum').textContent = left; tm.classList.toggle('low', left <= 5); if (left <= 0) { clearInterval(timerId); answer(null, true); } }, 200);
+  timerId = setInterval(() => { left = Math.max(0, Math.ceil((S.tEnd - Date.now()) / 1000)); $('#tnum').textContent = left; tm.classList.toggle('low', left <= 5); if (left <= 0) { clearInterval(timerId); answer(null, true); } }, 200);
+}
+// resposta errada: menos 5 segundos (o anel do relógio salta para a frente)
+const PENALTY = 5;
+function penalize() {
+  S.tEnd -= PENALTY * 1000; const ms = Math.max(0, S.tEnd - Date.now()), fg = $('#tfg'), tm = $('#timer');
+  fg.style.transition = 'none'; fg.style.strokeDashoffset = (113.1 * (1 - ms / (QTIME * 1000))).toFixed(1); void fg.getBoundingClientRect();
+  fg.style.transition = `stroke-dashoffset ${ms / 1000}s linear`; fg.style.strokeDashoffset = '113.1';
+  $('#tnum').textContent = Math.ceil(ms / 1000); tm.classList.toggle('low', ms <= 5000);
+  tm.classList.remove('pen'); void tm.offsetWidth; tm.classList.add('pen');
+}
+function keeperSave() { const side = Math.random() < .5 ? -1 : 1; keeper(side * 14, side * 65, 200); setTimeout(() => { const k = document.getElementById('kbody'); if (k) tween(300, t => k.setAttribute('transform', `translate(${(side * 14 * (1 - t)).toFixed(1)},${(4 * (1 - t)).toFixed(1)}) rotate(${(side * 65 * (1 - t)).toFixed(0)} 0 -8)`), easeOut); }, 380); }
+function wrongTry(p) {
+  S.tries.push(p); penalize(); keeperSave();
+  flash('DEFENDIDO', `−${PENALTY} s · tenta outra vez`, '#ff5d6c');
+  try { navigator.vibrate && navigator.vibrate([20, 30, 20]); } catch (e) {}
+  const m = $('#tryMsg'), st = stOf(S.q, p);
+  m.innerHTML = `✕ ${esc(p.nome)} não conta${st ? ` <small>(${esc(st)})</small>` : ''} · −${PENALTY} s`;
+  m.hidden = false; m.classList.remove('go'); void m.offsetWidth; m.classList.add('go');
+  $('#answer').classList.add('wrong'); setTimeout(() => $('#answer').classList.remove('wrong'), 700);
+  const inp = $('#resp'); inp.value = ''; hideSug(); try { inp.focus({preventScroll:true}); } catch (e) {}
 }
 function stopTimer() { clearInterval(timerId); const fg = $('#tfg'); const cs = getComputedStyle(fg).strokeDashoffset; fg.style.transition = 'none'; fg.style.strokeDashoffset = cs; $('#timer').classList.remove('low'); }
 
@@ -606,7 +635,7 @@ function search(txt) {
   for (const p of pool) {
     let s = -1;
     if (p.nWeb.startsWith(q)) s = 0; else if (p.nAll.split(' ').some(w => w.startsWith(q))) s = 1; else if (p.nAll.includes(q)) s = 2;
-    if (s >= 0) res.push([s, p]);
+    if (s >= 0 && !S.tries.includes(p)) res.push([s, p]);
   }
   res.sort((a, b) => a[0] - b[0] || b[1].fama - a[1].fama || a[1].nome.localeCompare(b[1].nome, 'pt'));
   return res.slice(0, 6).map(x => x[1]);
@@ -624,15 +653,20 @@ function renderSug() {
 function hideSug() { sugList = []; sugSel = 0; $('#sug').classList.remove('on'); $('#sug').innerHTML = ''; }
 
 async function answer(p, timeout = false) {
-  if (!S || S.answered) return; S.answered = true; busy = true;
-  stopTimer(); hideSug(); $('#resp').blur(); $('#answer').hidden = true; $('#skip').hidden = true;
+  if (!S || S.answered) return;
+  if (p && !S.q.ok(p)) {   // errou: perde 5 s e tenta outra vez (se ainda houver tempo)
+    if (S.tEnd - Date.now() > PENALTY * 1000) { wrongTry(p); return; }
+    S.tries.push(p); p = null; timeout = true;   // sem tempo para mais: acaba a pergunta
+  }
+  S.answered = true; busy = true;
+  stopTimer(); hideSug(); $('#resp').blur(); $('#answer').hidden = true; $('#skip').hidden = true; $('#tryMsg').hidden = true;
   const q = S.q, tier = p ? tierOf(q, p) : 0;
   const m = mult(); let pts = Math.round(TIERS[tier].pts * m), lifeBack = false;
   if (tier) { S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); }
   else { S.streak = 0; if (S.mode === 'fim') { S.lives--; renderLives(S.lives); } }
   if (S.mode === 'fim' && tier === 5 && S.lives < 3) { S.lives++; lifeBack = true; }
   S.score += pts;
-  S.shots.push({q, p, tier, pts, timeout});
+  S.shots.push({q, p, tier, pts, timeout, tries:S.tries.slice()});
   if (tier === 5) { ST.golacos++; saveStats(ST); }
   $('#pitchBox').scrollIntoView({behavior:'smooth', block:'center'});
   await sleep(150);
@@ -643,7 +677,7 @@ async function answer(p, timeout = false) {
     flash(tier >= 4 ? 'GOLAÇO!' : 'GOLO!', `de ${t.m} m · +${pts}`, t.hex);
     if (tier >= 3) confetti(tier * 10, [t.hex, '#f3f1ea', '#d7ff3a']);
     try { navigator.vibrate && navigator.vibrate(tier >= 4 ? [30, 40, 60] : 30); } catch (e) {}
-  } else flash(timeout ? 'TEMPO!' : kind === 'defesa' ? 'DEFENDIDO' : kind === 'poste' ? 'AO POSTE!' : 'PARA FORA', p ? 'resposta errada' : timeout ? 'acabaram os 25 s' : 'passaste a vez', '#ff5d6c');
+  } else flash(timeout ? 'TEMPO!' : kind === 'defesa' ? 'DEFENDIDO' : kind === 'poste' ? 'AO POSTE!' : 'PARA FORA', timeout ? 'acabou o tempo' : 'passaste a vez', '#ff5d6c');
   countUp($('#score'), S.score - pts, S.score);
   if (S.mode === 'fim') { const st = $('#streak'); if (S.streak >= 2) { st.textContent = `🔥 ${S.streak} seguidos` + (mult() > 1 ? ` · ×${String(mult()).replace('.', ',')}` : ''); st.classList.remove('on'); void st.offsetWidth; st.classList.add('on'); } else st.classList.remove('on'); if (lifeBack) renderLives(S.lives - 1); }
   await sleep(450);
@@ -657,8 +691,9 @@ function renderReveal(q, p, tier, pts, timeout, lifeBack) {
   const t = TIERS[tier], v = q.valid, last = S.mode !== 'fim' ? S.i >= S.qs.length - 1 : S.lives <= 0;
   let h = '<div class="rhead">';
   if (tier) h += `<div class="badge" style="background:${t.hex}">${t.m}<br>m</div><div><b>${t.nome}</b><span>${esc(p.nome)}${stOf(q, p) ? ' · ' + esc(stOf(q, p)) : ''}</span></div><div class="pts" style="color:${t.hex}">+${pts}</div>`;
-  else h += `<div class="badge miss">✕</div><div><b>${timeout ? 'Acabou o tempo' : p ? 'Não conta' : 'Passaste'}</b><span>${p ? esc(p.nome) + ': ' + esc(stOf(q, p) || 'não é uma das respostas certas') : 'Havia ' + v.length + ' respostas certas'}</span></div><div class="pts" style="color:var(--mute)">0</div>`;
+  else h += `<div class="badge miss">✕</div><div><b>${timeout ? 'Acabou o tempo' : 'Passaste'}</b><span>Havia ${v.length} respostas certas</span></div><div class="pts" style="color:var(--mute)">0</div>`;
   h += '</div>';
+  if (S.tries.length) h += `<p class="tries">${S.tries.length === 1 ? 'Tentativa falhada' : 'Tentativas falhadas'} (−${PENALTY} s cada): ${S.tries.map(x => `<b>${esc(x.nome)}</b>${stOf(q, x) ? ' (' + esc(stOf(q, x)) + ')' : ''}`).join(', ')}</p>`;
   if (tier) {
     const i = v.indexOf(p);
     h += `<p class="why">${i === 0 ? '<b>Era a resposta mais óbvia</b>' : `Era a <b>${i + 1}.ª</b> resposta mais óbvia`} de ${v.length} possíveis${q.cat === 'pl' ? ` (popularidade entre os adeptos: ${String(p.popular).replace('.', ',')}%)` : ''}.</p>`;
@@ -697,7 +732,7 @@ function endGame() {
   $('#endSub').textContent = fim ? `${S.shots.length} perguntas · ${golos} golos · melhor série ${S.bestStreak}` : `${golos} de ${S.shots.length} golos` + (far ? ` · remate mais longo: ${far} m` : '') + (S.friend && S.friendScore != null ? ` · o teu amigo fez ${S.friendScore}` : '');
   $('#endScore').textContent = '0'; show('s-end'); countUp($('#endScore'), 0, S.score);
   $('#share').textContent = fim ? 'Partilhar' : 'Desafiar amigo';
-  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Sem resposta (tempo)' : 'Passou'}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
+  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
 }
 function confettiEnd() { const c = document.createElement('div'); c.className = 'confetti'; c.style.position = 'fixed'; document.body.appendChild(c); for (let i = 0; i < 60; i++) { const e = document.createElement('i'); const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 240; e.style.cssText = `top:20%;background:${['#d7ff3a','#c084fc','#facc15','#4ade80','#fb923c'][i%5]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d + 160}px;--rot:${Math.random()*720}deg;animation-duration:1.8s`; c.appendChild(e); } setTimeout(() => c.remove(), 2200); }

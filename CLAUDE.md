@@ -7,6 +7,7 @@ Fala sempre em **português de Portugal** e de forma simples: o utilizador não 
 ## Como funciona
 - `index.html` — o jogo todo (HTML + CSS + JS). Ecrãs: início (categorias, modos, recordes), jogo (pergunta, caixa de resposta com sugestões, relvado SVG com o remate animado), fim (pontos, resumo, partilha).
 - Distância do remate = posição da resposta na lista de respostas certas, da mais óbvia para a mais rara, dividida em 5 quintos: 11 m (10 pts), 18 m (20), 25 m (30), 35 m (40), 50 m (50).
+- Resposta errada: o guarda-redes defende, perde 5 s (`PENALTY`) e tenta outra vez na mesma pergunta (`wrongTry`); a pergunta só acaba ao acertar, passar ou acabar o tempo. Errar não tira vidas no Sem fim, só o tempo esgotado ou passar.
 - Modos: Jogo rápido (7), Sem fim (3 vidas, multiplicador a cada 3 golos seguidos, golo de 50 m devolve uma vida), Desafio do dia (semente = data), Desafiar amigo (`?jogo=<semente base36>&c=<categoria>&p=<pontos>` refaz as mesmas 7).
 - Recordes ficam só no browser (`localStorage` `fora-da-caixa-v1`).
 
