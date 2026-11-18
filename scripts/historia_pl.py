@@ -5,7 +5,7 @@ A resposta "óbvia" é a do jogador mais popular nessa época (percentagem de ad
 Escreve historia.json. Só é preciso correr outra vez para juntar uma época nova (as passadas não mudam).
 Uso (a partir da raiz):  python3 scripts/historia_pl.py   ·   Windows: py -X utf8 scripts/historia_pl.py"""
 import csv, io, json, time, urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +19,11 @@ NOMES = {'Man City': 'Manchester City', 'Man Utd': 'Manchester United', 'Spurs':
          'Newcastle': 'Newcastle', 'Brighton': 'Brighton', 'Huddersfield': 'Huddersfield Town', 'Cardiff': 'Cardiff City',
          'Swansea': 'Swansea City', 'Stoke': 'Stoke City', 'Hull': 'Hull City', 'Norwich': 'Norwich City', 'Luton': 'Luton Town',
          'Ipswich': 'Ipswich Town', 'Middlesbrough': 'Middlesbrough', 'Sunderland': 'Sunderland'}
+
+
+# nomes por extenso dos grandes marcadores (o nome curto da FPL nem sempre serve numa pergunta)
+NOME_JOGADOR = {'108823': 'Dele Alli', '85971': 'Son Heung-min', '165809': 'Bernardo Silva', '194634': 'Diogo Jota', '102057': 'Raúl Jiménez',
+                '66749': 'Romelu Lukaku', '205651': 'Gabriel Jesus', '212319': 'Richarlison', '141746': 'Bruno Fernandes', '444145': 'Gabriel Martinelli'}
 
 
 def get(url):
@@ -44,6 +49,9 @@ def main():
     for r in rows(f'{BASE}/master_team_list.csv'):
         master[r['season']][int(r['team'])] = r['team_name']
     jogadores, perguntas = {}, []
+    contra = defaultdict(Counter)   # código do jogador → clube adversário → golos (todas as épocas)
+    nome_curto = {}
+    GRANDES6 = ['Liverpool', 'Manchester City', 'Arsenal', 'Chelsea', 'Manchester United', 'Tottenham']
     for ep in EPOCAS:
         label = f'{ep[:4]}/{ep[5:]}'
         teams = dict(master.get(ep, {}))
@@ -59,7 +67,7 @@ def main():
             else: home[r['fixture']] = int(r['opponent_team'])
         name2id = {v: k for k, v in teams.items()}
         st = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))   # jogador → equipa → estatística
-        hat = set(); tot = defaultdict(lambda: defaultdict(int))
+        hat = set(); tot = defaultdict(lambda: defaultdict(int)); vs = defaultdict(Counter); vs_grande = defaultdict(Counter)
         for r in gw:
             el = int(r['element'])
             if r.get('team') and NOMES.get(r['team'], r['team']) in name2id: t = name2id[NOMES.get(r['team'], r['team'])]
@@ -72,11 +80,17 @@ def main():
                 tot[el][k] += int(num(r[k])) if (k != 'clean_sheets' or m >= 60) else 0
             tot[el]['golos'] += g; tot[el]['assist'] += a; tot[el]['pontos'] += int(num(r['total_points']))
             if g >= 3: hat.add(el)
+            if g > 0:
+                adv = teams.get(int(num(r['opponent_team'])))
+                if adv:
+                    vs[el][adv] += g
+                    if adv in GRANDES6: vs_grande[adv][el] += g
         fama = {el: num(p['selected_by_percent']) + num(p['total_points']) / 1000 for el, p in raw.items()}
         pos = {el: int(num(p['element_type'])) for el, p in raw.items()}
         code = {el: str(p['code']) for el, p in raw.items()}
         for el, p in raw.items():
             if el in st: jogadores[code[el]] = [p['web_name'], f"{p['first_name']} {p['second_name']}".strip()]
+            if el in vs: contra[code[el]].update(vs[el]); nome_curto[code[el]] = (p['first_name'], p['second_name'], p['web_name'])
 
         def q(qid, txt, sub, items):
             items = [(el, s) for el, s in items if el in raw]
@@ -114,7 +128,22 @@ def main():
             for t in d: forca[t] += d[t]['golos']
         clubs = sorted(teams, key=lambda t: -forca[t])
         perguntas.append({'id': f'h{label}-clubes', 'ep': label, 'tipo': 'clube', 'txt': f'Um clube que jogou na Premier League {label}', 'sub': 'As 20 equipas dessa época', 'r': [[teams[t], ''] for t in clubs]})
+        # jogadores que marcaram contra cada um dos 6 grandes nesta época (muitas respostas)
+        for adv, cnt in vs_grande.items():
+            itens = [(el, f'{v} golo' + ('s' if v > 1 else '')) for el, v in cnt.items() if el in raw]
+            if 5 <= len(itens) <= 45:
+                q('vs-' + adv.replace(' ', ''), f'Um jogador que marcou contra o {adv} na Premier League {label}', f'Premier League {label} (autogolos não contam)', itens)
         print(label, len([x for x in perguntas if x['ep'] == label]), 'perguntas')
+    # clubes contra os quais cada um dos grandes marcadores marcou, em todas as épocas juntas (muitas respostas)
+    PREST = {'Liverpool': 9, 'Manchester City': 9, 'Arsenal': 8, 'Chelsea': 8, 'Manchester United': 8, 'Tottenham': 7, 'Newcastle': 5, 'Everton': 5, 'West Ham': 4, 'Leicester': 4, 'Aston Villa': 4}
+    for c, cnt in contra.items():
+        if sum(cnt.values()) < 40 or len(cnt) < 12: continue
+        first, second, web = nome_curto[c]
+        nome = NOME_JOGADOR.get(c) or (web if first.split()[0] in web else f"{first.split()[0]} {web.split('.')[-1]}")
+        r = sorted(cnt.items(), key=lambda x: (-x[1], -PREST.get(x[0], 0), x[0]))
+        perguntas.append({'id': f'hcontra-{c}', 'ep': '2016-2025', 'tipo': 'clube', 'txt': f'Um clube contra o qual {nome} marcou na Premier League',
+                          'sub': 'Épocas 2016/17 a 2024/25 (só jogos da Premier League)', 'r': [[t, f'{v} golo' + ('s' if v > 1 else '')] for t, v in r]})
+        print(f'  contra: {nome} ({sum(cnt.values())} golos, {len(cnt)} clubes)')
     data = {'fonte': 'FPL oficial (arquivo vaastav/Fantasy-Premier-League)', 'jogadores': jogadores, 'perguntas': perguntas}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
     print(f'historia.json: {len(perguntas)} perguntas, {len(jogadores)} jogadores ({OUT.stat().st_size // 1024} KB)')

@@ -19,7 +19,7 @@
   --bg:#f3ead6; --bg2:#fbf6ea; --panel:#fffaf0; --panel2:#f6eedc; --line:#ddd0b3;
   --ink:#1d2b22; --mute:#6c6a58; --acc:#1e5a37; --acc-ink:#f3ead6; --bad:#b8321f; --warn:#b86e0c;
   --red:#d6452f; --dark:#1d2b22; --cream:#f3ead6; --shadow:3px 3px 0 var(--dark);
-  --t0:#d9cdb1; --t1:#c9bd9c; --t2:#6fa86a; --t3:#e8b33a; --t4:#e07a34; --t5:#d6452f;
+  --t0:#d9cdb1; --t1:#c9bd9c; --t2:#6fa86a; --t3:#e8b33a; --t4:#e07a34; --t5:#d6452f; --t6:#6b3fa0;
   --r:18px; --display:'Alfa Slab One',Georgia,serif; --sans:'Barlow',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -306,6 +306,7 @@ dialog .tiers b{width:52px}
     <div class="hero" aria-hidden="true">
       <svg id="heroPitch" viewBox="0 0 360 230"></svg>
       <div class="ladder">
+        <span><i style="background:var(--t6)"></i>100 m · 80</span>
         <span><i style="background:var(--t5)"></i>50 m · 50</span>
         <span><i style="background:var(--t4)"></i>35 m · 40</span>
         <span><i style="background:var(--t3)"></i>25 m · 30</span>
@@ -441,7 +442,8 @@ dialog .tiers b{width:52px}
     <div><i style="background:var(--t2)"></i><b>18 m</b>Entrada da área · 20</div>
     <div><i style="background:var(--t3)"></i><b>25 m</b>Fora da caixa · 30</div>
     <div><i style="background:var(--t4)"></i><b>35 m</b>Bomba de longe · 40</div>
-    <div><i style="background:var(--t5)"></i><b>50 m</b>Do meio-campo · 50 (a mais rara)</div>
+    <div><i style="background:var(--t5)"></i><b>50 m</b>Do meio-campo · 50</div>
+    <div><i style="background:var(--t6)"></i><b>100 m</b>De baliza a baliza · 80 (só em perguntas com 12 ou mais respostas: as mais raras de todas)</div>
   </div>
   <p style="color:var(--mute);font-size:14px;margin:12px 0 0"><b style="color:var(--ink)">Sem fim:</b> 3 vidas; cada falhanço tira uma. A cada 3 golos seguidos o multiplicador sobe (×1,5, ×2…). Um golo do meio-campo devolve uma vida.</p>
   <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
@@ -471,8 +473,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118180959"></script>
-<script src="perguntas2.js?v=20261118180959"></script>
+<script src="perguntas.js?v=20261118192611"></script>
+<script src="perguntas2.js?v=20261118192611"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -482,7 +484,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118180959';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118192611';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -507,6 +509,7 @@ const TIERS = [
   {m:25, nome:'Fora da caixa', pts:30, hex:'#e8b33a', emo:'🟨'},
   {m:35, nome:'Bomba de longe', pts:40, hex:'#e07a34', emo:'🟧'},
   {m:50, nome:'Do meio-campo', pts:50, hex:'#d6452f', emo:'🟥'},
+  {m:100, nome:'De baliza a baliza', pts:80, hex:'#6b3fa0', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
 const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2025', liga:'Liga'};
@@ -657,7 +660,14 @@ function genQ(r, used, per, cat) {
 function genSet(seed, cat) { const r = rng(seed), used = new Set(), per = {}, out = []; while (out.length < NQ) { const q = genQ(r, used, per, cat); if (!q) break; out.push(q); } return out; }
 // semente nova cujas perguntas repetem o menos possível as dos últimos jogos (a semente e a categoria refazem o jogo, para os desafios)
 function freshSeed(cat) { const recent = new Set(ST.recent); let best = null; for (let k = 0; k < 40; k++) { const seed = (Math.random() * 2**32) >>> 0, qs = genSet(seed, cat), rep = qs.filter(q => recent.has(q.key)).length; if (!best || rep < best[1]) best = [seed, rep, qs]; if (rep === 0) break; } return best; }
-function tierOf(q, e) { const i = q.valid.indexOf(e); if (i < 0) return 0; return Math.min(5, 1 + Math.floor(i / q.valid.length * 5)); }
+// nível do remate pela posição na lista (da mais óbvia para a mais rara): 5 quintos (11 a 50 m);
+// em perguntas com 12 ou mais respostas, as mais raras de todas (8%, pelo menos 1) são golos de baliza a baliza (100 m, 80 pontos)
+const BALIZA_MIN = 12, BALIZA_PCT = .08;
+function tierOf(q, e) {
+  const i = q.valid.indexOf(e), n = q.valid.length; if (i < 0) return 0;
+  if (n >= BALIZA_MIN) { const top = Math.max(1, Math.round(n * BALIZA_PCT)); if (i >= n - top) return 6; return Math.min(5, 1 + Math.floor(i / (n - top) * 5)); }
+  return Math.min(5, 1 + Math.floor(i / n * 5));
+}
 const stOf = (q, e) => q.st ? q.st(e) : '';
 
 // ======================================================================
@@ -684,6 +694,7 @@ function drawPitch(svg, v, opts = {}) {
   const cc = []; for (let a = -90; a <= 90; a += 6) { const rad = a * Math.PI / 180; cc.push([9.15*Math.sin(rad), 52.5 - 9.15*Math.cos(rad)]); }
   h += `<polyline ${ln} points="${poly(cc, v)}"/>`;
   if (opts.markers !== false) TIERS.slice(1).forEach((t, i) => {
+    if (t.m > v.D) return;   // 100 m: fora do relvado desenhado (a bola vem de fora do ecrã)
     const [, y] = proj(0, t.m, v);
     h += `<g class="mk" opacity=".85"><line x1="0" x2="${v.W}" y1="${y}" y2="${y}" stroke="${t.hex}" stroke-width="1" stroke-dasharray="3 5" opacity=".55"/>`;
     h += `<rect x="6" y="${y-8}" width="46" height="16" rx="8" fill="rgba(255,250,240,.92)" stroke="#1d2b22" stroke-width="1"/><circle cx="15" cy="${y}" r="3.6" fill="${t.hex}" stroke="#1d2b22" stroke-width=".8"/><text x="33" y="${y+3.6}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d2b22" font-family="Barlow,sans-serif">${t.m} m</text></g>`;
@@ -727,7 +738,7 @@ async function shoot(tier, kind) {
   else if (kind === 'poste') { tx = cx + side * 3.66 * k0; ty = gy - (.6 + r()) * k0; }
   else if (kind === 'fora') { tx = cx + side * (4.5 + r() * 2) * k0; ty = gy - (2.8 + r() * 1.5) * k0; }
   else { tx = cx + side * (1.2 + r() * 1.6) * k0; ty = gy - (.5 + r() * 1.2) * k0; }
-  const peak = Math.min(ey, ty) - 20 - d * 1.4, s0 = ballSize(d), s1 = 6, dur = 520 + d * 13;
+  const peak = Math.max(6, Math.min(ey, ty) - 20 - Math.min(d, 57) * 1.4), s0 = ballSize(d), s1 = 6, dur = 520 + Math.min(d, 70) * 13;
   const kDive = tier ? -side : side;   // no golo, o guarda-redes atira-se para o lado errado
   setTimeout(() => keeper(kDive * (tier ? 16 : Math.abs(tx - cx) * .9), kDive * 70, 380), dur * .35);
   await tween(dur, (t, raw) => {
@@ -745,7 +756,7 @@ async function shoot(tier, kind) {
     $('#pitchBox').classList.add('shake'); setTimeout(() => $('#pitchBox').classList.remove('shake'), 500);
   }
 }
-function flash(big, small, color) { const f = $('#flash'); $('#flashB').textContent = big; $('#flashB').style.color = color; $('#flashS').textContent = small; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+function flash(big, small, color) { const f = $('#flash'); $('#flashB').textContent = big; $('#flashB').style.color = color; $('#flashB').style.fontSize = big.length > 11 ? 'clamp(24px,8vw,42px)' : ''; $('#flashS').textContent = small; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
 function confetti(n, colors) { const c = $('#confetti'); c.innerHTML = ''; for (let i = 0; i < n; i++) { const e = document.createElement('i'); const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 160; e.style.cssText = `background:${colors[i % colors.length]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d*.7 + 60}px;--rot:${Math.random()*720-360}deg;animation-delay:${Math.random()*120}ms`; c.appendChild(e); } }
 
 // ======================================================================
@@ -858,18 +869,19 @@ async function answer(p, timeout = false) {
   const m = mult(); let pts = Math.round(TIERS[tier].pts * m), lifeBack = false;
   if (tier) { S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); }
   else { S.streak = 0; if (S.mode === 'fim') { S.lives--; renderLives(S.lives); } }
-  if (S.mode === 'fim' && tier === 5 && S.lives < 3) { S.lives++; lifeBack = true; }
+  if (S.mode === 'fim' && tier >= 5 && S.lives < 3) { S.lives++; lifeBack = true; }
   S.score += pts;
   if (S.liga) ligaSync(false);
   S.shots.push({q, p, tier, pts, timeout, tries:S.tries.slice()});
-  if (tier === 5) { ST.golacos++; saveStats(ST); }
+  if (tier >= 5) { ST.golacos++; saveStats(ST); }
   $('#pitchBox').scrollIntoView({behavior:'smooth', block:'center'});
   await sleep(150);
   const kind = timeout ? 'defesa' : pick(Math.random, ['defesa','poste','fora']);
   await shoot(tier, kind);
   if (tier) {
     const t = TIERS[tier];
-    flash(tier >= 4 ? 'GOLAÇO!' : 'GOLO!', `de ${t.m} m · +${pts}`, t.hex);
+    flash(tier === 6 ? 'BALIZA A BALIZA!' : tier >= 4 ? 'GOLAÇO!' : 'GOLO!', `de ${t.m} m · +${pts}`, t.hex);
+    if (tier === 6) confetti(90, [t.hex, '#e8b33a', '#fffaf0', '#d6452f']);
     if (tier >= 3) confetti(tier * 10, [t.hex, '#fffaf0', '#e8b33a']);
     try { navigator.vibrate && navigator.vibrate(tier >= 4 ? [30, 40, 60] : 30); } catch (e) {}
   } else flash(timeout ? 'TEMPO!' : kind === 'defesa' ? 'DEFENDIDO' : kind === 'poste' ? 'AO POSTE!' : 'PARA FORA', timeout ? 'acabou o tempo' : 'passaste a vez', '#f05a3c');
@@ -885,7 +897,7 @@ function chip(e, q) { const t = tierOf(q, e), st = stOf(q, e), tag = e.equipa ? 
 function renderReveal(q, p, tier, pts, timeout, lifeBack) {
   const t = TIERS[tier], v = q.valid, last = S.mode !== 'fim' ? S.i >= S.qs.length - 1 : S.lives <= 0;
   let h = '<div class="rhead">';
-  if (tier) h += `<div class="badge" style="background:${t.hex}">${t.m}<br>m</div><div><b>${t.nome}</b><span>${esc(p.nome)}${stOf(q, p) ? ' · ' + esc(stOf(q, p)) : ''}</span></div><div class="pts" style="color:${t.hex}">+${pts}</div>`;
+  if (tier) h += `<div class="badge" style="background:${t.hex}${tier === 6 ? ";color:#fffaf0" : ""}">${t.m}<br>m</div><div><b>${t.nome}</b><span>${esc(p.nome)}${stOf(q, p) ? ' · ' + esc(stOf(q, p)) : ''}</span></div><div class="pts" style="color:${t.hex}">+${pts}</div>`;
   else h += `<div class="badge miss">✕</div><div><b>${timeout ? 'Acabou o tempo' : 'Passaste'}</b><span>Havia ${v.length} respostas certas</span></div><div class="pts" style="color:var(--mute)">0</div>`;
   h += '</div>';
   if (S.tries.length) h += `<p class="tries">${S.tries.length === 1 ? 'Tentativa falhada' : 'Tentativas falhadas'}${PENALTY ? ` (−${PENALTY} s cada)` : ''}: ${S.tries.map(x => `<b>${esc(x.nome)}</b>${stOf(q, x) ? ' (' + esc(stOf(q, x)) + ')' : ''}`).join(', ')}</p>`;
@@ -900,7 +912,7 @@ function renderReveal(q, p, tier, pts, timeout, lifeBack) {
   const nShow = v.length >= 10 ? 3 : 2;
   const rare = v.slice(-nShow).reverse().filter(x => x !== p), obv = v.slice(0, nShow).filter(x => x !== p && !rare.includes(x));
   h += '<div class="alts">';
-  if (rare.length) h += `<h4>Do meio-campo (as mais raras)</h4><div class="chips">${rare.map(x => chip(x, q)).join('')}</div>`;
+  if (rare.length) h += `<h4>As mais raras</h4><div class="chips">${rare.map(x => chip(x, q)).join('')}</div>`;
   if (obv.length) h += `<h4>As mais óbvias</h4><div class="chips">${obv.map(x => chip(x, q)).join('')}</div>`;
   if (q.cat !== 'pl') h += `<details class="all"><summary>Ver as ${v.length} respostas certas</summary><div class="chips">${v.map(x => chip(x, q)).join('')}</div></details>`;
   h += '</div>';
@@ -923,14 +935,14 @@ function endGame() {
   saveStats(ST);
   $('#endLbl').textContent = S.liga ? `${LIGA.nome} · jogo ${S.liga.n} de ${LIGA.porDia} de hoje` : fim ? `Sem fim · ${CATS[S.cat]}` : S.mode === 'dia' ? 'Desafio do dia · ' + new Date().toLocaleDateString('pt-PT', {day:'numeric', month:'long'}) : S.friend ? 'Desafio de um amigo' : `Jogo rápido · ${CATS[S.cat]}`;
   $('#endRec').innerHTML = rec ? '<span class="rec">Novo recorde!</span>' : '';
-  $('#endShots').innerHTML = fim && S.shots.length > 14 ? '' : S.shots.map((s, i) => `<i style="background:${TIERS[s.tier].hex};animation-delay:${200 + i * 90}ms;${s.tier ? '' : 'color:var(--mute)'}">${s.tier ? TIERS[s.tier].m : '✕'}</i>`).join('');
+  $('#endShots').innerHTML = fim && S.shots.length > 14 ? '' : S.shots.map((s, i) => `<i style="background:${TIERS[s.tier].hex};animation-delay:${200 + i * 90}ms;${s.tier ? (s.tier === 6 ? 'color:#fffaf0' : '') : 'color:var(--mute)'}">${s.tier ? TIERS[s.tier].m : '✕'}</i>`).join('');
   const far = Math.max(0, ...S.shots.map(s => TIERS[s.tier].m));
   $('#endSub').textContent = fim ? `${S.shots.length} perguntas · ${golos} golos · melhor série ${S.bestStreak}` : `${golos} de ${S.shots.length} golos` + (far ? ` · remate mais longo: ${far} m` : '') + (S.friend && S.friendScore != null ? ` · o teu amigo fez ${S.friendScore}` : '');
   $('#endScore').textContent = '0'; show('s-end'); countUp($('#endScore'), 0, S.score);
   $('#share').textContent = fim || S.liga ? 'Partilhar' : 'Desafiar amigo';
   $('#again').textContent = S.liga ? (S.liga.n < LIGA.porDia ? `Jogo da liga ${S.liga.n + 1} de ${LIGA.porDia} ›` : 'Ver classificação') : 'Jogar outra vez';
   if (S.liga) { const saved = ligaSync(true); renderEndLiga(); saved.then(refreshLiga); } else $('#endLiga').hidden = true;
-  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
+  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex + (s.tier === 6 ? ';color:#fffaf0' : '') : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
 }
 function confettiEnd() { const c = document.createElement('div'); c.className = 'confetti'; c.style.position = 'fixed'; document.body.appendChild(c); for (let i = 0; i < 60; i++) { const e = document.createElement('i'); const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 240; e.style.cssText = `top:20%;background:${['#1e5a37','#d6452f','#e8b33a','#6fa86a','#e07a34'][i%5]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d + 160}px;--rot:${Math.random()*720}deg;animation-duration:1.8s`; c.appendChild(e); } setTimeout(() => c.remove(), 2200); }
@@ -1069,7 +1081,7 @@ let ligaSyncT = null;
 function ligaSync(final) {
   if (!S?.liga) return;
   const r = S.liga.rec;
-  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, tiros:tirosDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
+  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier >= 5).length, perguntas:S.shots.length, tiros:tirosDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
   if (!final) r.fim = null;
   const path = `jogos/${ME}/${S.liga.dia}/j${S.liga.n}`, body = JSON.parse(JSON.stringify(r));
   const go = (k = 0) => ligaPut(path, body).catch(() => { if (k < 4) return new Promise(res => setTimeout(res, 2000 * (k + 1))).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
@@ -1106,7 +1118,7 @@ function renderLiga() {
   else {
     h = `<div class="lg-table">${rows.map((o, i) => `<div class="lg-row ${o.nome === ME ? 'me' : ''}" style="animation-delay:${i * 70}ms">
       <span class="pos">${['🥇','🥈','🥉'][i] && o.pts ? ['🥇','🥈','🥉'][i] : i + 1}</span>
-      <span class="nm"><b>${esc(o.nome)}</b><small>${o.jogos} ${o.jogos === 1 ? 'jogo' : 'jogos'} · melhor ${o.melhor} · ${o.golacos} do meio-campo</small></span>
+      <span class="nm"><b>${esc(o.nome)}</b><small>${o.jogos} ${o.jogos === 1 ? 'jogo' : 'jogos'} · melhor ${o.melhor} · ${o.golacos} de 50 m ou mais</small></span>
       <span class="pts">${o.pts}</span></div>`).join('')}</div>`;
     const days = {}; for (const n of LIGA.jogadores) for (const d in (LG.dados[n] || {})) if (filtros[LTAB](d)) days[d] = 1;
     const ds = Object.keys(days).sort().reverse().slice(0, LTAB === 'total' ? 14 : 7);
@@ -1134,7 +1146,7 @@ async function statsGet() {
 function registarJogo() {
   if (!LIGA.db || !ME || !S || S.liga || !S.shots.length) return;
   const rec = {modo:S.mode, cat:S.cat, dia:lisDate(), fim:Date.now(), pontos:S.score, golos:S.shots.filter(s => s.tier).length,
-               golacos:S.shots.filter(s => s.tier === 5).length, perguntas:S.shots.length, serie:S.bestStreak, tiros:tirosDe()};
+               golacos:S.shots.filter(s => s.tier >= 5).length, perguntas:S.shots.length, serie:S.bestStreak, tiros:tirosDe()};
   const go = (k = 0) => fetch(ligaUrl(`todos/${ME}`), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(rec)})
     .then(r => { if (!r.ok) throw new Error(r.status); }).catch(() => { if (k < 3) setTimeout(() => go(k + 1), 2000 * (k + 1)); });
   go();
@@ -1160,6 +1172,7 @@ function statsPor(js) {
       ppp: per ? soma('pontos') / per : null, acerto: per ? soma('golos') / per : null,
       dist: gol.length ? gol.reduce((s, t) => s + TIERS[t[1]].m, 0) / gol.length : null,
       erros: tiros.length ? tiros.reduce((s, t) => s + (t[2] || 0), 0) / tiros.length : null,
+      baliza: tiros.length ? tiros.filter(t => t[1] === 6).length : null,
       melhor: sete.length ? Math.max(...sete.map(x => x.pontos || 0)) : null,
       serie: Math.max(0, ...g.filter(x => x.modo === 'fim').map(x => x.serie || 0)) || null, cat};
   });
@@ -1248,7 +1261,8 @@ function renderStats() {
   h += barCard('Pontos por pergunta', 'a medida mais justa entre modos', rows, 'ppp', fmt1);
   h += barCard('Golos', '% de perguntas acertadas', rows, 'acerto', pct);
   h += barCard('Remate médio', 'distância média dos golos (mais longe = respostas mais raras)', rows, 'dist', v => v == null ? '—' : fmt1(v) + ' m');
-  h += barCard('Golos do meio-campo', 'respostas mais raras (50 m)', rows, 'golacos', v => v ?? '—');
+  h += barCard('Golos de longe', 'do meio-campo (50 m) ou de baliza a baliza (100 m)', rows, 'golacos', v => v ?? '—');
+  h += barCard('De baliza a baliza', 'golos de 100 m (80 pontos)', rows, 'baliza', v => v ?? '—');
   h += barCard('Erros por pergunta', 'menos é melhor', rows, 'erros', fmt1, true);
   h += barCard('Melhor jogo', 'jogos de 7 perguntas', rows, 'melhor', v => v ?? '—');
   if (STAB.scope === 'tudo') h += barCard('Melhor série no Sem fim', 'golos seguidos', rows, 'serie', v => v ?? '—');

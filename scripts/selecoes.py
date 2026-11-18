@@ -53,6 +53,7 @@ def recente(tour, ano, p):
     return ano >= '2015' and p in ('Brasil', 'Argentina')   # Copa América
 # participantes destas fases finais já estão escritos à mão em perguntas2.js
 JA_ESCRITAS = {('FIFA World Cup', '2010'), ('FIFA World Cup', '2014'), ('FIFA World Cup', '2018'), ('FIFA World Cup', '2022'), ('UEFA Euro', '2016'), ('UEFA Euro', '2021'), ('UEFA Euro', '2024')}
+POUCO_CONHECIDOS = {'Luis Hernández', 'Enner Valencia', 'Paolo Guerrero', 'Eduardo Vargas'}   # (perguntas "contra quem marcou")
 TORNEIOS = {'FIFA World Cup': 'Mundial', 'UEFA Euro': 'Euro', 'Copa América': 'Copa América'}
 def edicao(tour, year):
     if tour == 'UEFA Euro' and year == '2021': return 'Euro 2020', ' (jogado em 2021)'
@@ -196,6 +197,18 @@ def main():
         add('s-pt-10golos', 'portugal', 'jogador', 'Um jogador que marcou pelo menos 10 golos pela seleção portuguesa', f'Todos os jogos, até {max(r["date"] for r in pj)[:4]}', [(n, f'{v} golos', v) for n, v in c.items() if v >= 10], mx=40)
     else:
         print(f'  (Portugal: {gol_pt} golos, {len(com_marc)} com marcador — pergunta dos 10 golos não feita)')
+    # 9. seleções contra as quais as estrelas marcaram em fases finais (Mundial, Euro, Copa América: todos os golos têm marcador)
+    contra, ultimo, equipa = defaultdict(Counter), {}, {}
+    for g in G:
+        m = match.get(key(g))
+        if not m or m['tournament'] not in TORNEIOS or g['own_goal'] == 'TRUE': continue
+        n = NOMES.get(g['scorer'], g['scorer']); adv = pais(g['away_team'] if g['team'] == g['home_team'] else g['home_team'], g['date'])
+        if adv: contra[n][adv] += 1; ultimo[n] = max(ultimo.get(n, ''), g['date']); equipa[n] = pais(g['team'], g['date'])
+    for n, cnt in contra.items():
+        if len(cnt) < 8 or ultimo[n] < '1990' or fama_j[n] < 10 or n in POUCO_CONHECIDOS: continue
+        add(f's-contra-{n}', 'portugal' if equipa[n] == 'Portugal' else 'mundo', 'pais', f'Uma seleção contra a qual {n} marcou numa fase final',
+            'Mundiais, Euros e Copas Américas (só as fases finais)', [(a, f'{v} golo' + ('s' if v > 1 else ''), v) for a, v in cnt.items()], mx=40)
+        print(f'  contra: {n} ({len(cnt)} seleções)')
     data = {'fonte': 'martj42/international_results', 'perguntas': perguntas}
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
     print(f'selecoes.json: {len(perguntas)} perguntas ({OUT.stat().st_size // 1024} KB)', Counter(q["cat"] for q in perguntas))
