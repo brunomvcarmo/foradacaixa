@@ -470,8 +470,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118163954"></script>
-<script src="perguntas2.js?v=20261118163954"></script>
+<script src="perguntas.js?v=20261118164311"></script>
+<script src="perguntas2.js?v=20261118164311"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -481,7 +481,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118163954';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118164311';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -955,6 +955,7 @@ const LIGA = {
   // apagar os jogos de alguém UMA vez (o 1.º telemóvel que abrir a página faz o reset e marca-o em ligas/<id>/resets/<id do reset>)
   resets: [
     {id:'2026-11-18-bruno', nome:'Bruno', motivo:'jogou com a versão que tirava 5 s por erro'},
+    {id:'2026-11-18b-bruno', nome:'Bruno', todos:true, motivo:'pediu outra vez (classificação e todos os jogos)'},
   ],
   db: 'https://fora-da-caixa-b1efa-default-rtdb.europe-west1.firebasedatabase.app',   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
 };
@@ -977,6 +978,7 @@ function ensureResets() {
       const feitos = (await r.json()) || {};
       for (const rs of LIGA.resets) if (!feitos[rs.id]) {
         await ligaPut(`jogos/${rs.nome}`, null);
+        if (rs.todos) await ligaPut(`todos/${rs.nome}`, null);   // também os jogos fora da liga (estatísticas de "Tudo")
         await ligaPut(`resets/${rs.id}`, {nome:rs.nome, feito:Date.now()});
       }
     } catch (e) { resetsP = null; }   // sem ligação: tenta outra vez na próxima atualização
