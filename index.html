@@ -106,6 +106,27 @@ details.all .chips{margin-top:6px}
 .qnum{font-size:12px;color:var(--mute);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .qtxt{font-family:var(--display);font-weight:800;font-size:23px;line-height:1.15;letter-spacing:-.01em;margin:6px 0 4px}
 .qsub{font-size:13px;color:var(--mute)}
+.qinfo{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qinfo span{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--ink)}
+.qinfo .q100{background:#efe6f6;border-color:#cdb6e3;color:#4b2a75}
+.amigos{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.amigos h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.amg{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px}
+.amg i{width:9px;height:9px;border-radius:50%;flex:none}
+.amg b{min-width:62px}
+.amg span{flex:1;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.amg em{font-style:normal;font-weight:800;font-size:12px;padding:2px 8px;border-radius:8px;color:var(--dark)}
+.rc-am{display:block;font-size:12px;color:var(--mute);margin-top:3px}
+.rc-am i{font-style:normal;font-weight:700}
+.trofeus{display:grid;gap:8px}
+.tr-q{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.tr-q b{flex:1;font-size:16px}
+.tr-q .cups{font-size:20px;letter-spacing:2px}
+.tr-q em{font-style:normal;font-family:var(--display);font-size:20px}
+.tr-w{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--line);font-size:14px}
+.tr-w span{color:var(--mute);min-width:118px}
+.tr-w b{flex:1}
+.lg-campeao{margin:8px 0 2px;padding:8px 10px;border-radius:12px;background:#fbf0d2;border:1px solid #ecd28a;font-size:14px}
 .answer{position:relative;margin-bottom:10px}
 .answer input{width:100%;padding:15px 16px;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);font:inherit;font-size:17px;outline:none;transition:border-color .2s}
 .answer input:focus{border-color:var(--acc)}
@@ -372,6 +393,7 @@ dialog .tiers b{width:52px}
       <div class="qnum" id="qnum">Pergunta 1</div>
       <div class="qtxt" id="qtxt"></div>
       <div class="qsub" id="qsub"></div>
+      <div class="qinfo" id="qinfo"></div>
     </div>
 
     <div class="answer" id="answer">
@@ -393,7 +415,7 @@ dialog .tiers b{width:52px}
   <!-- ===================== LIGA ===================== -->
   <div id="s-liga" class="screen">
     <div class="lg-head"><button class="iconbtn" id="lgBack" aria-label="Voltar">‹</button><h2>🏆 Classificação</h2><button class="iconbtn" id="lgStats" aria-label="Estatísticas">📊</button><button class="iconbtn" id="lgRefresh" aria-label="Atualizar">↻</button></div>
-    <div class="tabs" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Esta semana</button><button data-t="total">Total</button></div>
+    <div class="tabs" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Semana</button><button data-t="total">Total</button><button data-t="trofeus">🏆</button></div>
     <div id="lgBody"></div>
     <p class="foot">3 jogos por dia contam (o dia muda à meia-noite de Lisboa). Os jogos 1, 2 e 3 de cada dia têm as mesmas perguntas para todos.</p>
   </div>
@@ -473,8 +495,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261118193329"></script>
-<script src="perguntas2.js?v=20261118193329"></script>
+<script src="perguntas.js?v=20261118204957"></script>
+<script src="perguntas2.js?v=20261118204957"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -484,7 +506,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261118193329';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261118204957';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -794,6 +816,8 @@ function nextQ() {
   const catLbl = q.cat === 'pl' || q.cat === 'historia' ? 'Premier League' : CATS[q.cat];
   $('#qnum').textContent = (S.mode === 'fim' ? `Pergunta ${S.i + 1}` + (mult() > 1 ? ` · ×${String(mult()).replace('.', ',')}` : '') : `Pergunta ${S.i + 1} de ${S.qs.length}`) + ` · ${catLbl}`;
   $('#qtxt').textContent = q.txt; $('#qsub').textContent = q.sub;
+  const nr = q.valid.length;
+  $('#qinfo').innerHTML = `<span>${nr} respostas certas</span>` + (nr >= BALIZA_MIN ? `<span class="q100">🟪 dá para golo de baliza a baliza</span>` : '');
   const qc = $('#qcard'); qc.classList.remove('enter'); void qc.offsetWidth; qc.classList.add('enter');
   $('#answer').hidden = false; $('#skip').hidden = false; $('#reveal').classList.remove('on'); $('#reveal').innerHTML = '';
   const inp = $('#resp'); inp.value = ''; hideSug(); S.tries = []; $('#tryMsg').hidden = true; $('#answer').classList.remove('wrong');
@@ -909,6 +933,7 @@ function renderReveal(q, p, tier, pts, timeout, lifeBack) {
     setTimeout(() => { const m = document.getElementById('mtr'); if (m) m.style.left = pos + '%'; }, 60);
   }
   if (lifeBack) h += `<p class="why" style="color:var(--t5)">❤️ Golo do meio-campo: recuperaste uma vida!</p>`;
+  if (S.liga) h += amigosHTML(q.key);
   const nShow = v.length >= 10 ? 3 : 2;
   const rare = v.slice(-nShow).reverse().filter(x => x !== p), obv = v.slice(0, nShow).filter(x => x !== p && !rare.includes(x));
   h += '<div class="alts">';
@@ -942,7 +967,7 @@ function endGame() {
   $('#share').textContent = fim || S.liga ? 'Partilhar' : 'Desafiar amigo';
   $('#again').textContent = S.liga ? (S.liga.n < LIGA.porDia ? `Jogo da liga ${S.liga.n + 1} de ${LIGA.porDia} ›` : 'Ver classificação') : 'Jogar outra vez';
   if (S.liga) { const saved = ligaSync(true); renderEndLiga(); saved.then(refreshLiga); } else $('#endLiga').hidden = true;
-  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex + (s.tier === 6 ? ';color:#fffaf0' : '') : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
+  $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex + (s.tier === 6 ? ';color:#fffaf0' : '') : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}${S.liga ? amigosLinha(s.q.key) : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
 }
 function confettiEnd() { const c = document.createElement('div'); c.className = 'confetti'; c.style.position = 'fixed'; document.body.appendChild(c); for (let i = 0; i < 60; i++) { const e = document.createElement('i'); const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 240; e.style.cssText = `top:20%;background:${['#1e5a37','#d6452f','#e8b33a','#6fa86a','#e07a34'][i%5]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d + 160}px;--rot:${Math.random()*720}deg;animation-duration:1.8s`; c.appendChild(e); } setTimeout(() => c.remove(), 2200); }
@@ -1042,6 +1067,9 @@ function renderLigaCard() {
   let h = `<div class="lg-top"><b>🏆 ${esc(LIGA.nome)}</b><button class="linkbtn" id="lgVer">Classificação ›</button></div>`;
   if (LG.erro && !LG.dados) h += `<p class="lg-note">Sem ligação à liga (${esc(LG.erro)}). <button class="linkbtn" id="lgRetry">Tentar outra vez</button></p>`;
   else {
+    const camp = semanasFechadas().at(-1);
+    if (camp && camp.ws === weekStart(new Date(new Date(hoje + 'T12:00:00Z').getTime() - 7 * 864e5).toISOString().slice(0, 10)))
+      h += `<p class="lg-campeao">🏆 Campeão da semana passada: <b>${camp.vencedores.map(esc).join(' e ')}</b> (${camp.pts} pontos)</p>`;
     h += `<div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${esc(o.nome)}</b><span class="dots" title="jogos de hoje">${dots(o.nome)}</span><em>${o.pts}</em></div>`).join('')}</div><p class="lg-sub">Pontos desta semana · bolinhas = jogos de hoje</p>`;
     if (!ME) h += `<button class="btn" id="lgWho">Escolher quem és</button>`;
     else if (falta > 0) h += `<button class="btn" id="lgPlay">Jogo da liga ${feitos + 1} de ${LIGA.porDia} ›</button><p class="lg-sub">7 perguntas · as mesmas para os ${LIGA.jogadores.length} · conta mesmo que saias a meio</p>`;
@@ -1081,7 +1109,7 @@ let ligaSyncT = null;
 function ligaSync(final) {
   if (!S?.liga) return;
   const r = S.liga.rec;
-  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier >= 5).length, perguntas:S.shots.length, tiros:tirosDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
+  Object.assign(r, {pontos:S.score, golos:S.shots.filter(s => s.tier).length, golacos:S.shots.filter(s => s.tier >= 5).length, perguntas:S.shots.length, tiros:tirosDe(), resp:S.shots.map(s => s.p ? s.p.nome : null), chaves:S.shots.map(s => s.q.key), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : undefined});
   if (!final) r.fim = null;
   const path = `jogos/${ME}/${S.liga.dia}/j${S.liga.n}`, body = JSON.parse(JSON.stringify(r));
   const go = (k = 0) => ligaPut(path, body).catch(() => { if (k < 4) return new Promise(res => setTimeout(res, 2000 * (k + 1))).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
@@ -1106,7 +1134,48 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 // ---------- classificação ----------
 function openLiga() { show('s-liga'); renderLiga(); refreshLiga(); }
+// ---------- o que os amigos responderam (no mesmo jogo n do mesmo dia: as perguntas são iguais) ----------
+function amigosDados(key) {
+  if (!S?.liga || !LG.dados) return [];
+  return LIGA.jogadores.filter(n => n !== ME).map(n => {
+    const g = LG.dados[n]?.[S.liga.dia]?.['j' + S.liga.n];
+    if (!g || !Array.isArray(g.chaves)) return {n, estado: g ? 'sem' : 'falta'};
+    const i = g.chaves.indexOf(key); if (i < 0) return {n, estado: 'ainda'};
+    return {n, estado: 'ok', resp: g.resp?.[i] ?? null, tier: g.tiros?.[i]?.[1] ?? 0};
+  });
+}
+function amigosHTML(key) {
+  const a = amigosDados(key).filter(x => x.estado !== 'sem'); if (!a.length) return '';
+  return `<div class="amigos"><h4>E os outros?</h4>${a.map(x => x.estado === 'ok'
+    ? `<div class="amg"><i style="background:${pcor(x.n)}"></i><b>${esc(x.n)}</b><span>${x.resp ? esc(x.resp) : 'passou / sem tempo'}</span><em style="background:${TIERS[x.tier].hex}${x.tier === 6 ? ';color:#fffaf0' : ''}">${x.tier ? TIERS[x.tier].m + ' m' : '✕'}</em></div>`
+    : `<div class="amg"><i style="background:${pcor(x.n)}"></i><b>${esc(x.n)}</b><span>ainda não jogou este jogo</span></div>`).join('')}</div>`;
+}
+function amigosLinha(key) {
+  const a = amigosDados(key).filter(x => x.estado === 'ok'); if (!a.length) return '';
+  return `<span class="rc-am">${a.map(x => `${esc(x.n)}: <i>${x.resp ? esc(x.resp) : '—'}${x.tier ? ' (' + TIERS[x.tier].m + ' m)' : ''}</i>`).join(' · ')}</span>`;
+}
+// ---------- campeões das semanas (só semanas já acabadas; a semana vai de segunda a domingo, hora de Lisboa) ----------
+function semanasFechadas() {
+  if (!LG.dados) return [];
+  const atual = weekStart(lisDate()), pts = {};
+  for (const n of LIGA.jogadores) for (const d in (LG.dados[n] || {})) { const ws = weekStart(d); if (ws >= atual) continue;
+    for (const g of Object.values(LG.dados[n][d] || {})) if (g) { pts[ws] = pts[ws] || {}; pts[ws][n] = (pts[ws][n] || 0) + (g.pontos || 0); } }
+  return Object.keys(pts).sort().map(ws => { const p = pts[ws], max = Math.max(...Object.values(p));
+    return {ws, pts: max, vencedores: Object.keys(p).filter(n => p[n] === max), tabela: p}; }).filter(s => s.pts > 0);
+}
+function renderTrofeus() {
+  document.querySelectorAll('#lgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === LTAB));
+  const sem = semanasFechadas(), cont = Object.fromEntries(LIGA.jogadores.map(n => [n, 0]));
+  sem.forEach(s => s.vencedores.forEach(n => cont[n]++));
+  const lab = ws => { const a = new Date(ws + 'T12:00:00Z'), b = new Date(a.getTime() + 6 * 864e5); return `${a.getUTCDate()}–${b.toLocaleDateString('pt-PT', {day:'numeric', month:'short'})}`; };
+  let h = `<h3 class="lg-h">Quadro de honra</h3><div class="trofeus">${Object.entries(cont).sort((a, b) => b[1] - a[1]).map(([n, c]) => `<div class="tr-q"><i style="width:10px;height:10px;border-radius:50%;background:${pcor(n)}"></i><b>${esc(n)}</b><span class="cups">${'🏆'.repeat(Math.min(c, 8))}</span><em>${c}</em></div>`).join('')}</div>`;
+  h += `<h3 class="lg-h">Campeões de cada semana</h3>`;
+  h += sem.length ? sem.slice().reverse().map(s => `<div class="tr-w"><span>${lab(s.ws)}</span><b>🏆 ${s.vencedores.map(esc).join(' e ')}</b>${s.pts} pts</div>`).join('')
+                  : '<p class="lg-note">Ainda nenhuma semana acabou. O primeiro campeão fica decidido no domingo à meia-noite (hora de Lisboa).</p>';
+  $('#lgBody').innerHTML = h;
+}
 function renderLiga() {
+  if (LTAB === 'trofeus') return renderTrofeus();
   const hoje = lisDate(), wk = weekStart(hoje);
   const filtros = {hoje: d => d === hoje, semana: d => weekStart(d) === wk, total: () => true};
   document.querySelectorAll('#lgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === LTAB));
