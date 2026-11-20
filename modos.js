@@ -103,18 +103,67 @@ const MX_HTML = `
 (() => {
   const home = $('#s-home'); home.insertAdjacentHTML('afterend', MX_HTML);
   $('#s-home .hero').insertAdjacentHTML('beforebegin', `<button class="mx-duban" id="duBan" hidden><span class="ic">⚔️</span><span id="duBanTx"></span><span class="go">›</span></button>`);
-  $('.modes').insertAdjacentHTML('afterend', `<div class="mx-h">Mais modos</div><div class="mx-tiles">
-    <button class="mx-tile" id="m-raj"><span class="ic">⚡</span><b>Rajada</b><small>Uma pergunta, 60 s: diz o máximo de respostas</small></button>
-    <button class="mx-tile" id="m-quem"><span class="ic">🕵️</span><b>Quem é?</b><small>Adivinha o jogador pelos clubes, com o mínimo de pistas</small></button>
-    <button class="mx-tile" id="m-mm"><span class="ic">📈</span><b>Mais ou menos</b><small>Custou mais ou menos? Marcou mais ou menos?</small></button>
-    <button class="mx-tile" id="m-duelo"><span class="ic">⚔️</span><b>Duelo</b><small>Desafia um amigo da liga: as mesmas 7 perguntas</small><span class="mx-badge" id="duBadge" hidden></span></button>
-  </div>`);
 })();
+// ======================================================================
+// ESCOLHER O MODO — ecrã com cartões que se passam com o dedo (scroll-snap), barra de ícones e pontinhos
+// ======================================================================
+const MODOS = [['7', '⚽', 'Rápido', 'Jogo rápido', '#1e5a37'], ['fim', '♾️', 'Sem fim', 'Sem fim', '#6b3fa0'], ['dia', '📅', 'Do dia', 'Desafio do dia', '#e07a34'],
+  ['raj', '⚡', 'Rajada', 'Rajada', '#d6452f'], ['quem', '🕵️', 'Quem é?', 'Quem é?', '#2b6fae'], ['mm', '📈', '+ ou −', 'Mais ou menos', '#a8750c'], ['duelo', '⚔️', 'Duelo', 'Duelo', '#1d2b22']];
+const duBadgeHTML = '<span class="mx-badge du-b" hidden></span>';
+$('#mNav').innerHTML = MODOS.map(([m, ic, , nome, cor], i) => `<button role="tab" data-i="${i}" style="--mcn:${cor}">${ic} ${nome}${m === 'duelo' ? duBadgeHTML : ''}</button>`).join('');
+$('#mDots').innerHTML = MODOS.map(() => '<i></i>').join('');
+$('#pcStrip').innerHTML = MODOS.map(([m, ic, curto], i) => `<button data-i="${i}" aria-label="${curto}">${ic}<small>${curto}</small>${m === 'duelo' ? duBadgeHTML : ''}</button>`).join('');
+const mCards = () => [...document.querySelectorAll('#mCar .mcard')];
+let mAtual = 0;
+function mMarca(i) {
+  mAtual = i; mCards().forEach((c, k) => c.classList.toggle('on', k === i));
+  document.querySelectorAll('#mNav button').forEach((b, k) => b.classList.toggle('on', k === i));
+  document.querySelectorAll('#mDots i').forEach((d, k) => d.classList.toggle('on', k === i));
+  const nb = document.querySelector(`#mNav button[data-i="${i}"]`); if (nb) nb.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'});
+}
+function mVai(i, suave = true) {
+  i = Math.max(0, Math.min(MODOS.length - 1, i)); const car = $('#mCar'), c = mCards()[i];
+  car.scrollTo({left: c.offsetLeft - (car.clientWidth - c.clientWidth) / 2, behavior: suave ? 'smooth' : 'auto'}); mMarca(i);
+}
+$('#mCar').addEventListener('scroll', () => {
+  const car = $('#mCar'), meio = car.scrollLeft + car.clientWidth / 2; let best = 0, d = 1e9;
+  mCards().forEach((c, k) => { const dd = Math.abs(c.offsetLeft + c.clientWidth / 2 - meio); if (dd < d) { d = dd; best = k; } });
+  if (best !== mAtual) mMarca(best);
+}, {passive:true});
+function mRecordes() {
+  const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best)), hoje = ST.dia?.[today()];
+  const dl = typeof duLista === 'function' && ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
+  const v = dl.filter(d => duRes(d, ME) > duRes(d, duOutro(d))).length, dr = dl.filter(d => duRes(d, ME) < duRes(d, duOutro(d))).length;
+  const txt = {best: ST.best ? `🏆 Recorde: ${ST.best}` : '', bestFim: ST.bestFim ? `🏆 Recorde: ${ST.bestFim}` : '', dia: hoje != null ? `Hoje: ${hoje} pontos` : '',
+    bestRaj: ST.bestRaj ? `🏆 Recorde: ${ST.bestRaj}` : '', bestQuem: ST.bestQuem ? `🏆 Recorde: ${ST.bestQuem}` : '', bestMm: mm ? `🏆 Melhor série: ${mm}` : '',
+    duelo: dl.length ? `${v} vitória${v === 1 ? '' : 's'} · ${dr} derrota${dr === 1 ? '' : 's'}` : ''};
+  document.querySelectorAll('#mCar [data-rec]').forEach(e => e.textContent = txt[e.dataset.rec] || '');
+}
+function openModos(i) {
+  mRecordes(); show('s-modos');
+  const k = i ?? (ST.modoIdx ?? 0);
+  requestAnimationFrame(() => mVai(k, false));
+}
+$('#playBtn').onclick = () => openModos();
+$('#pcStrip').onclick = e => { const b = e.target.closest('button[data-i]'); if (b) openModos(Number(b.dataset.i)); };
+$('#mNav').onclick = e => { const b = e.target.closest('button[data-i]'); if (b) mVai(Number(b.dataset.i)); };
+$('#mPrev').onclick = () => mVai(mAtual - 1); $('#mNext').onclick = () => mVai(mAtual + 1);
+$('#mdBack').onclick = () => { renderHome(); show('s-home'); };
+document.addEventListener('keydown', e => { if (!$('#s-modos').classList.contains('on') || document.querySelector('dialog[open]')) return; if (e.key === 'ArrowRight') mVai(mAtual + 1); else if (e.key === 'ArrowLeft') mVai(mAtual - 1); });
+// lembrar o último modo escolhido (abre nele da próxima vez)
+$('#mCar').addEventListener('click', e => { const b = e.target.closest('.mc-go'); if (b) { ST.modoIdx = mCards().indexOf(b.closest('.mcard')); saveStats(ST); } }, true);
+
 const mxST = k => (ST[k] = ST[k] ?? (k === 'bestMm' ? {} : k.endsWith('Rec') ? [] : 0));
 function mxPop(txt, cor) { const d = document.createElement('div'); d.className = 'mx-pop'; d.textContent = txt; d.style.color = cor; document.body.appendChild(d); setTimeout(() => d.remove(), 950); }
 function mxShake(el) { el.classList.remove('mx-shake'); void el.offsetWidth; el.classList.add('mx-shake'); try { navigator.vibrate && navigator.vibrate([20, 30, 20]); } catch (e) {} }
 const mxSair = () => { renderHome(); show('s-home'); };
 const fmtN = v => String(v).replace('.', ',');
+function mxRegistar(rec) {
+  if (!LIGA.db || !ME) return;
+  const body = JSON.stringify({...rec, dia:lisDate(), fim:Date.now()});
+  const go = (k = 0) => fetch(ligaUrl(`todos/${ME}`), {method:'POST', headers:{'Content-Type':'application/json'}, body}).then(r => { if (!r.ok) throw new Error(r.status); }).catch(() => { if (k < 3) setTimeout(() => go(k + 1), 2000 * (k + 1)); });
+  go();
+}
 async function mxJSON(f) { try { const r = await fetch(`${f}?v=${APP_VER}`); return r.ok ? await r.json() : null; } catch (e) { return null; } }
 
 // ---------- caixa de resposta com sugestões (igual à do jogo; no iPhone escolhe-se no fim do toque) ----------
@@ -212,6 +261,7 @@ function rajFim() {
   RJ.ended = true; clearInterval(RJ.t); RJ.caixa.inp.blur();
   const best = mxST('bestRaj'), rec = RJ.score > best && RJ.score > 0;
   if (rec) ST.bestRaj = RJ.score; ST.jogos++; saveStats(ST);
+  mxRegistar({modo:'raj', pontos:RJ.score, respostas:RJ.found.length, total:RJ.q.valid.length, erros:RJ.erros.length, raras:RJ.found.filter(f => f.tier >= 5).length, chave:RJ.q.key, cat:RJ.q.cat});
   const q = RJ.q, achou = new Set(RJ.found.map(f => f.e));
   $('#rjBar i').style.width = '0%'; $('#rjT').textContent = '0';
   $('#rjBody').innerHTML = `<div class="mx-end"><div class="lbl">⚡ Rajada · acabou o tempo</div><div class="mx-big">${RJ.score}</div>
@@ -306,6 +356,8 @@ function qeAcaba(certo) {
 function qeFim() {
   const best = mxST('bestQuem'), rec = QE.score > best && QE.score > 0;
   if (rec) ST.bestQuem = QE.score; ST.jogos++; saveStats(ST);
+  const certos = QE.res.filter(r => r.pts);
+  mxRegistar({modo:'quem', pontos:QE.score, acertos:certos.length, jogadores:QE.res.length, pistas:certos.reduce((s, r) => s + r.k + (r.extra ? 1 : 0), 0), erros:QE.res.reduce((s, r) => s + r.tries, 0)});
   [...$('#qeProg').children].forEach((e, i) => { const r = QE.res[i]; e.className = ''; e.style.background = r && r.pts ? TIERS[r.tier].hex : TIERS[0].hex; });
   $('#qeBody').innerHTML = `<div class="mx-end"><div class="lbl">🕵️ Quem é?</div><div class="mx-big">${QE.score}</div>
       <div class="lbl">${QE.res.filter(r => r.pts).length} de ${QE_N} acertados</div>${rec ? '<span class="mx-rec">Novo recorde!</span>' : `<div class="lbl" style="margin-top:6px">Recorde: ${ST.bestQuem}</div>`}</div>
@@ -367,6 +419,7 @@ async function mmResp(d) {
 function mmFim() {
   const best = mxST('bestMm'), id = MM.t.id, rec = MM.serie > (best[id] || 0);
   if (rec) best[id] = MM.serie; ST.jogos++; saveStats(ST);
+  mxRegistar({modo:'mm', tema:id, serie:MM.serie});
   $('#mmBody').insertAdjacentHTML('afterbegin', `<div class="mx-end"><div class="lbl">Errado! Série final</div><div class="mx-big">${MM.serie}</div>${rec && MM.serie ? '<span class="mx-rec">Novo recorde!</span>' : `<div class="lbl">Recorde neste tema: ${best[id] || 0}</div>`}</div>
     <div class="mx-row" style="margin:10px 0 14px"><button class="btn" id="mmAgain">Outra vez</button><button class="btn ghost" id="mmTemas">Outro tema</button></div>`);
   $('#mmBtns').remove(); window.scrollTo(0, 0);
@@ -391,9 +444,10 @@ const duOutro = d => d.de === ME ? d.para : d.de;
 function duLista() { return Object.entries(DU.dados || {}).map(([id, d]) => ({...d, id})).filter(d => d && (d.de === ME || d.para === ME)).sort((a, b) => (b.criado || 0) - (a.criado || 0)); }
 function duPendentes() { return duLista().filter(d => d.para === ME && !d.res?.[ME]); }
 function duRenderHome() {
-  if (!ME) { $('#duBan').hidden = true; $('#duBadge').hidden = true; return; }
-  const p = duPendentes(), ban = $('#duBan');
-  ban.hidden = !p.length; $('#duBadge').hidden = !p.length; $('#duBadge').textContent = p.length;
+  const p = ME ? duPendentes() : [], ban = $('#duBan');
+  document.querySelectorAll('.du-b').forEach(b => { b.hidden = !p.length; b.textContent = p.length; });
+  if (!ME) { ban.hidden = true; return; }
+  ban.hidden = !p.length;
   if (p.length) { $('#duBanTx').innerHTML = p.length === 1 ? `O <b>${esc(p[0].de)}</b> desafiou-te para um duelo!` : `Tens <b>${p.length} duelos</b> à tua espera!`; ban.onclick = () => p.length === 1 ? duJogar(p[0].id) : openDuelo(); }
 }
 async function duRefresh() { if (!ME || !LIGA.db) return; await duGet(); duRenderHome(); if ($('#s-duelo').classList.contains('on')) duRender(); }
@@ -468,6 +522,79 @@ async function dueloFim() {
     if (a > b) confettiEnd();
   } else sub.innerHTML = `${esc(sub.textContent)}<br><b>Agora é a vez do ${esc(op)}</b>: ele vê o desafio no início da app.`;
 }
+// ======================================================================
+// ESTATÍSTICAS dos outros modos (separadores no ecrã de estatísticas; os jogos vêm de ligas/<id>/todos/<nome>, os duelos de duelos/)
+// ======================================================================
+function mxPeriodo(dia) { const hoje = lisDate(); return {semana: weekStart(dia) === weekStart(hoje), mes: dia.slice(0, 7) === hoje.slice(0, 7), sempre: true}[STAB.per]; }
+function mxJogos(modo) { const out = []; for (const n of LIGA.jogadores) for (const g of Object.values(ST_TODOS?.[n] || {})) if (g && g.modo === modo && g.dia && mxPeriodo(g.dia)) out.push({...g, nome:n}); return out; }
+const mxMedia = (a, f) => a.length ? a.reduce((s, x) => s + f(x), 0) / a.length : null;
+const mxMax = (a, f) => a.length ? Math.max(...a.map(f)) : null;
+const mxPerTxt = () => STAB.per === 'semana' ? 'esta semana' : STAB.per === 'mes' ? 'este mês' : 'ainda';
+function renderStatsModo() {
+  const el = $('#stBody'), m = STAB.modo;
+  if (!LIGA.db) { el.innerHTML = '<p class="lg-note">A liga ainda não está ligada à base de dados.</p>'; return; }
+  if (m === 'duelo') return renderStatsDuelos();
+  if (!ST_TODOS) { el.innerHTML = '<p class="lg-note">A carregar…</p>'; statsGet().then(() => { if (ST_TODOS) renderStats(); }); return; }
+  const js = mxJogos(m);
+  const nome = {raj:'Rajadas', quem:'jogos do Quem é?', mm:'jogos do Mais ou menos'}[m];
+  if (!js.length) { el.innerHTML = `<p class="lg-note">Ninguém jogou ${nome} ${mxPerTxt()}.</p><p class="foot">Os resultados destes modos contam a partir de hoje.</p>`; return; }
+  const por = n => js.filter(g => g.nome === n);
+  let h = '';
+  if (m === 'raj') {
+    const rows = LIGA.jogadores.map(n => { const g = por(n); return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.pontos || 0), media:mxMedia(g, x => x.pontos || 0),
+      resp:mxMedia(g, x => x.respostas || 0), pctr:mxMedia(g, x => x.total ? x.respostas / x.total : 0), raras:g.length ? g.reduce((s, x) => s + (x.raras || 0), 0) : null, erros:mxMedia(g, x => x.erros || 0)}; });
+    h += barCard('Melhor rajada', 'pontos num só jogo', rows, 'melhor', v => v ?? '—');
+    h += barCard('Pontos por rajada', 'média', rows, 'media', fmt1);
+    h += barCard('Respostas por rajada', 'média de respostas certas em 60 s', rows, 'resp', fmt1);
+    h += barCard('Respostas encontradas', '% das respostas certas de cada pergunta', rows, 'pctr', pct);
+    h += barCard('Golos de longe', 'respostas de 50 m ou de baliza a baliza', rows, 'raras', v => v ?? '—');
+    h += barCard('Erros por rajada', 'menos é melhor', rows, 'erros', fmt1, true);
+    h += barCard('Rajadas', '', rows, 'jogos', v => v ?? '—');
+  } else if (m === 'quem') {
+    const rows = LIGA.jogadores.map(n => { const g = por(n), ac = g.reduce((s, x) => s + (x.acertos || 0), 0), jog = g.reduce((s, x) => s + (x.jogadores || 0), 0);
+      return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.pontos || 0), media:mxMedia(g, x => x.pontos || 0), acerto: jog ? ac / jog : null, pistas: ac ? g.reduce((s, x) => s + (x.pistas || 0), 0) / ac : null}; });
+    h += barCard('Melhor jogo', 'pontos em 7 jogadores', rows, 'melhor', v => v ?? '—');
+    h += barCard('Pontos por jogo', 'média', rows, 'media', fmt1);
+    h += barCard('Jogadores acertados', '% dos jogadores', rows, 'acerto', pct);
+    h += barCard('Pistas por acerto', 'quantos clubes precisou de ver (menos é melhor)', rows, 'pistas', fmt1, true);
+    h += barCard('Jogos', '', rows, 'jogos', v => v ?? '—');
+  } else {
+    const temas = (MMD?.temas || []).map(t => [t.id, t.nome]);
+    const rows = LIGA.jogadores.map(n => { const g = por(n); return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.serie || 0), media:mxMedia(g, x => x.serie || 0)}; });
+    h += barCard('Melhor série', 'em qualquer tema', rows, 'melhor', v => v ?? '—');
+    h += barCard('Série média', '', rows, 'media', fmt1);
+    h += barCard('Jogos', '', rows, 'jogos', v => v ?? '—');
+    const ids = [...new Set(js.map(g => g.tema))], nomeT = id => (temas.find(t => t[0] === id) || [id, {fee:'Transferências'}[id] || id.replace(/^g/, 'Golos ')])[1];
+    h += `<div class="sc"><div class="sc-h"><b>Melhor série por tema</b></div><div class="ct-w"><table class="ct"><thead><tr><th></th>${LIGA.jogadores.map(n => `<th><i style="background:${pcor(n)}"></i>${esc(n)}</th>`).join('')}</tr></thead>
+      <tbody>${ids.map(id => { const vals = LIGA.jogadores.map(n => mxMax(por(n).filter(g => g.tema === id), x => x.serie || 0)), mx = Math.max(...vals.filter(v => v != null));
+        return `<tr><th>${esc(nomeT(id))}</th>${vals.map(v => v == null ? '<td class="ct-e">—</td>' : `<td${v === mx && v > 0 ? ' style="background:#1e5a37;color:#fffaf0"' : ''}>${v}</td>`).join('')}</tr>`; }).join('')}</tbody></table></div></div>`;
+  }
+  el.innerHTML = h + `<p class="foot">Resultados guardados a partir de hoje · ${js.length} jogo${js.length === 1 ? '' : 's'} ${mxPerTxt() === 'ainda' ? 'no total' : mxPerTxt()}.</p>`;
+  if (m === 'mm' && !MMD) mxJSON('maisoumenos.json').then(d => { if (d) { MMD = d; if (STAB.modo === 'mm') renderStats(); } });
+}
+function renderStatsDuelos() {
+  const el = $('#stBody');
+  if (!DU.dados) { el.innerHTML = '<p class="lg-note">A carregar…</p>'; duGet().then(() => { if (DU.dados && STAB.modo === 'duelo') renderStats(); }); return; }
+  const ds = Object.values(DU.dados).filter(d => d && d.res && duAcabou(d.res[d.de]) && duAcabou(d.res[d.para]) && mxPeriodo(lisDate(new Date(d.criado || 0))));
+  if (!ds.length) { el.innerHTML = `<p class="lg-note">Ainda não há duelos acabados ${mxPerTxt() === 'ainda' ? '' : mxPerTxt()}.</p>`; return; }
+  const J = LIGA.jogadores, r = {}; J.forEach(n => r[n] = {v:0, e:0, d:0, pts:0, n:0});
+  const h2h = {}; J.forEach(a => { h2h[a] = {}; J.forEach(b => h2h[a][b] = [0, 0, 0]); });
+  for (const d of ds) {
+    const a = d.de, b = d.para, pa = duRes(d, a), pb = duRes(d, b); if (!r[a] || !r[b]) continue;
+    r[a].n++; r[b].n++; r[a].pts += pa; r[b].pts += pb;
+    if (pa > pb) { r[a].v++; r[b].d++; h2h[a][b][0]++; h2h[b][a][2]++; } else if (pa < pb) { r[b].v++; r[a].d++; h2h[b][a][0]++; h2h[a][b][2]++; } else { r[a].e++; r[b].e++; h2h[a][b][1]++; h2h[b][a][1]++; }
+  }
+  const rows = J.map(n => ({nome:n, vit:r[n].n ? r[n].v : null, pctv:r[n].n ? r[n].v / r[n].n : null, media:r[n].n ? r[n].pts / r[n].n : null, jogos:r[n].n || null}));
+  let h = barCard('Vitórias', 'duelos ganhos', rows, 'vit', v => v ?? '—');
+  h += barCard('% de vitórias', '', rows, 'pctv', pct);
+  h += barCard('Pontos por duelo', 'média', rows, 'media', fmt1);
+  h += barCard('Duelos', '', rows, 'jogos', v => v ?? '—');
+  h += `<div class="sc"><div class="sc-h"><b>Frente a frente</b><span>vitórias – derrotas de quem está na linha contra quem está na coluna</span></div><div class="ct-w"><table class="ct"><thead><tr><th></th>${J.map(n => `<th><i style="background:${pcor(n)}"></i>${esc(n)}</th>`).join('')}</tr></thead>
+    <tbody>${J.map(a => `<tr><th>${esc(a)}</th>${J.map(b => { if (a === b) return '<td class="ct-e">·</td>'; const [v, e, d] = h2h[a][b]; if (!v && !e && !d) return '<td class="ct-e">—</td>';
+      return `<td style="${v > d ? 'background:#1e5a37;color:#fffaf0' : v < d ? 'background:#f3d6cf' : ''}">${v}–${d}${e ? `<small>${e} emp.</small>` : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  el.innerHTML = h;
+}
+
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;
 $('#m-quem').onclick = startQuem;

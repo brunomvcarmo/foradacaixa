@@ -63,6 +63,54 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .stat b{display:block;font-family:var(--display);font-size:22px;font-weight:800}
 .stat span{font-size:11px;color:var(--mute)}
 .foot{color:var(--mute);font-size:12px;text-align:center;margin-top:14px}
+.playcta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:16px 18px;border-radius:var(--r);background:var(--acc);color:var(--acc-ink);border:2px solid var(--dark);box-shadow:var(--shadow);margin:0 0 10px;transition:transform .12s}
+.playcta:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--dark)}
+.pc-ball{width:52px;height:52px;flex:none;animation:pcRoll 3.2s ease-in-out infinite}
+.pc-ball svg{width:100%;height:100%}
+@keyframes pcRoll{0%,100%{transform:rotate(0)}50%{transform:rotate(200deg) translateY(-3px)}}
+.pc-t{display:flex;flex-direction:column}
+.pc-t b{font-family:var(--display);font-weight:400;font-size:28px;line-height:1}
+.pc-t small{font-size:13.5px;opacity:.85;margin-top:3px}
+.playcta .go{margin-left:auto;font-size:28px}
+.pc-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:0 0 6px}
+.pc-strip button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:20px;line-height:1.1}
+.pc-strip button small{font-size:10px;color:var(--mute);font-weight:600;white-space:nowrap}
+.pc-strip .mx-badge{top:-6px;right:-4px;font-size:10px;padding:1px 6px}
+.mnav{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:2px 16px 4px;scrollbar-width:none}
+.mnav::-webkit-scrollbar{display:none}
+.mnav button{position:relative;flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--mute);transition:all .2s}
+.mnav button.on{background:var(--mcn,var(--ink));border-color:var(--mcn,var(--ink));color:#fffaf0;transform:translateY(-1px)}
+.mnav .mx-badge{position:static;margin-left:2px}
+.mcar-w{position:relative}
+.mcar{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:6px 16px 14px;scrollbar-width:none;overscroll-behavior-x:contain}
+.mcar::-webkit-scrollbar{display:none}
+.mcard{flex:0 0 84%;scroll-snap-align:center;background:var(--panel);border:2px solid var(--dark);border-radius:22px;padding:0 0 16px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .3s,opacity .3s;transform:scale(.93);opacity:.6}
+.mcard.on{transform:none;opacity:1}
+.mc-art{position:relative;height:150px;background:var(--mc);background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.14) 0 22%,transparent 23%),radial-gradient(circle at 85% 80%,rgba(255,255,255,.1) 0 30%,transparent 31%),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 18px,transparent 18px 36px);display:grid;place-items:center;border-bottom:2px solid var(--dark)}
+.mc-emo{font-size:70px;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.25))}
+.mcard.on .mc-emo{animation:mcFloat 2.6s ease-in-out infinite}
+@keyframes mcFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+.mc-n{position:absolute;left:12px;bottom:10px;background:#fffaf0;color:var(--dark);font-weight:800;font-size:12px;border-radius:99px;padding:3px 10px;border:1.5px solid var(--dark)}
+.mcard h3{font-family:var(--display);font-weight:400;font-size:27px;margin:14px 16px 2px;color:var(--mc)}
+.mcard[data-m="duelo"] h3{color:var(--dark)}
+.mc-tag{margin:0 16px 8px;color:var(--ink);font-size:15px;min-height:42px}
+.mc-how{list-style:none;margin:0 16px 10px;padding:0;display:grid;gap:5px;font-size:14px;color:var(--mute)}
+.mc-how li{display:flex;gap:8px;align-items:flex-start}
+.mc-how li::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--mc);margin-top:6px}
+.mc-foot{display:flex;flex-wrap:wrap;gap:6px;margin:auto 16px 0;min-height:26px}
+.mc-rec{font-size:12.5px;font-weight:700;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+.mc-rec:empty{display:none}
+.mc-cat{font-size:12.5px;color:var(--mute);padding:4px 2px}
+.btn.mc-go{margin:12px 16px 0;width:calc(100% - 32px);background:var(--mc);color:#fffaf0}
+.mcar-arr{display:none;position:absolute;top:40%;z-index:3;width:40px;height:40px;border-radius:50%;background:var(--panel);border:2px solid var(--dark);font-size:22px;font-weight:700;box-shadow:2px 2px 0 var(--dark)}
+.mcar-arr.l{left:-6px}.mcar-arr.r{right:-6px}
+@media (hover:hover) and (pointer:fine){.mcar-arr{display:grid;place-items:center}}
+.mdots{display:flex;justify-content:center;gap:6px;margin:0 0 14px}
+.mdots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:all .25s}
+.mdots i.on{width:22px;background:var(--ink)}
+.tabs.scroll{overflow-x:auto;margin:0 -16px 10px;padding:0 16px 2px;scrollbar-width:none}
+.tabs.scroll::-webkit-scrollbar{display:none}
+.tabs.scroll button{flex:none;white-space:nowrap;padding:9px 13px}
 .catpick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 12px;border-radius:14px;background:var(--panel);border:2px solid var(--acc);color:var(--ink);box-shadow:0 2px 0 var(--line)}
 .catpick:active{transform:scale(.99)}
 .cp-ic{font-size:24px;flex:none}
@@ -381,31 +429,17 @@ dialog .tiers b{width:52px}
       </div>
     </div>
 
-    <div class="ligacard" id="ligaCard"></div>
-    <button class="catpick" id="catPick" type="button">
-      <span class="cp-ic">🗂️</span>
-      <span class="cp-t"><small>Tipo de perguntas · escolhe um ou vários</small><b id="catLbl">Tudo</b></span>
-      <span class="cp-go">Escolher</span>
+    <button class="playcta" id="playBtn" type="button">
+      <span class="pc-ball"><svg viewBox="0 0 40 40"><use href="#ballsym"/></svg></span>
+      <span class="pc-t"><b>Jogar</b><small>Escolhe entre 7 modos de jogo</small></span>
+      <span class="go">›</span>
     </button>
+    <div class="pc-strip" style="margin-bottom:14px" id="pcStrip" aria-label="Modos de jogo"></div>
+    <div class="ligacard" id="ligaCard"></div>
     <div class="modes">
       <button class="mode friend" id="m-friend" hidden>
         <span class="ic">⚔️</span>
         <span><b>Desafio de um amigo</b><small id="friendTxt">As mesmas 7 perguntas que ele jogou</small></span>
-        <span class="go">›</span>
-      </button>
-      <button class="mode main" id="m-7">
-        <span class="ic">⚽</span>
-        <span><b>Jogo rápido</b><small>7 perguntas novas · 25 s cada · sempre que quiseres</small></span>
-        <span class="go">›</span>
-      </button>
-      <button class="mode" id="m-fim">
-        <span class="ic">♾️</span>
-        <span><b>Sem fim</b><small>3 vidas · séries multiplicam · golo do meio-campo dá uma vida</small></span>
-        <span class="go">›</span>
-      </button>
-      <button class="mode" id="m-dia">
-        <span class="ic">📅</span>
-        <span><b>Desafio do dia</b><small id="diaTxt">As mesmas 7 para toda a gente hoje</small></span>
         <span class="go">›</span>
       </button>
     </div>
@@ -419,6 +453,59 @@ dialog .tiers b{width:52px}
     <p class="foot"><button class="linkbtn" id="howBtn">Como se joga</button></p>
     <p class="foot" id="dataFoot"></p>
     <p class="foot" id="verFoot" style="opacity:.6;margin-top:4px"></p>
+  </div>
+
+  <!-- ===================== ESCOLHER O MODO ===================== -->
+  <div id="s-modos" class="screen">
+    <div class="lg-head"><button class="iconbtn" id="mdBack" aria-label="Voltar">‹</button><h2>Escolhe o modo</h2></div>
+    <div class="mnav" id="mNav" role="tablist"></div>
+    <div class="mcar-w">
+      <button class="mcar-arr l" id="mPrev" aria-label="Modo anterior">‹</button>
+      <div class="mcar" id="mCar">
+        <section class="mcard" data-m="7" style="--mc:#1e5a37"><div class="mc-art"><span class="mc-emo">⚽</span><span class="mc-n">7 perguntas</span></div>
+          <h3>Jogo rápido</h3><p class="mc-tag">7 perguntas novas, 25 segundos cada, sempre que quiseres.</p>
+          <ul class="mc-how"><li>Qualquer resposta certa marca</li><li>Quanto mais rara, mais longe o remate</li><li>Se errares, tenta outra vez</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="best"></span><span class="mc-cat">usa o tipo de perguntas</span></div>
+          <button class="btn mc-go" id="m-7">Jogar ›</button></section>
+        <section class="mcard" data-m="fim" style="--mc:#6b3fa0"><div class="mc-art"><span class="mc-emo">♾️</span><span class="mc-n">3 vidas</span></div>
+          <h3>Sem fim</h3><p class="mc-tag">Perguntas até perderes as 3 vidas.</p>
+          <ul class="mc-how"><li>Passar ou acabar o tempo tira uma vida</li><li>3 golos seguidos sobem o multiplicador</li><li>Golo do meio-campo devolve uma vida</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="bestFim"></span><span class="mc-cat">usa o tipo de perguntas</span></div>
+          <button class="btn mc-go" id="m-fim">Jogar ›</button></section>
+        <section class="mcard" data-m="dia" style="--mc:#e07a34"><div class="mc-art"><span class="mc-emo">📅</span><span class="mc-n">hoje</span></div>
+          <h3>Desafio do dia</h3><p class="mc-tag" id="diaTxt">As mesmas 7 para toda a gente hoje</p>
+          <ul class="mc-how"><li>Iguais para todos, mudam à meia-noite</li><li>Perguntas de todos os tipos</li><li>Compara com os amigos</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="dia"></span></div>
+          <button class="btn mc-go" id="m-dia">Jogar ›</button></section>
+        <section class="mcard" data-m="raj" style="--mc:#d6452f"><div class="mc-art"><span class="mc-emo">⚡</span><span class="mc-n">60 s</span></div>
+          <h3>Rajada</h3><p class="mc-tag">Uma pergunta com muitas respostas e 60 segundos.</p>
+          <ul class="mc-how"><li>Diz o máximo de respostas certas</li><li>Cada uma vale a distância dela</li><li>Errar não tira nada</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="bestRaj"></span><span class="mc-cat">usa o tipo de perguntas</span></div>
+          <button class="btn mc-go" id="m-raj">Jogar ›</button></section>
+        <section class="mcard" data-m="quem" style="--mc:#2b6fae"><div class="mc-art"><span class="mc-emo">🕵️</span><span class="mc-n">7 jogadores</span></div>
+          <h3>Quem é?</h3><p class="mc-tag">Adivinha o jogador pelos clubes por onde passou.</p>
+          <ul class="mc-how"><li>Os clubes aparecem um a um</li><li>Com 1 clube: 50 m · com todos: 11 m</li><li>Errar mostra mais um clube</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="bestQuem"></span></div>
+          <button class="btn mc-go" id="m-quem">Jogar ›</button></section>
+        <section class="mcard" data-m="mm" style="--mc:#a8750c"><div class="mc-art"><span class="mc-emo">📈</span><span class="mc-n">série</span></div>
+          <h3>Mais ou menos</h3><p class="mc-tag">Custou mais ou menos? Marcou mais ou menos?</p>
+          <ul class="mc-how"><li>Transferências ou golos em 6 ligas</li><li>Cada acerto aumenta a série</li><li>O primeiro erro acaba</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="bestMm"></span></div>
+          <button class="btn mc-go" id="m-mm">Jogar ›</button></section>
+        <section class="mcard" data-m="duelo" style="--mc:#1d2b22"><div class="mc-art"><span class="mc-emo">⚔️</span><span class="mc-n">1 contra 1</span></div>
+          <h3>Duelo</h3><p class="mc-tag">Desafia um amigo da liga para um 1 contra 1.</p>
+          <ul class="mc-how"><li>Jogas 7 perguntas</li><li>Ele recebe o desafio na app</li><li>Joga as mesmas: ganha quem fizer mais</li></ul>
+          <div class="mc-foot"><span class="mc-rec" data-rec="duelo"></span><span class="mc-cat">usa o tipo de perguntas</span></div>
+          <button class="btn mc-go" id="m-duelo">Escolher amigo ›</button></section>
+      </div>
+      <button class="mcar-arr r" id="mNext" aria-label="Modo seguinte">›</button>
+    </div>
+    <div class="mdots" id="mDots"></div>
+    <button class="catpick" id="catPick" type="button">
+      <span class="cp-ic">🗂️</span>
+      <span class="cp-t"><small>Tipo de perguntas · escolhe um ou vários</small><b id="catLbl">Tudo</b></span>
+      <span class="cp-go">Escolher</span>
+    </button>
   </div>
 
   <!-- ===================== JOGO ===================== -->
@@ -469,6 +556,7 @@ dialog .tiers b{width:52px}
   <!-- ===================== ESTATÍSTICAS ===================== -->
   <div id="s-stats" class="screen">
     <div class="lg-head"><button class="iconbtn" id="stBack" aria-label="Voltar">‹</button><h2>📊 Estatísticas</h2><button class="iconbtn" id="stRefresh" aria-label="Atualizar">↻</button></div>
+    <div class="tabs scroll" id="stModo"><button data-v="perg">⚽ Perguntas</button><button data-v="raj">⚡ Rajada</button><button data-v="quem">🕵️ Quem é?</button><button data-v="mm">📈 Mais ou menos</button><button data-v="duelo">⚔️ Duelos</button></div>
     <div class="tabs" id="stScope"><button data-v="liga">Só a liga</button><button data-v="tudo">Tudo</button></div>
     <div class="tabs sm" id="stPer"><button data-v="semana">Esta semana</button><button data-v="mes">Este mês</button><button data-v="sempre">Sempre</button></div>
     <div id="stBody"></div>
@@ -558,9 +646,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120150126"></script>
-<script src="perguntas2.js?v=20261120150126"></script>
-<script src="perguntas3.js?v=20261120150126"></script>
+<script src="perguntas.js?v=20261120152524"></script>
+<script src="perguntas2.js?v=20261120152524"></script>
+<script src="perguntas3.js?v=20261120152524"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -570,7 +658,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120150126';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120152524';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1332,7 +1420,7 @@ function renderLiga() {
 const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
 const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
 const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', mercado:'Transferências', historia:'Premier League 2016-26', pl:'Premier League desta época'};
-let ST_TODOS = null, STAB = {scope:'liga', per:'semana'};
+let ST_TODOS = null, STAB = {scope:'liga', per:'semana', modo:'perg'};
 const tirosDe = () => S.shots.map(s => [s.q.cat, s.tier, s.tries.length]);
 async function statsGet() {
   if (!LIGA.db) return;
@@ -1351,7 +1439,7 @@ function statsJogos() {
   const out = [];
   for (const n of LIGA.jogadores) {
     for (const dia in (LG.dados?.[n] || {})) for (const g of Object.values(LG.dados[n][dia] || {})) if (g) out.push({...g, nome:n, dia, modo:'liga'});
-    if (STAB.scope === 'tudo') for (const g of Object.values(ST_TODOS?.[n] || {})) if (g) out.push({...g, nome:n});
+    if (STAB.scope === 'tudo') for (const g of Object.values(ST_TODOS?.[n] || {})) if (g && !['raj', 'quem', 'mm'].includes(g.modo)) out.push({...g, nome:n});   // os outros modos têm separador próprio
   }
   const hoje = lisDate(), wk = weekStart(hoje), mes = hoje.slice(0, 7);
   const f = {semana: d => weekStart(d) === wk, mes: d => d.slice(0, 7) === mes, sempre: () => true}[STAB.per];
@@ -1444,6 +1532,9 @@ function recordes(js) {
   return `<div class="sc"><div class="sc-h"><b>Recordes</b></div>${items.map(([ic, t, v, g]) => `<div class="rec-r"><span class="rec-i">${ic}</span><span class="rec-t">${t}<small><i style="background:${pcor(g.nome)}"></i>${esc(g.nome)} · ${dia(g.dia)}${g.modo !== 'liga' && STAB.scope === 'tudo' ? ' · ' + ({'7':'jogo rápido', fim:'sem fim', dia:'desafio do dia'}[g.modo] || g.modo) : ''}</small></span><b>${v}</b></div>`).join('')}</div>`;
 }
 function renderStats() {
+  document.querySelectorAll('#stModo button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.modo));
+  $('#stScope').hidden = STAB.modo !== 'perg';
+  if (STAB.modo !== 'perg' && typeof renderStatsModo === 'function') { document.querySelectorAll('#stPer button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.per)); return renderStatsModo(); }
   document.querySelectorAll('#stScope button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.scope));
   document.querySelectorAll('#stPer button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.per));
   const el = $('#stBody');
@@ -1602,6 +1693,7 @@ $('#rvDias').onclick = e => { const b = e.target.closest('button[data-d]'); if (
 $('#rvJogos').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b || b.disabled) return; RV.n = Number(b.dataset.n); renderRever(); };
 $('#stBack').onclick = () => { renderHome(); show('s-home'); };
 $('#stRefresh').onclick = async () => { await Promise.all([ligaGet(), statsGet()]); renderStats(); };
+$('#stModo').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.modo = b.dataset.v; renderStats(); if (STAB.modo === 'duelo' && typeof duGet === 'function') duGet().then(renderStats); };
 $('#stScope').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.scope = b.dataset.v; renderStats(); };
 $('#stPer').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.per = b.dataset.v; renderStats(); };
 $('#lgTabs').onclick = e => { const b = e.target.closest('button[data-t]'); if (!b) return; LTAB = b.dataset.t; renderLiga(); };
@@ -1644,6 +1736,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120150126"></script>
+<script src="modos.js?v=20261120152524"></script>
 </body>
 </html>
