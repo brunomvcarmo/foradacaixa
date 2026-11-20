@@ -111,6 +111,38 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tabs.scroll{overflow-x:auto;margin:0 -16px 10px;padding:0 16px 2px;scrollbar-width:none}
 .tabs.scroll::-webkit-scrollbar{display:none}
 .tabs.scroll button{flex:none;white-space:nowrap;padding:9px 13px}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:2px;padding:6px max(8px,calc(50% - 260px)) max(8px,env(safe-area-inset-bottom));background:rgba(255,250,240,.96);backdrop-filter:blur(8px);border-top:2px solid var(--dark)}
+.bnav[hidden]{display:none!important}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px 3px;border-radius:12px;font-size:11px;font-weight:700;color:var(--mute);transition:background .2s,color .2s}
+.bnav .bi{position:relative;font-size:21px;line-height:1.15;transition:transform .2s}
+.bnav .bi .mx-badge{position:absolute;top:-4px;right:-12px;font-size:10px;padding:1px 6px}
+.bnav button.on{color:var(--ink);background:var(--panel2)}
+.bnav button.on .bi{transform:translateY(-2px) scale(1.12)}
+body.has-nav .wrap{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+.hero svg#heroPitch{height:152px}
+.hero .ladder{top:8px;right:8px;gap:3px;font-size:10px}
+.hero .ladder span{padding:2px 7px 2px 5px}
+.atraso{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.atraso summary{list-style:none;display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 2px;font-size:15px}
+.atraso summary::-webkit-details-marker{display:none}
+.atraso summary em{margin-left:auto;font-style:normal;color:var(--acc);font-weight:700;font-size:14px}
+.atraso[open] summary em{visibility:hidden}
+.tbar{position:relative;height:8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin:0 0 8px}
+.tbar i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--acc);transition:width .2s linear}
+.tbar.low i{background:var(--red)}
+#s-game .pitch{transition:max-height .35s ease}
+#s-game .pitch{max-height:400px}
+#s-game.typing .pitch{max-height:92px}
+#s-game.typing .qcard{padding-bottom:10px}
+.eu-me{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--dark);box-shadow:var(--shadow);border-radius:var(--r);padding:14px 16px;margin-bottom:6px}
+.eu-me .av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:22px;color:#fffaf0;flex:none}
+.eu-me b{font-family:var(--display);font-weight:400;font-size:22px;display:block}
+.eu-me small{color:var(--mute)}
+.eu-stats{margin-top:0}
+.eu-recs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 14px}
+.eu-rec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.eu-rec span{font-size:12.5px;color:var(--mute)}
+.eu-rec b{font-family:var(--display);font-weight:400;font-size:22px}
 .catpick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 12px;border-radius:14px;background:var(--panel);border:2px solid var(--acc);color:var(--ink);box-shadow:0 2px 0 var(--line)}
 .catpick:active{transform:scale(.99)}
 .cp-ic{font-size:24px;flex:none}
@@ -418,7 +450,7 @@ dialog .tiers b{width:52px}
     <p class="tag">O óbvio não marca. Responde certo, mas <b>com a resposta que mais ninguém se lembra</b>: quanto mais rara, mais longe o remate e mais pontos.</p>
 
     <div class="hero" aria-hidden="true">
-      <svg id="heroPitch" viewBox="0 0 360 230"></svg>
+      <svg id="heroPitch" viewBox="0 0 360 230" preserveAspectRatio="xMidYMin slice"></svg>
       <div class="ladder">
         <span><i style="background:var(--t6)"></i>100 m · 80</span>
         <span><i style="background:var(--t5)"></i>50 m · 50</span>
@@ -444,15 +476,6 @@ dialog .tiers b{width:52px}
       </button>
     </div>
 
-    <div class="stats">
-      <div class="stat"><b id="st-jogos">0</b><span>jogos</span></div>
-      <div class="stat"><b id="st-best">0</b><span>recorde (7)</span></div>
-      <div class="stat"><b id="st-fim">0</b><span>recorde sem fim</span></div>
-      <div class="stat"><b id="st-golacos">0</b><span>do meio-campo</span></div>
-    </div>
-    <p class="foot"><button class="linkbtn" id="howBtn">Como se joga</button></p>
-    <p class="foot" id="dataFoot"></p>
-    <p class="foot" id="verFoot" style="opacity:.6;margin-top:4px"></p>
   </div>
 
   <!-- ===================== ESCOLHER O MODO ===================== -->
@@ -529,6 +552,7 @@ dialog .tiers b{width:52px}
       <div class="qinfo" id="qinfo"></div>
     </div>
 
+    <div class="tbar" id="tbar"><i id="tbarI"></i></div>
     <div class="answer" id="answer">
       <input id="resp" type="text" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Escreve o nome de um jogador…" aria-label="Resposta">
       <ul class="sug" id="sug" role="listbox"></ul>
@@ -570,6 +594,23 @@ dialog .tiers b{width:52px}
     <div id="rvBody"></div>
   </div>
 
+  <!-- ===================== EU ===================== -->
+  <div id="s-eu" class="screen">
+    <div class="lg-head"><button class="iconbtn" id="euBack" aria-label="Voltar">‹</button><h2>👤 <span id="euNome">Eu</span></h2></div>
+    <div class="eu-me" id="euMe"></div>
+    <div class="du-sec">Os teus recordes</div>
+    <div class="stats eu-stats">
+      <div class="stat"><b id="st-jogos">0</b><span>jogos</span></div>
+      <div class="stat"><b id="st-best">0</b><span>recorde (7)</span></div>
+      <div class="stat"><b id="st-fim">0</b><span>recorde sem fim</span></div>
+      <div class="stat"><b id="st-golacos">0</b><span>do meio-campo</span></div>
+    </div>
+    <div class="eu-recs" id="euRecs"></div>
+    <p class="foot"><button class="linkbtn" id="howBtn">Como se joga</button></p>
+    <p class="foot" id="dataFoot"></p>
+    <p class="foot" id="verFoot" style="opacity:.6;margin-top:4px"></p>
+  </div>
+
   <!-- ===================== FIM ===================== -->
   <div id="s-end" class="screen">
     <div class="endhead">
@@ -590,6 +631,13 @@ dialog .tiers b{width:52px}
   </div>
 </div>
 
+<nav class="bnav" id="bnav" aria-label="Navegação">
+  <button data-go="jogar"><span class="bi">⚽</span><span>Jogar</span></button>
+  <button data-go="liga"><span class="bi">🏆</span><span>Liga</span></button>
+  <button data-go="duelo"><span class="bi">⚔️<span class="mx-badge du-b" hidden></span></span><span>Duelos</span></button>
+  <button data-go="stats"><span class="bi">📊</span><span>Estatísticas</span></button>
+  <button data-go="eu"><span class="bi">👤</span><span>Eu</span></button>
+</nav>
 <dialog id="who">
   <h2>Quem és?</h2>
   <p style="color:var(--mute);margin:0">Fica guardado neste telemóvel. Podes trocar no início, em "trocar".</p>
@@ -646,9 +694,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120152931"></script>
-<script src="perguntas2.js?v=20261120152931"></script>
-<script src="perguntas3.js?v=20261120152931"></script>
+<script src="perguntas.js?v=20261120155626"></script>
+<script src="perguntas2.js?v=20261120155626"></script>
+<script src="perguntas3.js?v=20261120155626"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -658,7 +706,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120152931';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120155626';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -958,7 +1006,7 @@ function confetti(n, colors) { const c = $('#confetti'); c.innerHTML = ''; for (
 // Estado do jogo
 // ======================================================================
 let S = null, timerId = null, sugList = [], sugSel = 0, busy = false;
-function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0, 0); if (id !== 's-game') recarregarSePuder(); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0, 0); if (typeof navUpdate === 'function') navUpdate(id); if (id !== 's-game') recarregarSePuder(); }
 
 function startGame(mode, seed, cat, qsPre) {
   cat = catNorm(cat || (mode === 'dia' ? 'tudo' : ST.cat));
@@ -1002,8 +1050,9 @@ function startTimer() {
   clearInterval(timerId); const fg = $('#tfg'), tm = $('#timer'); let left = QTIME; S.tEnd = Date.now() + QTIME * 1000;
   fg.style.transition = 'none'; fg.style.strokeDashoffset = '0'; void fg.getBoundingClientRect();
   fg.style.transition = `stroke-dashoffset ${QTIME}s linear`; fg.style.strokeDashoffset = '113.1';
-  tm.classList.remove('low'); $('#tnum').textContent = left;
-  timerId = setInterval(() => { left = Math.max(0, Math.ceil((S.tEnd - Date.now()) / 1000)); $('#tnum').textContent = left; tm.classList.toggle('low', left <= 5); if (left <= 0) { clearInterval(timerId); answer(null, true); } }, 200);
+  tm.classList.remove('low'); $('#tnum').textContent = left; $('#tbarI').style.width = '100%'; $('#tbar').classList.remove('low'); $('#tbar').hidden = false;
+  timerId = setInterval(() => { const ms = Math.max(0, S.tEnd - Date.now()); left = Math.ceil(ms / 1000); $('#tnum').textContent = left;
+    $('#tbarI').style.width = (ms / (QTIME * 10)) + '%'; $('#tbar').classList.toggle('low', left <= 5); tm.classList.toggle('low', left <= 5); if (left <= 0) { clearInterval(timerId); answer(null, true); } }, 200);
 }
 // resposta errada: menos 5 segundos (o anel do relógio salta para a frente)
 const PENALTY = 0;   // segundos perdidos por resposta errada (0 = nenhum)
@@ -1060,7 +1109,7 @@ async function answer(p, timeout = false) {
     S.tries.push(p); p = null; timeout = true;   // sem tempo para mais: acaba a pergunta
   }
   S.answered = true; busy = true;
-  stopTimer(); hideSug(); $('#resp').blur(); $('#answer').hidden = true; $('#skip').hidden = true; $('#tryMsg').hidden = true;
+  stopTimer(); hideSug(); $('#resp').blur(); $('#s-game').classList.remove('typing'); $('#tbar').hidden = true; $('#answer').hidden = true; $('#skip').hidden = true; $('#tryMsg').hidden = true;
   const q = S.q, tier = p ? tierOf(q, p) : 0;
   const m = mult(); let pts = Math.round(TIERS[tier].pts * m), lifeBack = false;
   if (tier) { S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); }
@@ -1275,10 +1324,9 @@ function renderLigaCard() {
     else if (falta > 0) h += `<button class="btn" id="lgPlay">Jogo da liga ${feitos + 1} de ${LIGA.porDia} ›</button><p class="lg-sub">7 perguntas · as mesmas para os ${LIGA.jogadores.length} · conta mesmo que saias a meio</p>`;
     else h += `<p class="lg-done">✅ Já fizeste os ${LIGA.porDia} jogos de hoje. Amanhã há mais!</p>`;
     const atr = diasEmAtraso();
-    if (atr.length) h += `<div class="atraso"><b>📅 Jogos em atraso desta semana</b>${atr.map(d => `<button class="atr-b" data-d="${d}"><span>${labelDia(d)}</span><em>falta${LIGA.porDia - feitosDia(ME, d) > 1 ? 'm' : ''} ${LIGA.porDia - feitosDia(ME, d)}</em> ›</button>`).join('')}<p class="lg-sub">Contam para esse dia e têm as mesmas perguntas que os outros jogaram. Só os dias desta semana.</p></div>`;
+    if (atr.length) h += `<details class="atraso"><summary>📅 <b>${atr.length} dia${atr.length === 1 ? '' : 's'} com jogos em atraso</b><em>ver ›</em></summary>${atr.map(d => `<button class="atr-b" data-d="${d}"><span>${labelDia(d)}</span><em>falta${LIGA.porDia - feitosDia(ME, d) > 1 ? 'm' : ''} ${LIGA.porDia - feitosDia(ME, d)}</em> ›</button>`).join('')}<p class="lg-sub">Contam para esse dia e têm as mesmas perguntas que os outros jogaram. Só os dias desta semana.</p></details>`;
   }
   if (LG.dados && ME && diasRever().length) h += `<button class="st-btn" id="lgRv">📝 Rever perguntas: as tuas e as dos outros</button>`;
-  if (LG.dados) h += `<button class="st-btn" id="lgSt">📊 Estatísticas: compara-te com os outros</button>`;
   c.innerHTML = h;
   $('#lgSt') && ($('#lgSt').onclick = openStats);
   $('#lgRv') && ($('#lgRv').onclick = () => openRever());
@@ -1569,7 +1617,7 @@ function renderHome() {
 }
 function heroAnim() {
   const v = {W:360, H:230, Y0:66, Y1:230, D:57, K0:9, K1:18}; const svg = $('#heroPitch'); drawPitch(svg, v, {ball:false});
-  const pts = [[35, -10], [50, 8], [25, 14], [18, -6]];
+  const pts = [[25, -10], [18, 8], [25, 14], [11, -6]];   // de perto: o relvado do início está cortado em baixo
   const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); svg.appendChild(g);
   let i = 0;
   const loop = async () => {
@@ -1704,6 +1752,8 @@ $('#quit').onclick = () => { if (busy) return;
   clearInterval(timerId); if (S && S.shots.length && confirm('Terminar este jogo e ver o resultado?')) { endGame(); return; } renderHome(); show('s-home'); };
 $('#skip').onclick = () => { if (S && Date.now() - (S.ultimoErro || 0) < 700) return; answer(null); };   // proteção contra o "clique fantasma" do iPhone logo a seguir a um erro
 const inp = $('#resp');
+inp.addEventListener('focus', () => { if (S && !S.answered) $('#s-game').classList.add('typing'); });
+inp.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== inp) $('#s-game').classList.remove('typing'); }, 120));
 inp.addEventListener('input', () => { sugList = search(inp.value); sugSel = 0; renderSug(); });
 inp.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { sugSel = Math.min(sugList.length - 1, sugSel + 1); renderSug(); e.preventDefault(); }
@@ -1736,6 +1786,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120152931"></script>
+<script src="modos.js?v=20261120155626"></script>
 </body>
 </html>

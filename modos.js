@@ -453,7 +453,7 @@ function duRenderHome() {
   ban.hidden = !p.length;
   if (p.length) { $('#duBanTx').innerHTML = p.length === 1 ? `O <b>${esc(p[0].de)}</b> desafiou-te para um duelo!` : `Tens <b>${p.length} duelos</b> à tua espera!`; ban.onclick = () => p.length === 1 ? duJogar(p[0].id) : openDuelo(); }
 }
-async function duRefresh() { if (!ME || !LIGA.db) return; await duGet(); duRenderHome(); if ($('#s-duelo').classList.contains('on')) duRender(); }
+async function duRefresh() { if ($('#s-eu').classList.contains('on')) renderEu(); if (!ME || !LIGA.db) return; await duGet(); duRenderHome(); if ($('#s-duelo').classList.contains('on')) duRender(); if ($('#s-eu').classList.contains('on')) renderEu(); }
 function duRes(d, n) { const r = d.res?.[n]; return r ? r.pontos || 0 : null; }
 function duRender() {
   const el = $('#duBody');
@@ -597,6 +597,43 @@ function renderStatsDuelos() {
       return `<td style="${v > d ? 'background:#1e5a37;color:#fffaf0' : v < d ? 'background:#f3d6cf' : ''}">${v}–${d}${e ? `<small>${e} emp.</small>` : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>`;
   el.innerHTML = h;
 }
+
+// ======================================================================
+// BARRA DE NAVEGAÇÃO EM BAIXO (Jogar · Liga · Duelos · Estatísticas · Eu) e ecrã "Eu"
+// ======================================================================
+const NAV_DE = {'s-home':'jogar', 's-modos':'jogar', 's-liga':'liga', 's-rever':'liga', 's-duelo':'duelo', 's-stats':'stats', 's-eu':'eu'};
+function navUpdate(id) {
+  const tab = NAV_DE[id], nav = $('#bnav');
+  nav.hidden = !tab; document.body.classList.toggle('has-nav', !!tab);
+  nav.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.go === tab));
+}
+function renderEu() {
+  renderHome();
+  $('#euNome').textContent = ME || 'Eu';
+  const ini = ME ? ME.slice(0, 2).toUpperCase() : '?', cor = ME && typeof pcor === 'function' ? pcor(ME) : 'var(--mute)';
+  const cat = catNorm(ST.cat);
+  $('#euMe').innerHTML = `<span class="av" style="background:${cor}">${esc(ini)}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
+  $('#euTroca').onclick = askWho;
+  const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best));
+  const dl = ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
+  const v = dl.filter(d => duRes(d, ME) > duRes(d, duOutro(d))).length, dr = dl.filter(d => duRes(d, ME) < duRes(d, duOutro(d))).length;
+  const hoje = ST.dia?.[today()];
+  const it = [['⚡ Rajada', ST.bestRaj || 0, 'recorde'], ['🕵️ Quem é?', ST.bestQuem || 0, 'recorde'], ['📈 Mais ou menos', mm, 'melhor série'],
+    ['⚔️ Duelos', dl.length ? `${v}–${dr}` : '—', 'vitórias–derrotas'], ['📅 Desafio do dia', hoje ?? '—', 'hoje'], ['🗂️ Perguntas', cat === 'tudo' ? 'Todas' : cat.split(',').length + ' tipos', 'tipo escolhido']];
+  $('#euRecs').innerHTML = it.map(([t, val, sub]) => `<div class="eu-rec"><span>${t}</span><b>${esc(String(val))}</b><span>${sub}</span></div>`).join('');
+}
+function openEu() { renderEu(); show('s-eu'); duGet().then(() => { if ($('#s-eu').classList.contains('on')) renderEu(); }); }
+$('#bnav').onclick = e => {
+  const b = e.target.closest('button[data-go]'); if (!b) return;
+  const go = b.dataset.go;
+  if (go === 'jogar') { renderHome(); show('s-home'); }
+  else if (go === 'liga') openLiga();
+  else if (go === 'duelo') { if (!ME) { askWho(); return; } openDuelo(); }
+  else if (go === 'stats') openStats();
+  else openEu();
+};
+$('#euBack').onclick = mxSair;
+navUpdate((document.querySelector('.screen.on') || {}).id);
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;
