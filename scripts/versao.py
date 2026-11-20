@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 v = time.strftime('%Y%m%d%H%M%S', time.gmtime())
 p = ROOT / 'index.html'; s = p.read_text(encoding='utf-8')
 s = re.sub(r"const APP_VER = '[^']*';", f"const APP_VER = '{v}';", s, count=1)
-s = re.sub(r'(perguntas\d?\.js)\?v=[^"]*"', rf'\1?v={v}"', s)
+s = re.sub(r'((?:perguntas\d?|modos)\.js)\?v=[^"]*"', rf'\1?v={v}"', s)
 p.write_text(s, encoding='utf-8', newline='\n')
 (ROOT / 'versao.txt').write_text(v + '\n', encoding='utf-8', newline='\n')
 print('versão', v)

@@ -530,6 +530,7 @@ dialog .tiers b{width:52px}
     <div><i style="background:var(--t6)"></i><b>100 m</b>De baliza a baliza · 80 (só em perguntas com 12 ou mais respostas: as mais raras de todas)</div>
   </div>
   <p style="color:var(--mute);font-size:14px;margin:12px 0 0"><b style="color:var(--ink)">Sem fim:</b> 3 vidas; cada falhanço tira uma. A cada 3 golos seguidos o multiplicador sobe (×1,5, ×2…). Um golo do meio-campo devolve uma vida.</p>
+  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">Mais modos:</b> ⚡ <b>Rajada</b> — uma pergunta e 60 s para dizer o máximo de respostas (cada uma vale a distância dela). 🕵️ <b>Quem é?</b> — os clubes de um jogador aparecem um a um; quanto menos pistas usares, mais longe o remate. 📈 <b>Mais ou menos</b> — o de baixo custou (ou marcou) mais ou menos do que o de cima? O primeiro erro acaba a série. ⚔️ <b>Duelo</b> — desafias um amigo da liga, jogas 7 perguntas e ele recebe o desafio no início da app com as mesmas perguntas.</p>
   <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). Jogadores pelo mundo (que portugueses, brasileiros… jogaram em cada liga e clube) vem dos dados do Transfermarkt das épocas 2019/20 a 2024/25, pela nacionalidade principal de cada jogador; as Transferências também (valores do Transfermarkt, só transferências definitivas de 10 milhões ou mais). As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
   <button class="btn" onclick="this.closest('dialog').close()">Bora</button>
 </dialog>
@@ -557,9 +558,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120131734"></script>
-<script src="perguntas2.js?v=20261120131734"></script>
-<script src="perguntas3.js?v=20261120131734"></script>
+<script src="perguntas.js?v=20261120150126"></script>
+<script src="perguntas2.js?v=20261120150126"></script>
+<script src="perguntas3.js?v=20261120150126"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -569,7 +570,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120131734';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120150126';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -979,6 +980,7 @@ async function answer(p, timeout = false) {
   if (S.mode === 'fim' && tier >= 5 && S.lives < 3) { S.lives++; lifeBack = true; }
   S.score += pts;
   if (S.liga) ligaSync(false);
+  if (S.duelo && typeof dueloSync === 'function') dueloSync(false);   // duelos (modos.js)
   S.shots.push({q, p, tier, pts, timeout, tries:S.tries.slice()});
   if (tier >= 5) { ST.golacos++; saveStats(ST); }
   $('#pitchBox').scrollIntoView({behavior:'smooth', block:'center'});
@@ -1053,6 +1055,7 @@ function endGame() {
   $('#endRever').hidden = !S.liga; if (S.liga) { const {dia, n} = S.liga; $('#endRever').onclick = () => openRever(dia, n); }
   $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex + (s.tier === 6 ? ';color:#fffaf0' : '') : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}${S.liga ? amigosLinha(s.q.key) : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
+  if (S.duelo && typeof dueloFim === 'function') dueloFim();
 }
 function confettiEnd() { const c = document.createElement('div'); c.className = 'confetti'; c.style.position = 'fixed'; document.body.appendChild(c); for (let i = 0; i < 60; i++) { const e = document.createElement('i'); const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 240; e.style.cssText = `top:20%;background:${['#1e5a37','#d6452f','#e8b33a','#6fa86a','#e07a34'][i%5]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d + 160}px;--rot:${Math.random()*720}deg;animation-duration:1.8s`; c.appendChild(e); } setTimeout(() => c.remove(), 2200); }
 
@@ -1094,7 +1097,7 @@ const ME_KEY = 'fora-da-caixa-eu';
 let ME = null, LG = {dados:null, erro:null, aCarregar:false}, LTAB = 'hoje';
 try { ME = localStorage.getItem(ME_KEY); } catch (e) {}
 if (!LIGA.jogadores.includes(ME)) ME = null;
-function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {} renderMe(); renderLigaCard(); }
+function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {} renderMe(); renderLigaCard(); if (typeof duRefresh === 'function') duRefresh(); }
 // dias e semanas pela hora de Lisboa (para toda a gente mudar de dia à mesma hora)
 function lisDate(d = new Date()) { return new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit'}).format(d); }
 function weekStart(ds) { const d = new Date(ds + 'T12:00:00Z'); const wd = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - wd); return d.toISOString().slice(0, 10); }
@@ -1539,7 +1542,7 @@ $('#catList').addEventListener('change', () => { $('#catMsg').hidden = catMarcad
 $('#catAll').onclick = () => { const ins = [...document.querySelectorAll('#catList input')], todas = ins.every(i => i.checked); ins.forEach(i => i.checked = !todas); $('#catMsg').hidden = !todas; catBtnTodos(); };
 $('#catOk').onclick = () => { const m = catMarcadas(); if (!m.length) { $('#catMsg').hidden = false; return; } ST.cat = catNorm(m.join(',')); saveStats(ST); $('#catDlg').close(); renderHome(); toast(ST.cat === 'tudo' ? 'Perguntas: todas' : 'Perguntas: ' + catNome(ST.cat)); };
 $('#howBtn').onclick = () => $('#how').showModal();
-$('#again').onclick = () => { if (S.liga) { if (S.liga.n < LIGA.porDia) startLiga(S.liga.dia); else openLiga(); return; } startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat); };
+$('#again').onclick = () => { if (S.duelo && typeof openDuelo === 'function') { openDuelo(); return; } if (S.liga) { if (S.liga.n < LIGA.porDia) startLiga(S.liga.dia); else openLiga(); return; } startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat); };
 $('#lgBack').onclick = () => { renderHome(); show('s-home'); };
 $('#lgRefresh').onclick = refreshLiga;
 $('#lgStats').onclick = openStats;
@@ -1641,5 +1644,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
+<script src="modos.js?v=20261120150126"></script>
 </body>
 </html>
