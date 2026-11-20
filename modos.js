@@ -656,12 +656,9 @@ function navUpdate(id) {
 function renderEu() {
   renderHome();
   $('#euNome').textContent = ME || 'Eu';
-  const vEu = EMB_V[ME] || 1;
   const cat = catNorm(ST.cat);
   $('#euMe').innerHTML = `<span class="eu-emb">${ME ? emblemaSVG(ME) : ''}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
   $('#euTroca').onclick = askWho;
-  $('#euEmb').innerHTML = ME ? `<div class="du-sec">O teu emblema</div><div class="eu-ev">${[1, 2].map(v => `<button class="eu-v ${v === vEu ? 'on' : ''}" data-v="${v}"><img src="${emblemaURL(ME, v)}" alt=""><span>${v === 1 ? 'Quase igual' : 'Avacalhado'}</span></button>`).join('')}</div>` : '';
-  $('#euEmb').querySelectorAll('[data-v]').forEach(b => b.onclick = () => emblemaEscolhe(Number(b.dataset.v)));
   const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best));
   const dl = ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
   const v = dl.filter(d => duRes(d, ME) > duRes(d, duOutro(d))).length, dr = dl.filter(d => duRes(d, ME) < duRes(d, duOutro(d))).length;
@@ -683,21 +680,8 @@ $('#bnav').onclick = e => {
 $('#euBack').onclick = mxSair;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
-// ---------- emblemas: a versão de cada um (1 ou 2) fica no Firebase, em ligas/<id>/perfil/<nome>/emb ----------
-async function perfilGet() {
-  if (!LIGA.db) return;
-  try { const r = await fetch(ligaUrl('perfil'), {cache:'no-store'}); if (!r.ok) return; const p = (await r.json()) || {}; let mudou = false;
-    for (const n in p) { const v = Number(p[n]?.emb) || 1; if (EMB_V[n] !== v) { EMB_V[n] = v; mudou = true; } }
-    if (mudou) { renderLigaCard(); if ($('#s-eu').classList.contains('on')) renderEu(); if ($('#s-liga').classList.contains('on')) renderLiga(); if ($('#s-duelo').classList.contains('on')) duRender(); }
-  } catch (e) {}
-}
-async function emblemaEscolhe(v) {
-  if (!ME) return; EMB_V[ME] = v; renderEu(); renderLigaCard();
-  try { await ligaPut(`perfil/${ME}/emb`, v); toast('Emblema guardado: os outros também o veem'); } catch (e) { toast('Sem ligação: o emblema não ficou guardado'); }
-}
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button>');
 endGame = (orig => function () { $('#endDuVer').hidden = true; return orig.apply(this, arguments); })(endGame);
-perfilGet(); setInterval(() => { if (document.visibilityState === 'visible') perfilGet(); }, 60000);
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;

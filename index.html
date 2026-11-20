@@ -603,7 +603,6 @@ dialog .tiers b{width:52px}
   <div id="s-eu" class="screen">
     <div class="lg-head"><button class="iconbtn" id="euBack" aria-label="Voltar">‹</button><h2>👤 <span id="euNome">Eu</span></h2></div>
     <div class="eu-me" id="euMe"></div>
-    <div id="euEmb"></div>
     <div class="du-sec">Os teus recordes</div>
     <div class="stats eu-stats">
       <div class="stat"><b id="st-jogos">0</b><span>jogos</span></div>
@@ -700,10 +699,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120164454"></script>
-<script src="perguntas2.js?v=20261120164454"></script>
-<script src="perguntas3.js?v=20261120164454"></script>
-<script src="emblemas.js?v=20261120164454"></script>
+<script src="perguntas.js?v=20261120165005"></script>
+<script src="perguntas2.js?v=20261120165005"></script>
+<script src="perguntas3.js?v=20261120165005"></script>
+<script src="emblemas.js?v=20261120165005"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -713,7 +712,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120164454';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120165005';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1793,6 +1792,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120164454"></script>
+<script src="modos.js?v=20261120165005"></script>
 </body>
 </html>

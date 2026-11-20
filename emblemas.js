@@ -1,7 +1,7 @@
 // =====================================================================================
 // Fora da Caixa — emblemas dos amigos da liga (paródias dos símbolos dos clubes que cada um apoia).
-// Carregado ANTES do script principal. Expõe: emblemaSVG(nome, v), emblemaURL(nome, v), emb(nome, px) e EMB_V
-// (versão escolhida por cada um: 1 = quase igual, 2 = avacalhado; guardada no Firebase em ligas/<id>/perfil/<nome>/emb).
+// Carregado ANTES do script principal. Expõe: emblemaSVG(nome), emblemaURL(nome), emb(nome, px).
+// Todos usam a versão AVACALHADA (2) — o utilizador não quer escolha. A versão 1 (quase igual) fica no código, sem uso.
 // Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United. Outros nomes: círculo com as iniciais.
 // =====================================================================================
 (function () {
@@ -271,9 +271,9 @@ function generico(nome) {
   const ini = String(nome || '?').slice(0, 2).toUpperCase();
   return `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="125" r="94" fill="#1e5a37" stroke="#1d2b22" stroke-width="6"/><text x="100" y="152" text-anchor="middle" font-family="${'Alfa Slab One, Georgia, serif'}" font-weight="700" font-size="80" fill="#f3ead6">${ini}</text></svg>`;
 }
-window.EMB_V = window.EMB_V || {};
-window.emblemaSVG = (nome, v) => { const f = CLUBE_DE[nome]; return f ? f(nome, v || EMB_V[nome] || 1) : generico(nome); };
+const VERSAO = 2;   // avacalhado para todos
+window.emblemaSVG = (nome, v) => { const f = CLUBE_DE[nome]; return f ? f(nome, v || VERSAO) : generico(nome); };
 const cache = {};
-window.emblemaURL = (nome, v) => { v = v || EMB_V[nome] || 1; const k = nome + '|' + v; return cache[k] || (cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(emblemaSVG(nome, v))); };
+window.emblemaURL = (nome, v) => { v = v || VERSAO; const k = nome + '|' + v; return cache[k] || (cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(emblemaSVG(nome, v))); };
 window.emb = (nome, px = 22, cls = '') => `<img class="emb ${cls}" src="${emblemaURL(nome)}" width="${px}" height="${Math.round(px * 1.25)}" alt="" decoding="async">`;
 })();
