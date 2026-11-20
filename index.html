@@ -143,6 +143,11 @@ body.has-nav .wrap{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 .eu-rec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .eu-rec span{font-size:12.5px;color:var(--mute)}
 .eu-rec b{font-family:var(--display);font-weight:400;font-size:22px}
+.emb{display:inline-block;vertical-align:middle;margin-right:6px;flex:none;object-fit:contain}
+.sb-n .emb{margin-right:5px}
+.ct th .emb{margin:0 0 2px}
+.who-b{display:flex;flex-direction:column;align-items:center;gap:4px}
+.who-b .emb{margin:0}
 .catpick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 12px;border-radius:14px;background:var(--panel);border:2px solid var(--acc);color:var(--ink);box-shadow:0 2px 0 var(--line)}
 .catpick:active{transform:scale(.99)}
 .cp-ic{font-size:24px;flex:none}
@@ -598,6 +603,7 @@ dialog .tiers b{width:52px}
   <div id="s-eu" class="screen">
     <div class="lg-head"><button class="iconbtn" id="euBack" aria-label="Voltar">‹</button><h2>👤 <span id="euNome">Eu</span></h2></div>
     <div class="eu-me" id="euMe"></div>
+    <div id="euEmb"></div>
     <div class="du-sec">Os teus recordes</div>
     <div class="stats eu-stats">
       <div class="stat"><b id="st-jogos">0</b><span>jogos</span></div>
@@ -694,9 +700,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120155626"></script>
-<script src="perguntas2.js?v=20261120155626"></script>
-<script src="perguntas3.js?v=20261120155626"></script>
+<script src="perguntas.js?v=20261120164454"></script>
+<script src="perguntas2.js?v=20261120164454"></script>
+<script src="perguntas3.js?v=20261120164454"></script>
+<script src="emblemas.js?v=20261120164454"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -706,7 +713,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120155626';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120164454';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1296,7 +1303,7 @@ function feitosHoje(nome) { const d = LG.dados?.[nome]?.[lisDate()]; return d ? 
 // ---------- quem és ----------
 function renderMe() { const el = $('#meBar'); if (!el) return; el.hidden = !ME; el.innerHTML = ME ? `És o <b>${esc(ME)}</b> · <button class="linkbtn" id="meSwap">trocar</button>` : ''; const b = $('#meSwap'); if (b) b.onclick = askWho; }
 function askWho() {
-  const d = $('#who'); $('#whoBtns').innerHTML = LIGA.jogadores.map(n => `<button class="who-b ${n === ME ? 'on' : ''}" data-n="${esc(n)}">${esc(n)}</button>`).join('');
+  const d = $('#who'); $('#whoBtns').innerHTML = LIGA.jogadores.map(n => `<button class="who-b ${n === ME ? 'on' : ''}" data-n="${esc(n)}">${emb(n, 40)}<span>${esc(n)}</span></button>`).join('');
   $('#whoBtns').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b) return; setMe(b.dataset.n); d.close(); toast(`Olá, ${b.dataset.n}!`); };
   if (!d.open) d.showModal();
 }
@@ -1319,7 +1326,7 @@ function renderLigaCard() {
     const camp = semanasFechadas().at(-1);
     if (camp && camp.ws === weekStart(new Date(new Date(hoje + 'T12:00:00Z').getTime() - 7 * 864e5).toISOString().slice(0, 10)))
       h += `<p class="lg-campeao">🏆 Campeão da semana passada: <b>${camp.vencedores.map(esc).join(' e ')}</b> (${camp.pts} pontos)</p>`;
-    h += `<div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${esc(o.nome)}</b><span class="dots" title="jogos de hoje">${dots(o.nome)}</span><em>${o.pts}</em></div>`).join('')}</div><p class="lg-sub">Pontos desta semana · bolinhas = jogos de hoje</p>`;
+    h += `<div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${emb(o.nome, 22)}${esc(o.nome)}</b><span class="dots" title="jogos de hoje">${dots(o.nome)}</span><em>${o.pts}</em></div>`).join('')}</div><p class="lg-sub">Pontos desta semana · bolinhas = jogos de hoje</p>`;
     if (!ME) h += `<button class="btn" id="lgWho">Escolher quem és</button>`;
     else if (falta > 0) h += `<button class="btn" id="lgPlay">Jogo da liga ${feitos + 1} de ${LIGA.porDia} ›</button><p class="lg-sub">7 perguntas · as mesmas para os ${LIGA.jogadores.length} · conta mesmo que saias a meio</p>`;
     else h += `<p class="lg-done">✅ Já fizeste os ${LIGA.porDia} jogos de hoje. Amanhã há mais!</p>`;
@@ -1388,7 +1395,7 @@ function renderEndLiga() {
   el.hidden = false;
   el.innerHTML = `<div class="lg-top"><b>🏆 Esta semana</b><button class="linkbtn" id="endLgVer">Classificação ›</button></div>
     <p class="lg-pos">Estás em <b>${pos}.º lugar</b>${pos > 1 ? `, a ${tab[pos - 2].pts - tab[pos - 1].pts} pontos do ${esc(tab[pos - 2].nome)}` : tab[1] ? `, com ${tab[0].pts - tab[1].pts} pontos de avanço` : ''}</p>
-    <div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${esc(o.nome)}</b><span class="dots">${Array.from({length: LIGA.porDia}, (_, k) => `<i class="${k < feitosHoje(o.nome) ? 'on' : ''}"></i>`).join('')}</span><em>${o.pts}</em></div>`).join('')}</div>`;
+    <div class="lg-mini">${tab.map((o, i) => `<div class="${o.nome === ME ? 'me' : ''}"><span>${i + 1}.</span><b>${emb(o.nome, 22)}${esc(o.nome)}</b><span class="dots">${Array.from({length: LIGA.porDia}, (_, k) => `<i class="${k < feitosHoje(o.nome) ? 'on' : ''}"></i>`).join('')}</span><em>${o.pts}</em></div>`).join('')}</div>`;
   $('#endLgVer').onclick = openLiga;
 }
 // atualiza sozinha: a cada 15 s com o início ou a classificação abertos, e ao voltar à app
@@ -1410,8 +1417,8 @@ function amigosDados(key) {
 function amigosHTML(key) {
   const a = amigosDados(key).filter(x => x.estado !== 'sem'); if (!a.length) return '';
   return `<div class="amigos"><h4>E os outros?</h4>${a.map(x => x.estado === 'ok'
-    ? `<div class="amg"><i style="background:${pcor(x.n)}"></i><b>${esc(x.n)}</b><span>${x.resp ? esc(x.resp) : 'passou / sem tempo'}</span><em style="background:${TIERS[x.tier].hex}${x.tier === 6 ? ';color:#fffaf0' : ''}">${x.tier ? TIERS[x.tier].m + ' m' : '✕'}</em></div>`
-    : `<div class="amg"><i style="background:${pcor(x.n)}"></i><b>${esc(x.n)}</b><span>ainda não jogou este jogo</span></div>`).join('')}</div>`;
+    ? `<div class="amg">${emb(x.n, 18)}<b>${esc(x.n)}</b><span>${x.resp ? esc(x.resp) : 'passou / sem tempo'}</span><em style="background:${TIERS[x.tier].hex}${x.tier === 6 ? ';color:#fffaf0' : ''}">${x.tier ? TIERS[x.tier].m + ' m' : '✕'}</em></div>`
+    : `<div class="amg">${emb(x.n, 18)}<b>${esc(x.n)}</b><span>ainda não jogou este jogo</span></div>`).join('')}</div>`;
 }
 function amigosLinha(key) {
   const a = amigosDados(key).filter(x => x.estado === 'ok'); if (!a.length) return '';
@@ -1431,7 +1438,7 @@ function renderTrofeus() {
   const sem = semanasFechadas(), cont = Object.fromEntries(LIGA.jogadores.map(n => [n, 0]));
   sem.forEach(s => s.vencedores.forEach(n => cont[n]++));
   const lab = ws => { const a = new Date(ws + 'T12:00:00Z'), b = new Date(a.getTime() + 6 * 864e5); return `${a.getUTCDate()}–${b.toLocaleDateString('pt-PT', {day:'numeric', month:'short'})}`; };
-  let h = `<h3 class="lg-h">Quadro de honra</h3><div class="trofeus">${Object.entries(cont).sort((a, b) => b[1] - a[1]).map(([n, c]) => `<div class="tr-q"><i style="width:10px;height:10px;border-radius:50%;background:${pcor(n)}"></i><b>${esc(n)}</b><span class="cups">${'🏆'.repeat(Math.min(c, 8))}</span><em>${c}</em></div>`).join('')}</div>`;
+  let h = `<h3 class="lg-h">Quadro de honra</h3><div class="trofeus">${Object.entries(cont).sort((a, b) => b[1] - a[1]).map(([n, c]) => `<div class="tr-q">${emb(n, 26)}<b>${esc(n)}</b><span class="cups">${'🏆'.repeat(Math.min(c, 8))}</span><em>${c}</em></div>`).join('')}</div>`;
   h += `<h3 class="lg-h">Campeões de cada semana</h3>`;
   h += sem.length ? sem.slice().reverse().map(s => `<div class="tr-w"><span>${lab(s.ws)}</span><b>🏆 ${s.vencedores.map(esc).join(' e ')}</b>${s.pts} pts</div>`).join('')
                   : '<p class="lg-note">Ainda nenhuma semana acabou. O primeiro campeão fica decidido no domingo à meia-noite (hora de Lisboa).</p>';
@@ -1450,7 +1457,7 @@ function renderLiga() {
   else {
     h = `<div class="lg-table">${rows.map((o, i) => `<div class="lg-row ${o.nome === ME ? 'me' : ''}" style="animation-delay:${i * 70}ms">
       <span class="pos">${['🥇','🥈','🥉'][i] && o.pts ? ['🥇','🥈','🥉'][i] : i + 1}</span>
-      <span class="nm"><b>${esc(o.nome)}</b><small>${o.jogos} ${o.jogos === 1 ? 'jogo' : 'jogos'} · melhor ${o.melhor} · ${o.golacos} de 50 m ou mais</small></span>
+      <span class="nm"><b>${emb(o.nome, 28)}${esc(o.nome)}</b><small>${o.jogos} ${o.jogos === 1 ? 'jogo' : 'jogos'} · melhor ${o.melhor} · ${o.golacos} de 50 m ou mais</small></span>
       <span class="pts">${o.pts}</span></div>`).join('')}</div>`;
     const days = {}; for (const n of LIGA.jogadores) for (const d in (LG.dados[n] || {})) if (filtros[LTAB](d)) days[d] = 1;
     const ds = Object.keys(days).sort().reverse().slice(0, LTAB === 'total' ? 14 : 7);
@@ -1519,7 +1526,7 @@ function barCard(titulo, sub, rows, key, fmt, menosMelhor) {
   return `<div class="sc"><div class="sc-h"><b>${titulo}</b>${sub ? `<span>${sub}</span>` : ''}</div>${ord.map(r => {
     const v = r[key], w = v == null ? 0 : Math.max(2, 100 * v / max);
     const lider = v != null && v === best && vals.filter(x => x === best).length < vals.length ? ' 👑' : '';
-    return `<div class="sb" title="${esc(r.nome)}: ${fmt(v)}"><span class="sb-n"><i style="background:${pcor(r.nome)}"></i>${esc(r.nome)}${lider}</span><span class="sb-t"><span class="sb-f" style="width:${w}%;background:${pcor(r.nome)}"></span></span><span class="sb-v">${fmt(v)}</span></div>`;
+    return `<div class="sb" title="${esc(r.nome)}: ${fmt(v)}"><span class="sb-n">${emb(r.nome, 18)}${esc(r.nome)}${lider}</span><span class="sb-t"><span class="sb-f" style="width:${w}%;background:${pcor(r.nome)}"></span></span><span class="sb-v">${fmt(v)}</span></div>`;
   }).join('')}</div>`;
 }
 function catTable(rows) {
@@ -1528,7 +1535,7 @@ function catTable(rows) {
   const cell = k => { if (!k || !k.n) return '<td class="ct-e">—</td>'; const v = k.golos / k.n;
     const bg = `color-mix(in oklab, #1e5a37 ${Math.round(12 + v * 78)}%, #fbf6ea)`; return `<td style="background:${bg};color:${v > .55 ? '#fffaf0' : '#1d2b22'}" title="${k.golos} golos em ${k.n} perguntas">${Math.round(v * 100)}%<small>${k.n}</small></td>`; };
   return `<div class="sc"><div class="sc-h"><b>Golos por categoria</b><span>% de perguntas com golo · em baixo, quantas jogou</span></div>
-    <div class="ct-w"><table class="ct"><thead><tr><th></th>${rows.map(r => `<th><i style="background:${pcor(r.nome)}"></i>${esc(r.nome)}</th>`).join('')}</tr></thead>
+    <div class="ct-w"><table class="ct"><thead><tr><th></th>${rows.map(r => `<th>${emb(r.nome, 18)}<br>${esc(r.nome)}</th>`).join('')}</tr></thead>
     <tbody>${cats.map(c => `<tr><th>${CAT_NOME[c]}</th>${rows.map(r => cell(r.cat[c])).join('')}</tr>`).join('')}</tbody></table></div></div>`;
 }
 function evolucao(js) {
@@ -1577,7 +1584,7 @@ function recordes(js) {
   const c = top(js.filter(g => g.modo === 'fim'), 'serie'); if (c?.serie) items.push(['🔥', 'Maior série no Sem fim', `${c.serie} seguidos`, c]);
   const pg = sete.filter(g => g.perguntas >= 7).map(g => ({...g, ac:g.golos / g.perguntas})); const d = top(pg, 'ac'); if (d) items.push(['🎯', 'Mais golos num jogo de 7', `${d.golos} de ${d.perguntas}`, d]);
   if (!items.length) return '';
-  return `<div class="sc"><div class="sc-h"><b>Recordes</b></div>${items.map(([ic, t, v, g]) => `<div class="rec-r"><span class="rec-i">${ic}</span><span class="rec-t">${t}<small><i style="background:${pcor(g.nome)}"></i>${esc(g.nome)} · ${dia(g.dia)}${g.modo !== 'liga' && STAB.scope === 'tudo' ? ' · ' + ({'7':'jogo rápido', fim:'sem fim', dia:'desafio do dia'}[g.modo] || g.modo) : ''}</small></span><b>${v}</b></div>`).join('')}</div>`;
+  return `<div class="sc"><div class="sc-h"><b>Recordes</b></div>${items.map(([ic, t, v, g]) => `<div class="rec-r"><span class="rec-i">${ic}</span><span class="rec-t">${t}<small>${emb(g.nome, 14)}${esc(g.nome)} · ${dia(g.dia)}${g.modo !== 'liga' && STAB.scope === 'tudo' ? ' · ' + ({'7':'jogo rápido', fim:'sem fim', dia:'desafio do dia'}[g.modo] || g.modo) : ''}</small></span><b>${v}</b></div>`).join('')}</div>`;
 }
 function renderStats() {
   document.querySelectorAll('#stModo button').forEach(b => b.classList.toggle('on', b.dataset.v === STAB.modo));
@@ -1786,6 +1793,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120155626"></script>
+<script src="modos.js?v=20261120164454"></script>
 </body>
 </html>
