@@ -1,6 +1,6 @@
 // =====================================================================================
 // Fora da Caixa — emblemas dos amigos da liga (paródias dos símbolos dos clubes que cada um apoia).
-// Carregado ANTES do script principal. Expõe: emblemaSVG(nome), emblemaURL(nome), emb(nome, px).
+// Carregado ANTES do script principal. Expõe: emblemaSVG(nome), emblemaURL(nome), emblemaPNG(nome, grande), emb(nome, px).
 // Todos usam a versão AVACALHADA (2) — o utilizador não quer escolha. A versão 1 (quase igual) fica no código, sem uso.
 // Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United. Outros nomes: círculo com as iniciais.
 // =====================================================================================
@@ -275,5 +275,9 @@ const VERSAO = 2;   // avacalhado para todos
 window.emblemaSVG = (nome, v) => { const f = CLUBE_DE[nome]; return f ? f(nome, v || VERSAO) : generico(nome); };
 const cache = {};
 window.emblemaURL = (nome, v) => { v = v || VERSAO; const k = nome + '|' + v; return cache[k] || (cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(emblemaSVG(nome, v))); };
-window.emb = (nome, px = 22, cls = '') => `<img class="emb ${cls}" src="${emblemaURL(nome)}" width="${px}" height="${Math.round(px * 1.25)}" alt="" decoding="async">`;
+// PNGs feitos por scripts/emblemas_png.py (o SVG com efeitos fica desfocado em tamanho pequeno no iPhone):
+// -p = mini (sem letras nem efeitos) para listas; -g = completo para tamanhos grandes
+const PNG = {Bruno:'bruno', Freitas:'freitas', CC:'cc', Viegas:'viegas'};
+window.emblemaPNG = (nome, grande) => PNG[nome] ? `icones/emblemas/${PNG[nome]}-${grande ? 'g' : 'p'}.png?v=${typeof APP_VER !== 'undefined' ? APP_VER : ''}` : emblemaURL(nome);
+window.emb = (nome, px = 22, cls = '') => `<img class="emb ${cls}" src="${emblemaPNG(nome, px > 32)}" width="${px}" height="${Math.round(px * 1.25)}" alt="" decoding="async">`;
 })();

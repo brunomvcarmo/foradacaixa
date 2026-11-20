@@ -89,7 +89,7 @@ const MX_CSS = `
 .du-x{font-size:28px}
 .du-q .sc-h span{display:block}
 .eu-emb{width:64px;height:80px;flex:none}
-.eu-emb svg{width:100%;height:100%;display:block}
+.eu-emb img{width:100%;height:100%;display:block}
 .eu-ev{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
 .eu-v{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:14px;background:var(--panel);border:2px solid var(--line);font-weight:700;font-size:14px}
 .eu-v img{width:84px;height:105px}
@@ -657,7 +657,7 @@ function renderEu() {
   renderHome();
   $('#euNome').textContent = ME || 'Eu';
   const cat = catNorm(ST.cat);
-  $('#euMe').innerHTML = `<span class="eu-emb">${ME ? emblemaSVG(ME) : ''}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
+  $('#euMe').innerHTML = `<span class="eu-emb">${ME ? `<img src="${emblemaPNG(ME, true)}" alt="">` : ''}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
   $('#euTroca').onclick = askWho;
   const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best));
   const dl = ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
