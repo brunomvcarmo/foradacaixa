@@ -7,7 +7,7 @@
   const B = window.BANCO, A = window.ALIASES, X = window.EXTRAS;
   const add = (id, cat, tipo, txt, sub, r) => B.push({id, cat, tipo, txt, sub, r});
 
-  // ---------- carreiras: clubes onde jogaram (equipa principal; empréstimos contam) ----------
+  // ---------- carreiras (categoria 'ligas' = Jogadores pelo mundo): clubes onde jogaram (equipa principal; empréstimos contam) ----------
   const CJ = [
     // portugueses que andaram por várias ligas
     ['nani', 'Nani', 'portugal', ['Manchester United', 'Sporting', 'Valência', 'Lazio', 'Fenerbahçe', 'Orlando City', 'Venezia', 'Melbourne Victory', 'Adana Demirspor', 'Estrela da Amadora'], 'Até 2024'],
@@ -66,7 +66,7 @@
     ['gullit', 'Ruud Gullit (como jogador)', 'mundo', ['Milan', 'Chelsea', 'PSV', 'Feyenoord', 'Sampdoria', 'Haarlem']],
     ['romario', 'Romário', 'mundo', ['Barcelona', 'PSV', 'Flamengo', 'Vasco da Gama', 'Valência', 'Fluminense', 'Al-Sadd', 'Miami FC', 'Adelaide United', 'América-RJ']],
   ];
-  CJ.forEach(([k, quem, cat, r, ate]) => add(`car3-${k}`, cat, 'clube', `Um clube em que ${quem} jogou`, `Na equipa principal (empréstimos contam)${ate ? ', ' + ate.toLowerCase() : ''}`, r));
+  CJ.forEach(([k, quem, cat, r, ate]) => add(`car3-${k}`, 'ligas', 'clube', `Um clube em que ${quem} jogou`, `Na equipa principal (empréstimos contam)${ate ? ', ' + ate.toLowerCase() : ''}`, r));
 
   // ---------- carreiras de treinadores (clubes, como treinador principal) ----------
   const CT = [
@@ -77,7 +77,7 @@
     ['capello', 'Fabio Capello', ['Milan', 'Real Madrid', 'Juventus', 'Roma', 'Jiangsu Suning'], ''],
     ['hiddink', 'Guus Hiddink', ['Real Madrid', 'Chelsea', 'PSV', 'Valência', 'Fenerbahçe', 'Betis', 'Anzhi'], ''],
   ];
-  CT.forEach(([k, quem, r, ate]) => add(`trein3-${k}`, k === 'marcosilva' || k === 'nuno' ? 'portugal' : 'mundo', 'clube', `Um clube que ${quem} treinou`, `Como treinador principal de clubes${ate ? ', ' + ate : ''}`, r));
+  CT.forEach(([k, quem, r, ate]) => add(`trein3-${k}`, 'ligas', 'clube', `Um clube que ${quem} treinou`, `Como treinador principal de clubes${ate ? ', ' + ate : ''}`, r));
 
   // ---------- treinadores campeões ----------
   add('camp-trein-pt', 'portugal', 'treinador', 'Um treinador que foi campeão nacional em Portugal desde 2000', 'Campeões da 1.ª Liga de 1999/00 a 2024/25',

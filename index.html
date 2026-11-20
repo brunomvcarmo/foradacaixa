@@ -63,6 +63,25 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .stat b{display:block;font-family:var(--display);font-size:22px;font-weight:800}
 .stat span{font-size:11px;color:var(--mute)}
 .foot{color:var(--mute);font-size:12px;text-align:center;margin-top:14px}
+.catpick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 12px;border-radius:14px;background:var(--panel);border:2px solid var(--acc);color:var(--ink);box-shadow:0 2px 0 var(--line)}
+.catpick:active{transform:scale(.99)}
+.cp-ic{font-size:24px;flex:none}
+.cp-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.cp-t small{font-size:12px;color:var(--mute);font-weight:600}
+.cp-t b{font-size:15px;line-height:1.25}
+.cp-go{flex:none;background:var(--acc);color:var(--acc-ink);font-weight:700;font-size:13px;padding:7px 11px;border-radius:99px}
+.cd-p{color:var(--mute);margin:0 0 12px;font-size:14px}
+.cd-list{display:grid;gap:8px;max-height:min(56vh,460px);overflow-y:auto}
+.cd-it{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg2);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cd-it input{position:absolute;opacity:0;pointer-events:none}
+.cd-box{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:15px;font-weight:800;color:transparent}
+.cd-it:has(input:checked){border-color:var(--acc);background:color-mix(in oklab,var(--acc) 9%,var(--panel))}
+.cd-it:has(input:checked) .cd-box{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.cd-it input:focus-visible+.cd-box{outline:2px solid var(--acc);outline-offset:2px}
+.cd-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cd-tx b{font-size:15px}
+.cd-tx small{font-size:12.5px;color:var(--mute)}
+.cd-msg{color:var(--bad);font-weight:600;font-size:14px;margin:10px 0 0}
 .cats{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px 2px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cats span{font-size:12px;color:var(--mute);align-self:center;flex:none;margin-right:2px}
@@ -363,10 +382,11 @@ dialog .tiers b{width:52px}
     </div>
 
     <div class="ligacard" id="ligaCard"></div>
-    <div class="cats" id="cats" role="group" aria-label="Perguntas">
-      <span>Perguntas:</span>
-      <button data-c="tudo">Tudo</button><button data-c="ligapt">Liga Portuguesa</button><button data-c="portugal">Portugal</button><button data-c="mundo">Mundo e história</button><button data-c="pl">Premier League desta época</button><button data-c="historia">Premier League 2016-2026</button>
-    </div>
+    <button class="catpick" id="catPick" type="button">
+      <span class="cp-ic">🗂️</span>
+      <span class="cp-t"><small>Tipo de perguntas · escolhe um ou vários</small><b id="catLbl">Tudo</b></span>
+      <span class="cp-go">Escolher</span>
+    </button>
     <div class="modes">
       <button class="mode friend" id="m-friend" hidden>
         <span class="ic">⚔️</span>
@@ -487,6 +507,13 @@ dialog .tiers b{width:52px}
   <p style="color:var(--mute);margin:0">Fica guardado neste telemóvel. Podes trocar no início, em "trocar".</p>
   <div class="who-grid" id="whoBtns"></div>
 </dialog>
+<dialog id="catDlg">
+  <h2>Tipo de perguntas</h2>
+  <p class="cd-p">Escolhe um ou mais tipos (toca para marcar). Vale para o <b>Jogo rápido</b> e o <b>Sem fim</b>; a Liga dos Amigos e o Desafio do dia usam sempre todas.</p>
+  <div class="cd-list" id="catList"></div>
+  <p class="cd-msg" id="catMsg" hidden>Escolhe pelo menos um tipo.</p>
+  <div class="row2"><button class="btn ghost" id="catAll" type="button">Marcar todos</button><button class="btn" id="catOk" type="button">Guardar</button></div>
+</dialog>
 <dialog id="how">
   <h2>Como se joga</h2>
   <ol>
@@ -503,7 +530,7 @@ dialog .tiers b{width:52px}
     <div><i style="background:var(--t6)"></i><b>100 m</b>De baliza a baliza · 80 (só em perguntas com 12 ou mais respostas: as mais raras de todas)</div>
   </div>
   <p style="color:var(--mute);font-size:14px;margin:12px 0 0"><b style="color:var(--ink)">Sem fim:</b> 3 vidas; cada falhanço tira uma. A cada 3 golos seguidos o multiplicador sobe (×1,5, ×2…). Um golo do meio-campo devolve uma vida.</p>
-  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
+  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). Jogadores pelo mundo (que portugueses, brasileiros… jogaram em cada liga e clube) vem dos dados do Transfermarkt das épocas 2019/20 a 2024/25, pela nacionalidade principal de cada jogador. As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
   <button class="btn" onclick="this.closest('dialog').close()">Bora</button>
 </dialog>
 <div class="toast" id="toast"></div>
@@ -530,9 +557,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120122632"></script>
-<script src="perguntas2.js?v=20261120122632"></script>
-<script src="perguntas3.js?v=20261120122632"></script>
+<script src="perguntas.js?v=20261120130226"></script>
+<script src="perguntas2.js?v=20261120130226"></script>
+<script src="perguntas3.js?v=20261120130226"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -542,7 +569,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120122632';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120130226';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -570,7 +597,20 @@ const TIERS = [
   {m:100, nome:'De baliza a baliza', pts:80, hex:'#6b3fa0', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', pl:'Premier League desta época', historia:'Premier League 2016-2026', liga:'Liga'};
+const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', pl:'Premier League desta época', historia:'Premier League 2016-2026', liga:'Liga'};
+// tipos de perguntas que se podem escolher (vários de uma vez: a categoria fica "ligapt,ligas", por exemplo)
+const CAT_PARTES = ['ligapt', 'portugal', 'mundo', 'ligas', 'historia', 'pl'];
+const CAT_INFO = {ligapt:'Resultados da 1.ª Liga desde 1994/95', portugal:'Seleção, clubes e jogadores portugueses', mundo:'Mundiais, Euros, campeões e taças',
+  ligas:'Jogadores de cada país em cada liga e clube, carreiras', historia:'Premier League de 2016/17 a 2025/26', pl:'Premier League desta época (muda todas as semanas)'};
+function catTem(c) { return c === 'pl' ? TPL.length > 0 : c === 'historia' ? HQ.length > 0 : c === 'ligapt' ? LQ.length > 0 : c === 'ligas' ? OQ.length > 0 : BQ.some(q => q.cat === c); }
+// categoria válida: 'tudo', 'liga', um tipo, ou vários tipos separados por vírgulas (todos os tipos = 'tudo')
+function catNorm(cat) {
+  if (cat === 'liga') return 'liga';
+  const ok = CAT_PARTES.filter(catTem), ps = String(cat || '').split(',').filter(p => ok.includes(p));
+  if (!ps.length || ps.length === ok.length) return 'tudo';
+  return ok.filter(p => ps.includes(p)).join(',');
+}
+function catNome(cat) { return cat.split(',').map(p => CATS[p] || p).join(' + '); }
 const TEAMPT = {"Man City":"Manchester City","Man Utd":"Manchester United","Nott'm Forest":"Nottingham Forest","Spurs":"Tottenham"};
 const POSN = {gk:'guarda-redes', def:'defesa', mid:'médio', fwd:'avançado'};
 const POSA = {gk:'GR', def:'DEF', mid:'MED', fwd:'AV'};
@@ -614,11 +654,12 @@ function buildBank() {
     const valid = b.r.map(n => getEnt(b.tipo, n)), set = new Set(valid);
     return {key:'b:' + b.id, cat:b.cat, tipo:b.tipo, txt:b.txt, sub:b.sub || '', valid, ok:e => set.has(e)};
   }).filter(q => q.valid.length >= 5);
+  OQ = BQ.filter(q => q.cat === 'ligas'); BQ = BQ.filter(q => q.cat !== 'ligas');
   for (const tipo in EX) EX[tipo].forEach(n => getEnt(tipo, n));
   buildPools();
 }
 // perguntas geradas por scripts: seleções (selecoes.json) e Liga Portuguesa (liga_pt.json)
-let LQ = [];
+let LQ = [], OQ = [];   // OQ: Jogadores pelo mundo (perguntas3.js + nacionalidades.json)
 function buildGen(G, cat0) {
   const out = G.perguntas.map(h => {
     const tipo = h.tipo || 'clube', stats = new Map();
@@ -700,7 +741,13 @@ function genQ(r, used, per, cat) {
     let x = r(); for (const [p, w] of LIGAPT_MIX) { x -= w; if (x < 0) { if (!(semAtual && p === 'atual')) { const q = tira(LQ.filter(q => q.per === p)); if (q) return q; } break; } }
     return tira(LQ.filter(q => !semAtual || q.per !== 'atual'));
   };
+  if (cat.includes(',')) {   // vários tipos escolhidos: cada um com a mesma probabilidade
+    const ps = cat.split(','), i0 = Math.floor(r() * ps.length);
+    for (let k = 0; k < ps.length; k++) { const q = genQ(r, used, per, ps[(i0 + k) % ps.length]); if (q) return q; }
+    return null;
+  }
   if (cat === 'pl') return genPL(r, used, per);
+  if (cat === 'ligas') return tira(OQ);
   if (cat === 'ligapt') return ligapt(false);
   if (cat === 'historia') return tira(HQ);
   if (cat === 'portugal' || cat === 'mundo') return tira(BQ.filter(q => q.cat === cat));
@@ -709,11 +756,11 @@ function genQ(r, used, per, cat) {
   const semAtual = false;
   // nos jogos da liga (a partir de 19 nov 2026): poucas perguntas da Premier League desta época, no máximo LIGA.maxPL por jogo
   const nPL = Object.values(per).reduce((a, b) => a + b, 0), regraPL = cat === 'liga' && LIGA_PL_MAX != null;
-  const fontes = regraPL ? [['banco', .42], ['ligapt', .25], ['historia', .23], ['pl', nPL >= LIGA_PL_MAX ? 0 : .1]]
-                         : [['banco', .4], ['ligapt', .22], ['historia', .2], ['pl', .18]];   // (sem a regra: igual a antes)
+  const fontes = regraPL ? [['banco', .34], ['ligapt', .22], ['historia', .19], ['ligas', .15], ['pl', nPL >= LIGA_PL_MAX ? 0 : .1]]
+                         : [['banco', .32], ['ligapt', .2], ['historia', .18], ['ligas', .15], ['pl', .15]];
   let x = r() * fontes.reduce((s, f) => s + f[1], 0), q = null;
-  for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
-  return q || tira(BQ) || tira(HQ) || ligapt(semAtual);
+  for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : f === 'ligas' ? tira(OQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
+  return q || tira(BQ) || tira(HQ) || tira(OQ) || ligapt(semAtual);
 }
 function genSet(seed, cat) { const r = rng(seed), used = new Set(), per = {}, out = []; while (out.length < NQ) { const q = genQ(r, used, per, cat); if (!q) break; out.push(q); } return out; }
 // semente nova cujas perguntas repetem o menos possível as dos últimos jogos (a semente e a categoria refazem o jogo, para os desafios)
@@ -824,8 +871,7 @@ let S = null, timerId = null, sugList = [], sugSel = 0, busy = false;
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0, 0); if (id !== 's-game') recarregarSePuder(); }
 
 function startGame(mode, seed, cat, qsPre) {
-  cat = cat || (mode === 'dia' ? 'tudo' : ST.cat);
-  if (!CATS[cat] || (cat === 'pl' && !TPL.length) || (cat === 'historia' && !HQ.length) || (cat === 'ligapt' && !LQ.length)) cat = 'tudo';
+  cat = catNorm(cat || (mode === 'dia' ? 'tudo' : ST.cat));
   if (mode === 'dia') seed = hashStr(`dia:${typeof LIGA !== 'undefined' ? LIGA.sal : ''}:` + today());
   let qs = [];
   if (mode === 'fim') { if (seed == null) seed = (Math.random() * 2**32) >>> 0; }
@@ -994,7 +1040,7 @@ function endGame() {
   else { if (S.score > ST.best) { ST.best = S.score; rec = S.score > 0; } }
   if (S.mode === 'dia') { const k = today(); ST.dia[k] = Math.max(ST.dia[k] || 0, S.score); const ks = Object.keys(ST.dia).sort().slice(-10); ST.dia = Object.fromEntries(ks.map(x => [x, ST.dia[x]])); }
   saveStats(ST);
-  $('#endLbl').textContent = S.liga ? `${LIGA.nome} · jogo ${S.liga.n} de ${LIGA.porDia} ${S.liga.dia === lisDate() ? 'de hoje' : 'de ' + labelDia(S.liga.dia)}` : fim ? `Sem fim · ${CATS[S.cat]}` : S.mode === 'dia' ? 'Desafio do dia · ' + new Date().toLocaleDateString('pt-PT', {day:'numeric', month:'long'}) : S.friend ? 'Desafio de um amigo' : `Jogo rápido · ${CATS[S.cat]}`;
+  $('#endLbl').textContent = S.liga ? `${LIGA.nome} · jogo ${S.liga.n} de ${LIGA.porDia} ${S.liga.dia === lisDate() ? 'de hoje' : 'de ' + labelDia(S.liga.dia)}` : fim ? `Sem fim · ${catNome(S.cat)}` : S.mode === 'dia' ? 'Desafio do dia · ' + new Date().toLocaleDateString('pt-PT', {day:'numeric', month:'long'}) : S.friend ? 'Desafio de um amigo' : `Jogo rápido · ${catNome(S.cat)}`;
   $('#endRec').innerHTML = rec ? '<span class="rec">Novo recorde!</span>' : '';
   $('#endShots').innerHTML = fim && S.shots.length > 14 ? '' : S.shots.map((s, i) => `<i style="background:${TIERS[s.tier].hex};animation-delay:${200 + i * 90}ms;${s.tier ? (s.tier === 6 ? 'color:#fffaf0' : '') : 'color:var(--mute)'}">${s.tier ? TIERS[s.tier].m : '✕'}</i>`).join('');
   const far = Math.max(0, ...S.shots.map(s => TIERS[s.tier].m));
@@ -1281,7 +1327,7 @@ function renderLiga() {
 // uma cor fixa por jogador (pela ordem de LIGA.jogadores; validadas contra o fundo creme; o nome vai sempre escrito ao lado)
 const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
 const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
-const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', historia:'Premier League 2016-26', pl:'Premier League desta época'};
+const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', historia:'Premier League 2016-26', pl:'Premier League desta época'};
 let ST_TODOS = null, STAB = {scope:'liga', per:'semana'};
 const tirosDe = () => S.shots.map(s => [s.q.cat, s.tier, s.tries.length]);
 async function statsGet() {
@@ -1423,8 +1469,8 @@ function renderHome() {
   renderMe(); renderLigaCard();
   $('#st-jogos').textContent = ST.jogos; $('#st-best').textContent = ST.best; $('#st-fim').textContent = ST.bestFim; $('#st-golacos').textContent = ST.golacos;
   const d = ST.dia[today()]; $('#diaTxt').textContent = d != null ? `Hoje fizeste ${d} · podes repetir` : 'As mesmas 7 para toda a gente hoje';
-  if (!CATS[ST.cat] || (ST.cat === 'pl' && !TPL.length) || (ST.cat === 'historia' && !HQ.length) || (ST.cat === 'ligapt' && !LQ.length)) ST.cat = 'tudo';
-  document.querySelectorAll('#cats button').forEach(b => { b.classList.toggle('on', b.dataset.c === ST.cat); b.hidden = (b.dataset.c === 'pl' && !TPL.length) || (b.dataset.c === 'historia' && !HQ.length) || (b.dataset.c === 'ligapt' && !LQ.length); });
+  ST.cat = catNorm(ST.cat);
+  $('#catLbl').textContent = ST.cat === 'tudo' ? 'Tudo (todos os tipos)' : catNome(ST.cat);
 }
 function heroAnim() {
   const v = {W:360, H:230, Y0:66, Y1:230, D:57, K0:9, K1:18}; const svg = $('#heroPitch'); drawPitch(svg, v, {ball:false});
@@ -1448,7 +1494,7 @@ function heroAnim() {
 async function boot() {
   buildBank();
   const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
-  const hist = getJ(`historia.json?v=${APP_VER}`), selP = getJ(`selecoes.json?v=${APP_VER}`), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ(`historia.json?v=${APP_VER}`), selP = getJ(`selecoes.json?v=${APP_VER}`), nacP = getJ(`nacionalidades.json?v=${APP_VER}`), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1457,15 +1503,16 @@ async function boot() {
   } catch (e) { console.warn('Sem dados da Premier League:', e); }
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
   try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
+  try { const N = await nacP; if (N) OQ = OQ.concat(buildGen(N)); } catch (e) { console.warn('Sem perguntas de nacionalidades:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
   $('#verFoot').textContent = `versão ${APP_VER}`;
-  $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
+  $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length + OQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, jogadores pelo mundo, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
   renderHome(); heroAnim(); verVersao();
   if (!ME) askWho();
   refreshLiga();
   const qs = new URLSearchParams(location.search), j = qs.get('jogo');
   if (j) {   // desafio de um amigo (?jogo=semente&c=categoria&p=pontos)
-    const fp = qs.get('p'), c = CATS[qs.get('c')] ? qs.get('c') : 'tudo', btn = $('#m-friend'); btn.hidden = false;
+    const fp = qs.get('p'), c = catNorm(qs.get('c')), btn = $('#m-friend'); btn.hidden = false;
     $('#friendTxt').textContent = (j === 'dia' ? 'O desafio de hoje' : 'As mesmas 7 perguntas') + (fp ? ` · fez ${fp} pontos` : '');
     btn.onclick = () => { if (j === 'dia') startGame('dia'); else startGame('7', parseInt(j, 36) >>> 0, c); S.friend = true; S.friendScore = fp != null ? Number(fp) : null; };
   }
@@ -1476,7 +1523,19 @@ async function boot() {
 $('#m-7').onclick = () => startGame('7');
 $('#m-fim').onclick = () => startGame('fim');
 $('#m-dia').onclick = () => startGame('dia');
-$('#cats').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; ST.cat = b.dataset.c; saveStats(ST); renderHome(); });
+// janela "Tipo de perguntas": marcar um ou vários
+function openCats() {
+  const sel = ST.cat === 'tudo' ? CAT_PARTES : ST.cat.split(',');
+  const nq = c => c === 'pl' ? 'sempre novas' : `${(c === 'ligapt' ? LQ : c === 'historia' ? HQ : c === 'ligas' ? OQ : BQ.filter(q => q.cat === c)).length} perguntas`;
+  $('#catList').innerHTML = CAT_PARTES.filter(catTem).map(c => `<label class="cd-it"><input type="checkbox" value="${c}"${sel.includes(c) ? ' checked' : ''}><span class="cd-box">✓</span><span class="cd-tx"><b>${CATS[c]}</b><small>${CAT_INFO[c]} · ${nq(c)}</small></span></label>`).join('');
+  $('#catMsg').hidden = true; catBtnTodos(); $('#catDlg').showModal();
+}
+const catMarcadas = () => [...document.querySelectorAll('#catList input:checked')].map(i => i.value);
+$('#catPick').onclick = openCats;
+function catBtnTodos() { const ins = [...document.querySelectorAll('#catList input')]; $('#catAll').textContent = ins.every(i => i.checked) ? 'Desmarcar todos' : 'Marcar todos'; }
+$('#catList').addEventListener('change', () => { $('#catMsg').hidden = catMarcadas().length > 0; catBtnTodos(); });
+$('#catAll').onclick = () => { const ins = [...document.querySelectorAll('#catList input')], todas = ins.every(i => i.checked); ins.forEach(i => i.checked = !todas); $('#catMsg').hidden = !todas; catBtnTodos(); };
+$('#catOk').onclick = () => { const m = catMarcadas(); if (!m.length) { $('#catMsg').hidden = false; return; } ST.cat = catNorm(m.join(',')); saveStats(ST); $('#catDlg').close(); renderHome(); toast(ST.cat === 'tudo' ? 'Perguntas: todas' : 'Perguntas: ' + catNome(ST.cat)); };
 $('#howBtn').onclick = () => $('#how').showModal();
 $('#again').onclick = () => { if (S.liga) { if (S.liga.n < LIGA.porDia) startLiga(S.liga.dia); else openLiga(); return; } startGame(S.mode === 'fim' ? 'fim' : S.mode === 'dia' ? 'dia' : '7', null, S.friend ? null : S.cat); };
 $('#lgBack').onclick = () => { renderHome(); show('s-home'); };
