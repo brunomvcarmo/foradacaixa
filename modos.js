@@ -50,6 +50,7 @@ const MX_CSS = `
 .mm-card.b{border:2px solid var(--dark);box-shadow:var(--shadow)}
 .mm-n{font-family:var(--display);font-size:22px;line-height:1.15}
 .mm-l{color:var(--mute);font-size:13px;margin-top:4px}
+.mm-t{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:14px}
 .mm-v{font-family:var(--display);font-size:36px;color:var(--acc);margin-top:4px;min-height:44px}
 .mm-v.q{color:var(--mute)}
 .mm-v.bad{color:var(--red)}
@@ -395,13 +396,15 @@ function mmOutro(a) {
 }
 const mmVal = v => MM.t.unid === 'M€' ? `${fmtN(v)} M€` : `${v} golo${v === 1 ? '' : 's'}`;
 function mmRender() {
-  const t = MM.t, verbo = t.pergunta === 'custou' ? 'custou' : 'marcou';
+  const t = MM.t, verbo = t.pergunta === 'custou' ? 'custou' : 'marcou', fee = t.id === 'fee';
+  // nas transferências diz-se SEMPRE qual é (há jogadores com várias, de valores diferentes): a mais cara de cada um
+  const qual = x => fee ? `<div class="mm-t">🔁 ${esc(x.d)}</div>` : '';
   $('#mmBody').innerHTML = `<div class="mm-score"><span>${t.ic} ${esc(t.nome)}</span><span>série <b id="mmS">${MM.serie}</b></span></div>
-    <div class="mm-card"><div class="mm-n">${esc(MM.a.n)}</div><div class="mm-l">${verbo}</div><div class="mm-v">${mmVal(MM.a.v)}</div><div class="mm-d">${esc(MM.a.d)}</div></div>
+    <div class="mm-card"><div class="mm-n">${esc(MM.a.n)}</div>${qual(MM.a)}<div class="mm-l">${fee ? 'nesta transferência custou' : verbo}</div><div class="mm-v">${mmVal(MM.a.v)}</div>${fee ? '' : `<div class="mm-d">${esc(MM.a.d)}</div>`}</div>
     <div class="mm-vs">… e este ${verbo} mais ou menos?</div>
-    <div class="mm-card b"><div class="mm-n">${esc(MM.b.n)}</div><div class="mm-l">${verbo}</div><div class="mm-v q" id="mmBv">?</div><div class="mm-d" id="mmBd"></div></div>
+    <div class="mm-card b"><div class="mm-n">${esc(MM.b.n)}</div>${qual(MM.b)}<div class="mm-l">${fee ? 'nesta transferência custou' : verbo}</div><div class="mm-v q" id="mmBv">?</div>${fee ? '' : '<div class="mm-d" id="mmBd"></div>'}</div>
     <div class="mm-btns" id="mmBtns"><button class="up" data-d="mais">▲ Mais</button><button class="down" data-d="menos">▼ Menos</button></div>
-    <p class="foot">${esc(t.sub)} · Transfermarkt</p>`;
+    <p class="foot">${esc(t.sub)}${t.sub.includes('Transfermarkt') ? '' : ' · Transfermarkt'}</p>`;
   $('#mmBtns').querySelectorAll('button').forEach(b => b.onclick = () => mmResp(b.dataset.d));
 }
 async function mmResp(d) {
@@ -410,7 +413,7 @@ async function mmResp(d) {
   $('#mmBtns').querySelectorAll('button').forEach(x => x.disabled = true);
   const el = $('#mmBv'); el.classList.remove('q');
   await tween(700, k => el.textContent = mmVal(MM.t.unid === 'M€' ? Math.round(b.v * k * 10) / 10 : Math.round(b.v * k)), easeOut);
-  el.textContent = mmVal(b.v); $('#mmBd').textContent = b.d;
+  el.textContent = mmVal(b.v); const bd = $('#mmBd'); if (bd) bd.textContent = b.d;
   if (certo) {
     MM.serie++; $('#mmS').textContent = MM.serie; mxPop(MM.serie % 5 === 0 ? `${MM.serie} SEGUIDAS!` : '✓', 'var(--t2)');
     await sleep(900); MM.a = b; MM.b = mmOutro(b); MM.busy = false; mmRender();

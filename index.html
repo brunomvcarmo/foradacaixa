@@ -646,9 +646,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120152524"></script>
-<script src="perguntas2.js?v=20261120152524"></script>
-<script src="perguntas3.js?v=20261120152524"></script>
+<script src="perguntas.js?v=20261120152931"></script>
+<script src="perguntas2.js?v=20261120152931"></script>
+<script src="perguntas3.js?v=20261120152931"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -658,7 +658,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120152524';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120152931';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1736,6 +1736,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120152524"></script>
+<script src="modos.js?v=20261120152931"></script>
 </body>
 </html>

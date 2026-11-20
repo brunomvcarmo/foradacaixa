@@ -91,7 +91,7 @@ def main():
             if v >= 15e6 and v > caras.get(pid, (0,))[0]:
                 caras[pid] = (v, f"{clube(r['from_team_id'], r['from_team_name'])} → {clube(r['to_team_id'], r['to_team_name'])}, {N.epoca_longa(r['season_name'])}")
     temas.append({'id': 'fee', 'nome': 'Transferências', 'ic': '💰', 'pergunta': 'custou', 'unid': 'M€',
-                  'sub': 'A transferência mais cara de cada jogador (valor do Transfermarkt, até ao verão de 2025)',
+                  'sub': 'A transferência mais cara de cada jogador (está sempre escrita: de onde, para onde e quando) · valor do Transfermarkt, até ao verão de 2025',
                   'itens': sorted([[prof[p][0], round(v / 1e6, 1), d] for p, (v, d) in caras.items()], key=lambda x: -x[1])})
     for liga, (lnome, na) in N.LIGAS.items():
         if liga in ('NL1', 'BE1', 'SC1', 'TR1'): continue
