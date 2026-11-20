@@ -132,6 +132,26 @@ details.all .chips{margin-top:6px}
 .atr-b span{flex:1;display:block}
 .atr-b span::first-letter{text-transform:uppercase}
 .atr-b em{font-style:normal;font-size:12px;font-weight:700;color:var(--red)}
+.rv-dias{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px 2px;scrollbar-width:none}
+.rv-dias::-webkit-scrollbar{display:none}
+.rv-dias button{flex:none;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--mute);text-align:center;line-height:1.2}
+.rv-dias button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rv-dias button small{display:block;font-weight:500;font-size:11px;opacity:.8}
+#rvJogos button[disabled]{opacity:.45}
+.rv-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;animation:qIn .35s both}
+.rv-q .qn{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.rv-q h3{font-family:var(--display);font-weight:400;font-size:18px;line-height:1.2;margin:4px 0 2px}
+.rv-q .sb2{font-size:12px;color:var(--mute);margin-bottom:8px}
+.rv-r{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:14px}
+.rv-r:first-of-type{border-top:0}
+.rv-r i{width:9px;height:9px;border-radius:50%;flex:none}
+.rv-r b{min-width:62px}
+.rv-r span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-r span small{color:var(--mute)}
+.rv-r em{font-style:normal;font-weight:800;font-size:12px;padding:2px 8px;border-radius:8px;color:var(--dark);flex:none}
+.rv-r.eu{font-weight:700}
+.rv-tranca{text-align:center;padding:30px 10px;color:var(--mute)}
+.rv-tranca b{display:block;font-size:30px;margin-bottom:6px}
 .lg-campeao{margin:8px 0 2px;padding:8px 10px;border-radius:12px;background:#fbf0d2;border:1px solid #ecd28a;font-size:14px}
 .answer{position:relative;margin-bottom:10px}
 .answer input{width:100%;padding:15px 16px;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);font:inherit;font-size:17px;outline:none;transition:border-color .2s}
@@ -434,6 +454,14 @@ dialog .tiers b{width:52px}
     <div id="stBody"></div>
   </div>
 
+  <!-- ===================== REVER PERGUNTAS ===================== -->
+  <div id="s-rever" class="screen">
+    <div class="lg-head"><button class="iconbtn" id="rvBack" aria-label="Voltar">‹</button><h2>📝 Rever perguntas</h2><button class="iconbtn" id="rvRefresh" aria-label="Atualizar">↻</button></div>
+    <div class="rv-dias" id="rvDias"></div>
+    <div class="tabs" id="rvJogos"></div>
+    <div id="rvBody"></div>
+  </div>
+
   <!-- ===================== FIM ===================== -->
   <div id="s-end" class="screen">
     <div class="endhead">
@@ -445,6 +473,7 @@ dialog .tiers b{width:52px}
     </div>
     <div class="ligacard" id="endLiga" hidden></div>
     <button class="btn" id="again">Jogar outra vez</button>
+    <button class="st-btn" id="endRever" hidden>📝 Rever as perguntas deste jogo (com as respostas dos outros)</button>
     <div class="row2">
       <button class="btn friend" id="share">Desafiar amigo</button>
       <button class="btn ghost" id="home">Início</button>
@@ -501,8 +530,8 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120094007"></script>
-<script src="perguntas2.js?v=20261120094007"></script>
+<script src="perguntas.js?v=20261120094627"></script>
+<script src="perguntas2.js?v=20261120094627"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -512,7 +541,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120094007';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120094627';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -973,6 +1002,7 @@ function endGame() {
   $('#share').textContent = fim || S.liga ? 'Partilhar' : 'Desafiar amigo';
   $('#again').textContent = S.liga ? (S.liga.n < LIGA.porDia ? `Jogo da liga ${S.liga.n + 1} de ${LIGA.porDia}${S.liga.dia === lisDate() ? '' : ' (' + labelDia(S.liga.dia).split(',')[0] + ')'} ›` : 'Ver classificação') : 'Jogar outra vez';
   if (S.liga) { const saved = ligaSync(true); renderEndLiga(); saved.then(refreshLiga); } else $('#endLiga').hidden = true;
+  $('#endRever').hidden = !S.liga; if (S.liga) { const {dia, n} = S.liga; $('#endRever').onclick = () => openRever(dia, n); }
   $('#recap').innerHTML = S.shots.map(s => { const t = TIERS[s.tier], st = s.p ? stOf(s.q, s.p) : ''; return `<div class="rc"><div class="badge ${s.tier ? '' : 'miss'}" style="${s.tier ? 'background:' + t.hex + (s.tier === 6 ? ';color:#fffaf0' : '') : ''}">${s.tier ? t.m + ' m' : '✕'}</div><p><b>${esc(s.q.txt)}</b><br>${s.p ? esc(s.p.nome) + (st ? ' · ' + esc(st) : '') : s.timeout ? 'Acabou o tempo' : 'Passou'}${s.tries.length ? ` · ${s.tries.length} ${s.tries.length === 1 ? 'erro' : 'erros'}` : ''}${S.liga ? amigosLinha(s.q.key) : ''}</p><span class="pts">${s.pts ? '+' + s.pts : ''}</span></div>`; }).join('');
   if (S.score > 0 && rec) confettiEnd();
 }
@@ -1108,9 +1138,11 @@ function renderLigaCard() {
     const atr = diasEmAtraso();
     if (atr.length) h += `<div class="atraso"><b>📅 Jogos em atraso desta semana</b>${atr.map(d => `<button class="atr-b" data-d="${d}"><span>${labelDia(d)}</span><em>falta${LIGA.porDia - feitosDia(ME, d) > 1 ? 'm' : ''} ${LIGA.porDia - feitosDia(ME, d)}</em> ›</button>`).join('')}<p class="lg-sub">Contam para esse dia e têm as mesmas perguntas que os outros jogaram. Só os dias desta semana.</p></div>`;
   }
+  if (LG.dados && ME && diasRever().length) h += `<button class="st-btn" id="lgRv">📝 Rever perguntas: as tuas e as dos outros</button>`;
   if (LG.dados) h += `<button class="st-btn" id="lgSt">📊 Estatísticas: compara-te com os outros</button>`;
   c.innerHTML = h;
   $('#lgSt') && ($('#lgSt').onclick = openStats);
+  $('#lgRv') && ($('#lgRv').onclick = () => openRever());
   $('#lgVer') && ($('#lgVer').onclick = openLiga); $('#lgRetry') && ($('#lgRetry').onclick = refreshLiga);
   $('#lgWho') && ($('#lgWho').onclick = askWho); $('#lgPlay') && ($('#lgPlay').onclick = () => startLiga());
   c.querySelectorAll('.atr-b').forEach(b => b.onclick = () => { b.disabled = true; startLiga(b.dataset.d); });
@@ -1449,6 +1481,60 @@ $('#again').onclick = () => { if (S.liga) { if (S.liga.n < LIGA.porDia) startLig
 $('#lgBack').onclick = () => { renderHome(); show('s-home'); };
 $('#lgRefresh').onclick = refreshLiga;
 $('#lgStats').onclick = openStats;
+// ---------- rever perguntas: só jogos que JÁ acabaste (assim ninguém vê as perguntas antes de jogar) ----------
+let RV = {dia:null, n:1, sets:{}};
+function jogoMeu(dia, n) { return LG.dados?.[ME]?.[dia]?.['j' + n] || null; }
+function podeVer(dia, n) { const g = jogoMeu(dia, n); return !!g && (g.estado === 'acabado' || Date.now() - (g.inicio || 0) > 30 * 60e3) && !(S?.liga && !S.ended && S.liga.dia === dia && S.liga.n === n); }
+function diasRever() {
+  if (!ME || !LG.dados?.[ME]) return [];
+  return Object.keys(LG.dados[ME]).filter(d => [1, 2, 3].some(n => podeVer(d, n))).sort().reverse().slice(0, 21);
+}
+async function setsDoDia(dia) {
+  if (RV.sets[dia]) return RV.sets[dia];
+  try { const r = await fetch(ligaUrl(`sets/${dia}`), {cache:'no-store'}); if (r.ok) RV.sets[dia] = (await r.json()) || {}; } catch (e) {}
+  return RV.sets[dia] || {};
+}
+// as perguntas de um jogo: as guardadas no Firebase; nos jogos antigos (antes de se guardarem), pelas chaves que cada um guardou
+function perguntasDoJogo(dia, n, sets) {
+  const arr = sets['j' + n];
+  if (Array.isArray(arr)) { const qs = desserializar(arr); if (qs) return qs; }
+  const g = jogoMeu(dia, n); if (!g || !Array.isArray(g.chaves)) return null;
+  const porChave = new Map([...BQ, ...HQ, ...LQ].map(q => [q.key, q]));
+  return g.chaves.map((k, i) => porChave.get(k) || {key:k, txt:'Pergunta da Premier League desta época', sub:'(já não é possível mostrar as respostas certas)', valid:[], tipo:'pl', semDados:true});
+}
+async function openRever(dia, n) {
+  show('s-rever'); $('#rvBody').innerHTML = '<p class="lg-note">A carregar…</p>';
+  await ligaGet();
+  const dias = diasRever();
+  RV.dia = dia && dias.includes(dia) ? dia : dias[0] || null;
+  RV.n = n || [3, 2, 1].find(k => RV.dia && podeVer(RV.dia, k)) || 1;
+  renderRever();
+}
+async function renderRever() {
+  const dias = diasRever();
+  $('#rvDias').innerHTML = dias.map(d => { const dt = new Date(d + 'T12:00:00Z'); return `<button data-d="${d}" class="${d === RV.dia ? 'on' : ''}">${d === lisDate() ? 'Hoje' : dt.toLocaleDateString('pt-PT', {weekday:'short', timeZone:'UTC'})}<small>${dt.toLocaleDateString('pt-PT', {day:'numeric', month:'short', timeZone:'UTC'})}</small></button>`; }).join('');
+  if (!RV.dia) { $('#rvJogos').innerHTML = ''; $('#rvBody').innerHTML = '<div class="rv-tranca"><b>🔒</b>Ainda não acabaste nenhum jogo da liga. As perguntas de cada jogo ficam disponíveis depois de o jogares.</div>'; return; }
+  $('#rvJogos').innerHTML = [1, 2, 3].map(k => `<button data-n="${k}" class="${k === RV.n ? 'on' : ''}" ${podeVer(RV.dia, k) ? '' : 'disabled'}>Jogo ${k}${podeVer(RV.dia, k) ? '' : ' 🔒'}</button>`).join('');
+  if (!podeVer(RV.dia, RV.n)) { $('#rvBody').innerHTML = `<div class="rv-tranca"><b>🔒</b>Ainda não fizeste o jogo ${RV.n} deste dia. Joga-o primeiro e depois vês aqui as perguntas e as respostas de todos.</div>`; return; }
+  const sets = await setsDoDia(RV.dia), qs = perguntasDoJogo(RV.dia, RV.n, sets);
+  if (!qs) { $('#rvBody').innerHTML = '<p class="lg-note">Este jogo é anterior a esta funcionalidade: as perguntas não ficaram guardadas.</p>'; return; }
+  const jog = LIGA.jogadores.map(nm => ({nm, g: LG.dados?.[nm]?.[RV.dia]?.['j' + RV.n] || null}));
+  $('#rvBody').innerHTML = qs.map((q, i) => {
+    const linhas = jog.map(({nm, g}) => {
+      if (!g) return `<div class="rv-r"><i style="background:${pcor(nm)}"></i><b>${esc(nm)}</b><span><small>ainda não jogou</small></span></div>`;
+      const j = Array.isArray(g.chaves) ? g.chaves.indexOf(q.key) : -1;
+      if (j < 0) return `<div class="rv-r"><i style="background:${pcor(nm)}"></i><b>${esc(nm)}</b><span><small>${g.estado === 'a jogar' ? 'a jogar agora' : 'não chegou a esta pergunta'}</small></span></div>`;
+      const t = g.tiros?.[j]?.[1] ?? 0, er = g.tiros?.[j]?.[2] || 0, resp = g.resp?.[j];
+      return `<div class="rv-r ${nm === ME ? 'eu' : ''}"><i style="background:${pcor(nm)}"></i><b>${esc(nm)}</b><span>${resp ? esc(resp) : '<small>passou / sem tempo</small>'}${er ? ` <small>· ${er} erro${er > 1 ? 's' : ''}</small>` : ''}</span><em style="background:${TIERS[t].hex}${t === 6 ? ';color:#fffaf0' : ''}">${t ? TIERS[t].m + ' m' : '✕'}</em></div>`;
+    }).join('');
+    const todas = q.semDados ? '' : `<details class="all"><summary>Ver as ${q.valid.length} respostas certas (da mais óbvia para a mais rara)</summary><div class="chips">${q.valid.map(x => chip(x, q)).join('')}</div></details>`;
+    return `<div class="rv-q" style="animation-delay:${i * 50}ms"><div class="qn">Pergunta ${i + 1}${q.valid.length ? ' · ' + q.valid.length + ' respostas certas' : ''}</div><h3>${esc(q.txt)}</h3><div class="sb2">${esc(q.sub || '')}</div>${linhas}${todas}</div>`;
+  }).join('');
+}
+$('#rvBack').onclick = () => { renderHome(); show('s-home'); };
+$('#rvRefresh').onclick = async () => { RV.sets = {}; await ligaGet(); renderRever(); };
+$('#rvDias').onclick = e => { const b = e.target.closest('button[data-d]'); if (!b) return; RV.dia = b.dataset.d; RV.n = [3, 2, 1].find(k => podeVer(RV.dia, k)) || 1; renderRever(); };
+$('#rvJogos').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b || b.disabled) return; RV.n = Number(b.dataset.n); renderRever(); };
 $('#stBack').onclick = () => { renderHome(); show('s-home'); };
 $('#stRefresh').onclick = async () => { await Promise.all([ligaGet(), statsGet()]); renderStats(); };
 $('#stScope').onclick = e => { const b = e.target.closest('button[data-v]'); if (!b) return; STAB.scope = b.dataset.v; renderStats(); };
