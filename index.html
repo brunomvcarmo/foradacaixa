@@ -530,7 +530,7 @@ dialog .tiers b{width:52px}
     <div><i style="background:var(--t6)"></i><b>100 m</b>De baliza a baliza · 80 (só em perguntas com 12 ou mais respostas: as mais raras de todas)</div>
   </div>
   <p style="color:var(--mute);font-size:14px;margin:12px 0 0"><b style="color:var(--ink)">Sem fim:</b> 3 vidas; cada falhanço tira uma. A cada 3 golos seguidos o multiplicador sobe (×1,5, ×2…). Um golo do meio-campo devolve uma vida.</p>
-  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). Jogadores pelo mundo (que portugueses, brasileiros… jogaram em cada liga e clube) vem dos dados do Transfermarkt das épocas 2019/20 a 2024/25, pela nacionalidade principal de cada jogador. As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
+  <p style="color:var(--mute);font-size:14px;margin:10px 0 0"><b style="color:var(--ink)">De onde vêm as perguntas:</b> Portugal e Mundo são um banco escrito à mão, com factos fechados (cada pergunta diz até quando conta). Jogadores pelo mundo (que portugueses, brasileiros… jogaram em cada liga e clube) vem dos dados do Transfermarkt das épocas 2019/20 a 2024/25, pela nacionalidade principal de cada jogador; as Transferências também (valores do Transfermarkt, só transferências definitivas de 10 milhões ou mais). As da Premier League (desta época e de 2016/17 a 2024/25) são criadas a partir das estatísticas oficiais; as desta época mudam todas as semanas. Nelas, a resposta óbvia é o jogador mais popular entre os adeptos nessa época.</p>
   <button class="btn" onclick="this.closest('dialog').close()">Bora</button>
 </dialog>
 <div class="toast" id="toast"></div>
@@ -557,9 +557,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120130226"></script>
-<script src="perguntas2.js?v=20261120130226"></script>
-<script src="perguntas3.js?v=20261120130226"></script>
+<script src="perguntas.js?v=20261120131734"></script>
+<script src="perguntas2.js?v=20261120131734"></script>
+<script src="perguntas3.js?v=20261120131734"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -569,7 +569,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120130226';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120131734';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -597,12 +597,12 @@ const TIERS = [
   {m:100, nome:'De baliza a baliza', pts:80, hex:'#6b3fa0', emo:'🟪'},
 ];
 const QTIME = 25, NQ = 7;
-const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', pl:'Premier League desta época', historia:'Premier League 2016-2026', liga:'Liga'};
+const CATS = {tudo:'Tudo', ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', mercado:'Transferências', pl:'Premier League desta época', historia:'Premier League 2016-2026', liga:'Liga'};
 // tipos de perguntas que se podem escolher (vários de uma vez: a categoria fica "ligapt,ligas", por exemplo)
-const CAT_PARTES = ['ligapt', 'portugal', 'mundo', 'ligas', 'historia', 'pl'];
+const CAT_PARTES = ['ligapt', 'portugal', 'mundo', 'ligas', 'mercado', 'historia', 'pl'];
 const CAT_INFO = {ligapt:'Resultados da 1.ª Liga desde 1994/95', portugal:'Seleção, clubes e jogadores portugueses', mundo:'Mundiais, Euros, campeões e taças',
-  ligas:'Jogadores de cada país em cada liga e clube, carreiras', historia:'Premier League de 2016/17 a 2025/26', pl:'Premier League desta época (muda todas as semanas)'};
-function catTem(c) { return c === 'pl' ? TPL.length > 0 : c === 'historia' ? HQ.length > 0 : c === 'ligapt' ? LQ.length > 0 : c === 'ligas' ? OQ.length > 0 : BQ.some(q => q.cat === c); }
+  ligas:'Jogadores de cada país em cada liga e clube, carreiras', mercado:'Quem custou mais de X milhões, compras e vendas dos clubes', historia:'Premier League de 2016/17 a 2025/26', pl:'Premier League desta época (muda todas as semanas)'};
+function catTem(c) { return c === 'pl' ? TPL.length > 0 : c === 'historia' ? HQ.length > 0 : c === 'ligapt' ? LQ.length > 0 : c === 'ligas' ? OQ.length > 0 : c === 'mercado' ? MQ.length > 0 : BQ.some(q => q.cat === c); }
 // categoria válida: 'tudo', 'liga', um tipo, ou vários tipos separados por vírgulas (todos os tipos = 'tudo')
 function catNorm(cat) {
   if (cat === 'liga') return 'liga';
@@ -659,7 +659,7 @@ function buildBank() {
   buildPools();
 }
 // perguntas geradas por scripts: seleções (selecoes.json) e Liga Portuguesa (liga_pt.json)
-let LQ = [], OQ = [];   // OQ: Jogadores pelo mundo (perguntas3.js + nacionalidades.json)
+let LQ = [], OQ = [], MQ = [];   // MQ: Transferências (transferencias.json)   // OQ: Jogadores pelo mundo (perguntas3.js + nacionalidades.json)
 function buildGen(G, cat0) {
   const out = G.perguntas.map(h => {
     const tipo = h.tipo || 'clube', stats = new Map();
@@ -748,6 +748,7 @@ function genQ(r, used, per, cat) {
   }
   if (cat === 'pl') return genPL(r, used, per);
   if (cat === 'ligas') return tira(OQ);
+  if (cat === 'mercado') return tira(MQ);
   if (cat === 'ligapt') return ligapt(false);
   if (cat === 'historia') return tira(HQ);
   if (cat === 'portugal' || cat === 'mundo') return tira(BQ.filter(q => q.cat === cat));
@@ -756,11 +757,11 @@ function genQ(r, used, per, cat) {
   const semAtual = false;
   // nos jogos da liga (a partir de 19 nov 2026): poucas perguntas da Premier League desta época, no máximo LIGA.maxPL por jogo
   const nPL = Object.values(per).reduce((a, b) => a + b, 0), regraPL = cat === 'liga' && LIGA_PL_MAX != null;
-  const fontes = regraPL ? [['banco', .34], ['ligapt', .22], ['historia', .19], ['ligas', .15], ['pl', nPL >= LIGA_PL_MAX ? 0 : .1]]
-                         : [['banco', .32], ['ligapt', .2], ['historia', .18], ['ligas', .15], ['pl', .15]];
+  const fontes = regraPL ? [['banco', .31], ['ligapt', .21], ['historia', .17], ['ligas', .13], ['mercado', .08], ['pl', nPL >= LIGA_PL_MAX ? 0 : .1]]
+                         : [['banco', .29], ['ligapt', .19], ['historia', .17], ['ligas', .13], ['mercado', .08], ['pl', .14]];
   let x = r() * fontes.reduce((s, f) => s + f[1], 0), q = null;
-  for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : f === 'ligas' ? tira(OQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
-  return q || tira(BQ) || tira(HQ) || tira(OQ) || ligapt(semAtual);
+  for (const [f, w] of fontes) { x -= w; if (x < 0) { q = f === 'banco' ? tira(BQ) : f === 'ligapt' ? ligapt(semAtual) : f === 'historia' ? tira(HQ) : f === 'ligas' ? tira(OQ) : f === 'mercado' ? tira(MQ) : (TPL.length ? genPL(r, used, per) : null); break; } }
+  return q || tira(BQ) || tira(HQ) || tira(OQ) || tira(MQ) || ligapt(semAtual);
 }
 function genSet(seed, cat) { const r = rng(seed), used = new Set(), per = {}, out = []; while (out.length < NQ) { const q = genQ(r, used, per, cat); if (!q) break; out.push(q); } return out; }
 // semente nova cujas perguntas repetem o menos possível as dos últimos jogos (a semente e a categoria refazem o jogo, para os desafios)
@@ -1327,7 +1328,7 @@ function renderLiga() {
 // uma cor fixa por jogador (pela ordem de LIGA.jogadores; validadas contra o fundo creme; o nome vai sempre escrito ao lado)
 const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
 const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
-const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', historia:'Premier League 2016-26', pl:'Premier League desta época'};
+const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', mercado:'Transferências', historia:'Premier League 2016-26', pl:'Premier League desta época'};
 let ST_TODOS = null, STAB = {scope:'liga', per:'semana'};
 const tirosDe = () => S.shots.map(s => [s.q.cat, s.tier, s.tries.length]);
 async function statsGet() {
@@ -1494,7 +1495,7 @@ function heroAnim() {
 async function boot() {
   buildBank();
   const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
-  const hist = getJ(`historia.json?v=${APP_VER}`), selP = getJ(`selecoes.json?v=${APP_VER}`), nacP = getJ(`nacionalidades.json?v=${APP_VER}`), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ(`historia.json?v=${APP_VER}`), selP = getJ(`selecoes.json?v=${APP_VER}`), nacP = getJ(`nacionalidades.json?v=${APP_VER}`), merP = getJ(`transferencias.json?v=${APP_VER}`), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1504,9 +1505,10 @@ async function boot() {
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
   try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
   try { const N = await nacP; if (N) OQ = OQ.concat(buildGen(N)); } catch (e) { console.warn('Sem perguntas de nacionalidades:', e); }
+  try { const M = await merP; if (M) MQ = buildGen(M); } catch (e) { console.warn('Sem perguntas de transferências:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
   $('#verFoot').textContent = `versão ${APP_VER}`;
-  $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length + OQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, jogadores pelo mundo, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
+  $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length + OQ.length + MQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, jogadores pelo mundo, transferências, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
   renderHome(); heroAnim(); verVersao();
   if (!ME) askWho();
   refreshLiga();
@@ -1526,7 +1528,7 @@ $('#m-dia').onclick = () => startGame('dia');
 // janela "Tipo de perguntas": marcar um ou vários
 function openCats() {
   const sel = ST.cat === 'tudo' ? CAT_PARTES : ST.cat.split(',');
-  const nq = c => c === 'pl' ? 'sempre novas' : `${(c === 'ligapt' ? LQ : c === 'historia' ? HQ : c === 'ligas' ? OQ : BQ.filter(q => q.cat === c)).length} perguntas`;
+  const nq = c => c === 'pl' ? 'sempre novas' : `${(c === 'ligapt' ? LQ : c === 'historia' ? HQ : c === 'ligas' ? OQ : c === 'mercado' ? MQ : BQ.filter(q => q.cat === c)).length} perguntas`;
   $('#catList').innerHTML = CAT_PARTES.filter(catTem).map(c => `<label class="cd-it"><input type="checkbox" value="${c}"${sel.includes(c) ? ' checked' : ''}><span class="cd-box">✓</span><span class="cd-tx"><b>${CATS[c]}</b><small>${CAT_INFO[c]} · ${nq(c)}</small></span></label>`).join('');
   $('#catMsg').hidden = true; catBtnTodos(); $('#catDlg').showModal();
 }
