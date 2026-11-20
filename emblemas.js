@@ -2,7 +2,7 @@
 // Fora da Caixa — emblemas dos amigos da liga (paródias dos símbolos dos clubes que cada um apoia).
 // Carregado ANTES do script principal. Expõe: emblemaSVG(nome), emblemaURL(nome), emblemaPNG(nome, grande), emb(nome, px).
 // Todos usam a versão AVACALHADA (2) — o utilizador não quer escolha. A versão 1 (quase igual) fica no código, sem uso.
-// Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United. Outros nomes: círculo com as iniciais.
+// Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United · Manel = Leicester City. Outros nomes: círculo com as iniciais.
 // =====================================================================================
 (function () {
 'use strict';
@@ -266,7 +266,42 @@ function united(nome, v) {
   <text font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="15" fill="#111" letter-spacing="2.4" text-anchor="middle"><textPath href="#${u}b" startOffset="50%">UNITED</textPath></text></svg>`;
 }
 
-const CLUBE_DE = {Bruno: liverpool, Freitas: chelsea, CC: arsenal, Viegas: united};
+// ---------- raposa de frente (Leicester) ----------
+function RAPOSA(opt = {}) {
+  const u = 'rp' + (UID++), dk = '#5a2408';
+  return `<g><defs><linearGradient id="${u}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7a04a"/><stop offset=".55" stop-color="#e2711f"/><stop offset="1" stop-color="#a84a12"/></linearGradient></defs>
+  <g stroke="${dk}" stroke-width="1.8" stroke-linejoin="round">
+    <path d="M-30 -26 L-22 -60 L-4 -34Z M30 -26 L22 -60 L4 -34Z" fill="url(#${u}g)"/>
+    <path d="M-25 -32 L-21 -50 L-11 -35Z M25 -32 L21 -50 L11 -35Z" fill="#3a1606" stroke="none"/>
+    <path d="M-32 -28 C-38 -8 -30 8 -16 18 L0 36 L16 18 C30 8 38 -8 32 -28 C20 -38 -20 -38 -32 -28Z" fill="url(#${u}g)"/>
+    <path d="M-30 -4 C-20 6 -10 16 0 34 C10 16 20 6 30 -4 C18 4 8 6 0 6 C-8 6 -18 4 -30 -4Z" fill="#fffaf0"/>
+    <path d="M-36 -10 L-44 -2 L-34 -2 L-40 6 L-30 2Z M36 -10 L44 -2 L34 -2 L40 6 L30 2Z" fill="#fffaf0"/>
+  </g>
+  <path d="M-6 -24 L0 -4 L6 -24" fill="none" stroke="${dk}" stroke-width="1" opacity=".5"/>
+  ${opt.pisca ? `<path d="M-18 -12 Q-11 -7 -4 -12" fill="none" stroke="#1a0b03" stroke-width="2.6" stroke-linecap="round"/>`
+              : `<path d="M-18 -12 Q-11 -18 -4 -12 Q-11 -8 -18 -12Z" fill="#1a0b03"/><circle cx="-9" cy="-13" r="1.2" fill="#fff"/>`}
+  <path d="M18 -12 Q11 -18 4 -12 Q11 -8 18 -12Z" fill="#1a0b03"/><circle cx="12" cy="-13" r="1.2" fill="#fff"/>
+  <ellipse cx="0" cy="27" rx="5.5" ry="4" fill="#1a0b03"/><ellipse cx="-1.5" cy="25.8" rx="1.6" ry="1" fill="#fff" opacity=".7"/>
+  ${opt.lingua ? `<path d="M-3 32 C-4 40 4 40 3 32Z" fill="#e8577a" stroke="#7a1f33" stroke-width="1"/>` : ''}</g>`;
+}
+function leicester(nome, v) {
+  const u = 'Le' + (UID++), azul = '#0a3d9e';
+  const SH = 'M100 12 C130 12 160 18 176 30 L176 116 C176 176 140 212 100 234 C60 212 24 176 24 116 L24 30 C40 18 70 12 100 12Z';
+  const petala = a => { const x = Math.cos(a) * 30, y = Math.sin(a) * 30; return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="21"/>`; };
+  return `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">${FX(u)}<defs><clipPath id="${u}c"><path d="${SH}"/></clipPath>
+    <radialGradient id="${u}az" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#2f6be0"/><stop offset=".6" stop-color="${azul}"/><stop offset="1" stop-color="#041d52"/></radialGradient></defs>
+  <g filter="url(#${u}som)">
+    <path d="${SH}" fill="url(#${u}az)"/><path d="${SH}" fill="none" stroke="url(#${u}ouro)" stroke-width="6"/><path d="${SH}" fill="none" stroke="#041d52" stroke-width="1.5"/>
+    <g filter="url(#${u}rel)" transform="translate(100 112)"><g fill="#fffaf0" stroke="url(#${u}ouro)" stroke-width="2.5">${[0, 1, 2, 3, 4].map(i => petala(-Math.PI / 2 + i * 2 * Math.PI / 5)).join('')}</g>
+      <circle r="24" fill="#fffaf0"/></g>
+    <g filter="url(#${u}rel)" transform="translate(100 114) scale(.95)">${RAPOSA({pisca: v === 2, lingua: v === 2})}</g>
+    <path d="M14 176 L186 176 L177 190 L186 204 L14 204 L23 190Z" fill="url(#${u}ouro)" stroke="#041d52" stroke-width="2.4"/>
+    ${v === 2 ? `<g transform="rotate(-14 154 42)"><rect x="128" y="32" width="54" height="20" rx="4" fill="#fffaf0" stroke="#041d52" stroke-width="2"/><text x="155" y="47" text-anchor="middle" font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="13" fill="#c8102e">5000-1</text></g>` : ''}
+    <g clip-path="url(#${u}c)"><path d="M0 0 L200 0 L200 100 Q100 84 0 112Z" fill="url(#${u}verniz)"/></g>
+  </g>
+  <text x="100" y="195.5" text-anchor="middle" font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="${v === 1 ? 13 : 12.5}" fill="#041d52">${nome.toUpperCase()}CESTER CITY</text></svg>`;
+}
+const CLUBE_DE = {Bruno: liverpool, Freitas: chelsea, CC: arsenal, Viegas: united, Manel: leicester};
 function generico(nome) {
   const ini = String(nome || '?').slice(0, 2).toUpperCase();
   return `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="125" r="94" fill="#1e5a37" stroke="#1d2b22" stroke-width="6"/><text x="100" y="152" text-anchor="middle" font-family="${'Alfa Slab One, Georgia, serif'}" font-weight="700" font-size="80" fill="#f3ead6">${ini}</text></svg>`;
@@ -277,7 +312,7 @@ const cache = {};
 window.emblemaURL = (nome, v) => { v = v || VERSAO; const k = nome + '|' + v; return cache[k] || (cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(emblemaSVG(nome, v))); };
 // PNGs feitos por scripts/emblemas_png.py (o SVG com efeitos fica desfocado em tamanho pequeno no iPhone):
 // -p = mini (sem letras nem efeitos) para listas; -g = completo para tamanhos grandes
-const PNG = {Bruno:'bruno', Freitas:'freitas', CC:'cc', Viegas:'viegas'};
+const PNG = {Bruno:'bruno', Freitas:'freitas', CC:'cc', Viegas:'viegas', Manel:'manel'};
 window.emblemaPNG = (nome, grande) => PNG[nome] ? `icones/emblemas/${PNG[nome]}-${grande ? 'g' : 'p'}.png?v=${typeof APP_VER !== 'undefined' ? APP_VER : ''}` : emblemaURL(nome);
 window.emb = (nome, px = 22, cls = '') => `<img class="emb ${cls}" src="${emblemaPNG(nome, px > 32)}" width="${px}" height="${Math.round(px * 1.25)}" alt="" decoding="async">`;
 })();

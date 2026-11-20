@@ -401,7 +401,9 @@ details.all .chips{margin-top:6px}
 .ct th{font-weight:600;text-align:left;color:var(--mute);font-size:12px;padding:2px 4px}
 .ct thead th{text-align:center;color:var(--ink);white-space:nowrap}
 .ct thead th i{margin-right:4px;vertical-align:1px}
-.ct td{text-align:center;border-radius:8px;padding:6px 2px;font-weight:700;min-width:54px}
+.ct td{text-align:center;border-radius:8px;padding:6px 1px;font-weight:700;min-width:40px}
+.ct tbody th{max-width:78px;word-break:break-word;hyphens:auto;font-size:11.5px;line-height:1.2}
+.ct thead th{font-size:11px}
 .ct td small{display:block;font-weight:500;font-size:10px;opacity:.75}
 .ct td.ct-e{background:var(--panel2);color:var(--mute)}
 .ev-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:600;margin-bottom:4px}
@@ -699,10 +701,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120165914"></script>
-<script src="perguntas2.js?v=20261120165914"></script>
-<script src="perguntas3.js?v=20261120165914"></script>
-<script src="emblemas.js?v=20261120165914"></script>
+<script src="perguntas.js?v=20261120194623"></script>
+<script src="perguntas2.js?v=20261120194623"></script>
+<script src="perguntas3.js?v=20261120194623"></script>
+<script src="emblemas.js?v=20261120194623"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -712,7 +714,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120165914';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261120194623';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1223,7 +1225,7 @@ async function share() {
 const LIGA = {
   id: 'amigos',
   nome: 'Liga dos Amigos',
-  jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas'],
+  jogadores: ['Bruno', 'CC', 'Freitas', 'Viegas', 'Manel'],
   porDia: 3,
   maxPL: 2,   // máximo de perguntas da Premier League desta época em cada jogo da liga (desde 19 nov 2026)
   sal: '2',   // entra na semente dos jogos e do Desafio do dia: mudar para dar perguntas novas no mesmo dia (iguais para todos)
@@ -1471,7 +1473,7 @@ function renderLiga() {
 // Jogos fora da liga: ligas/<id>/todos/<nome>/<id> (POST no fim de cada jogo, ver registarJogo)
 // ======================================================================
 // uma cor fixa por jogador (pela ordem de LIGA.jogadores; validadas contra o fundo creme; o nome vai sempre escrito ao lado)
-const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c'];
+const PCOR = ['#2e8a52', '#d6452f', '#2b6fae', '#a8750c', '#7d48b0'];
 const pcor = n => PCOR[Math.max(0, LIGA.jogadores.indexOf(n)) % PCOR.length];
 const CAT_NOME = {ligapt:'Liga Portuguesa', portugal:'Portugal', mundo:'Mundo e história', ligas:'Jogadores pelo mundo', mercado:'Transferências', historia:'Premier League 2016-26', pl:'Premier League desta época'};
 let ST_TODOS = null, STAB = {scope:'liga', per:'semana', modo:'perg'};
@@ -1792,6 +1794,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120165914"></script>
+<script src="modos.js?v=20261120194623"></script>
 </body>
 </html>

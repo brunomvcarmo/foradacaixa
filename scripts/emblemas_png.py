@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 SAIDA = RAIZ / 'icones' / 'emblemas'
-NOMES = ['Bruno', 'Freitas', 'CC', 'Viegas']
+NOMES = ['Bruno', 'Freitas', 'CC', 'Viegas', 'Manel']
 TAM = {'g': (300, 375), 'p': (120, 150)}
 PAGINA = """<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
