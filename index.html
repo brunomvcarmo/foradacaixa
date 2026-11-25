@@ -358,6 +358,14 @@ details.all .chips{margin-top:6px}
 .lg-done{margin:12px 0 0;font-weight:600;text-align:center}
 .ligacard .btn{margin-top:12px}
 .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.who-lock{font-family:var(--sans);font-size:11.5px;font-weight:700;color:var(--mute)}
+.who-cn{display:flex;align-items:center;gap:8px}
+.who-pin{display:block;width:100%;font:inherit;font-family:var(--display);font-size:34px;letter-spacing:.6em;text-align:center;padding:12px 0 12px .6em;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);outline:none}
+.who-pin:focus,.who-nome:focus{border-color:var(--acc)}
+.who-nome{display:block;width:100%;font:inherit;font-size:18px;padding:13px 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);outline:none;margin:4px 0 4px}
+.conv-de{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:4px 0 14px}
+.conv-de b{font-family:var(--display);font-weight:400;font-size:20px;display:block}
+.conv-de span{color:var(--mute);font-size:14px}
 .who-b{padding:18px 10px;border-radius:14px;background:var(--panel2);border:2px solid var(--line);font-family:var(--display);font-weight:800;font-size:20px;transition:all .15s}
 .who-b:hover{border-color:var(--acc)}
 .who-b.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
@@ -646,9 +654,32 @@ dialog .tiers b{width:52px}
   <button data-go="eu"><span class="bi">👤</span><span>Eu</span></button>
 </nav>
 <dialog id="who">
-  <h2>Quem és?</h2>
-  <p style="color:var(--mute);margin:0">Fica guardado neste telemóvel. Podes trocar no início, em "trocar".</p>
-  <div class="who-grid" id="whoBtns"></div>
+  <div id="whoEscolha">
+    <h2>Quem és?</h2>
+    <p style="color:var(--mute);margin:0">Da 1.ª vez em cada telemóvel pede o código do teu perfil. Depois fica guardado.</p>
+    <div class="who-grid" id="whoBtns"></div>
+    <button class="btn ghost" id="whoSouConv" type="button">Não sou da liga: entrar como convidado</button>
+  </div>
+  <div id="whoCodigo" hidden>
+    <h2 class="who-cn" id="whoCodNome"></h2>
+    <p style="color:var(--mute);margin:0 0 12px">Escreve o código de 4 algarismos deste perfil.</p>
+    <input id="whoPin" class="who-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Código">
+    <p class="cd-msg" id="whoErr" hidden>Código errado. Tenta outra vez.</p>
+    <div class="row2"><button class="btn ghost" id="whoVolta" type="button">Voltar</button><button class="btn" id="whoEntra" type="button">Entrar</button></div>
+  </div>
+  <div id="whoConv" hidden>
+    <h2>Convidado</h2>
+    <p style="color:var(--mute);margin:0 0 12px">Podes jogar os desafios que te mandarem e os jogos normais. A liga e os duelos são só para quem tem perfil.</p>
+    <input id="whoConvNome" class="who-nome" type="text" maxlength="16" placeholder="Como te chamas?" autocomplete="off" aria-label="Nome">
+    <div class="row2"><button class="btn ghost" id="whoConvVolta" type="button">Voltar</button><button class="btn" id="whoConvOk" type="button">Entrar</button></div>
+  </div>
+</dialog>
+<dialog id="conv">
+  <h2>⚔️ Desafio!</h2>
+  <div class="conv-de" id="convDe"></div>
+  <input id="convNome" class="who-nome" type="text" maxlength="16" placeholder="Como te chamas?" autocomplete="off" aria-label="O teu nome">
+  <button class="btn" id="convOk" type="button">Aceitar o desafio ›</button>
+  <button class="linkbtn" id="convLiga" type="button" style="display:block;margin:12px auto 0">Sou da Liga dos Amigos (tenho código)</button>
 </dialog>
 <dialog id="catDlg">
   <h2>Tipo de perguntas</h2>
@@ -701,10 +732,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261120194623"></script>
-<script src="perguntas2.js?v=20261120194623"></script>
-<script src="perguntas3.js?v=20261120194623"></script>
-<script src="emblemas.js?v=20261120194623"></script>
+<script src="perguntas.js?v=20261125145409"></script>
+<script src="perguntas2.js?v=20261125145409"></script>
+<script src="perguntas3.js?v=20261125145409"></script>
+<script src="emblemas.js?v=20261125145409"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -714,7 +745,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261120194623';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261125145409';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1207,7 +1238,12 @@ function confettiEnd() { const c = document.createElement('div'); c.className = 
 async function share() {
   const fim = S.mode === 'fim';
   const row = S.shots.slice(0, 20).map(s => TIERS[s.tier].emo).join('');
-  const url = location.origin + location.pathname + (fim || S.liga ? '' : S.mode === 'dia' ? `?jogo=dia&p=${S.score}` : `?jogo=${S.seed.toString(36)}&c=${S.cat}&p=${S.score}`);
+  const quem = ME || CONVIDADO, deP = quem ? `&de=${encodeURIComponent(quem)}` : '';
+  const url = location.origin + location.pathname + (fim || S.liga ? '' : S.mode === 'dia' ? `?jogo=dia&d=${today()}&p=${S.score}${deP}` : `?jogo=${S.seed.toString(36)}&c=${S.cat}&p=${S.score}${deP}`);
+  if (ME && LIGA.db && !fim && !S.liga && !S.duelo) {   // fica guardado para quem desafiou ver os resultados (ecrã dos duelos)
+    const chave = (S.mode === 'dia' ? `dia-${today()}` : S.seed.toString(36)) + '_' + (S.mode === 'dia' ? 'tudo' : S.cat).replace(/[.#$\[\]\/]/g, '') + '_' + ME;
+    fetch(ligaUrl(`convites/${chave}/de`), {method:'PUT', body:JSON.stringify(ME)}).then(() => fetch(ligaUrl(`convites/${chave}/info`), {method:'PUT', body:JSON.stringify({pontos:S.score, criado:Date.now(), cat:S.mode === 'dia' ? 'dia' : S.cat})})).catch(() => {});
+  }
   const txt = S.liga ? `Fora da Caixa ⚽ ${LIGA.nome}: ${S.score} pontos no jogo ${S.liga.n} de hoje\n${row}` : fim ? `Fora da Caixa ⚽ Sem fim: ${S.score} pontos, série de ${S.bestStreak}\n${row}` : `Fora da Caixa ⚽ ${S.score} pontos${S.mode === 'dia' ? ' no desafio do dia' : ''}\n${row}\nConsegues rematar de mais longe?`;
   try { if (navigator.share) { await navigator.share({text: txt, url}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
   try { await navigator.clipboard.writeText(txt + '\n' + url); toast('Copiado! Cola numa conversa'); } catch (e) { prompt('Copia isto:', txt + '\n' + url); }
@@ -1235,14 +1271,30 @@ const LIGA = {
     {id:'2026-11-18b-bruno', nome:'Bruno', todos:true, motivo:'pediu outra vez (classificação e todos os jogos)'},
     {id:'2026-11-18c-todos', nome:'*', todos:true, motivo:'recomeçar a liga de todos depois de corrigir o "tentar outra vez" no iPhone'},
   ],
-  db: 'https://fora-da-caixa-b1efa-default-rtdb.europe-west1.firebasedatabase.app',   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
+  db: 'https://fora-da-caixa-b1efa-default-rtdb.europe-west1.firebasedatabase.app',
+  // código de 4 algarismos de cada perfil: só o SHA-256 de 'fdc:<nome>:<código>' (os códigos não ficam no repositório).
+  // Pedido na 1.ª vez que alguém escolhe esse perfil num telemóvel. Para mudar um código: calcular o hash novo e trocar aqui.
+  codigos: {"Bruno": "356513740fe74d01d12035cf7071c9bdf3d6255041622261da0df2a567aac088", "CC": "7549515235481b2e1cd7f0382275d392128362ce7d3a07c982564a85b934cb4b", "Freitas": "ee6ad63d32945da4f6aa1979e5be20799567e59ab47728b63906a559e769f2ad", "Viegas": "b9b2aaf193b3462d97331ad4e59229d7581a1a9931b2cc64a0880eac6e3b9f02", "Manel": "f337494140caffa1b958b74db7fe0e8ac5d40db1df631d04fbeb709ab9022ae4"},   // endereço da base de dados Firebase, ex.: https://fora-da-caixa-default-rtdb.europe-west1.firebasedatabase.app
 };
 if (window.__LIGA_DB) LIGA.db = window.__LIGA_DB;   // só para os testes
 const ME_KEY = 'fora-da-caixa-eu';
 let ME = null, LG = {dados:null, erro:null, aCarregar:false}, LTAB = 'hoje';
 try { ME = localStorage.getItem(ME_KEY); } catch (e) {}
 if (!LIGA.jogadores.includes(ME)) ME = null;
-function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {} renderMe(); renderLigaCard(); if (typeof duRefresh === 'function') duRefresh(); }
+// perfis cujo código já foi posto neste telemóvel (os telemóveis que já tinham um perfil antes dos códigos ficam com ele)
+const OK_KEY = 'fora-da-caixa-ok', CONV_KEY = 'fora-da-caixa-convidado';
+let PERFIS_OK = []; try { PERFIS_OK = JSON.parse(localStorage.getItem(OK_KEY) || 'null'); } catch (e) {}
+if (!Array.isArray(PERFIS_OK)) { PERFIS_OK = ME ? [ME] : []; try { localStorage.setItem(OK_KEY, JSON.stringify(PERFIS_OK)); } catch (e) {} }
+let CONVIDADO = null; try { CONVIDADO = localStorage.getItem(CONV_KEY); } catch (e) {}
+function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {}
+  if (!PERFIS_OK.includes(n)) { PERFIS_OK.push(n); try { localStorage.setItem(OK_KEY, JSON.stringify(PERFIS_OK)); } catch (e) {} }
+  renderMe(); renderLigaCard(); if (typeof duRefresh === 'function') duRefresh(); }
+function setConvidado(nome) { CONVIDADO = nome; try { localStorage.setItem(CONV_KEY, nome); } catch (e) {} renderMe(); }
+async function codigoCerto(nome, cod) {
+  const h = LIGA.codigos?.[nome]; if (!h) return true;
+  try { const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`fdc:${nome}:${cod}`));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('') === h; } catch (e) { return false; }
+}
 // dias e semanas pela hora de Lisboa (para toda a gente mudar de dia à mesma hora)
 function lisDate(d = new Date()) { return new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit'}).format(d); }
 function weekStart(ds) { const d = new Date(ds + 'T12:00:00Z'); const wd = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - wd); return d.toISOString().slice(0, 10); }
@@ -1302,10 +1354,26 @@ function desserializar(arr) {
 function feitosHoje(nome) { const d = LG.dados?.[nome]?.[lisDate()]; return d ? Object.keys(d).length : 0; }
 
 // ---------- quem és ----------
-function renderMe() { const el = $('#meBar'); if (!el) return; el.hidden = !ME; el.innerHTML = ME ? `És o <b>${esc(ME)}</b> · <button class="linkbtn" id="meSwap">trocar</button>` : ''; const b = $('#meSwap'); if (b) b.onclick = askWho; }
+function renderMe() { const el = $('#meBar'); if (!el) return; el.hidden = !ME && !CONVIDADO;
+  el.innerHTML = ME ? `És o <b>${esc(ME)}</b> · <button class="linkbtn" id="meSwap">trocar</button>` : CONVIDADO ? `Convidado: <b>${esc(CONVIDADO)}</b> · <button class="linkbtn" id="meSwap">sou da liga</button>` : '';
+  const b = $('#meSwap'); if (b) b.onclick = askWho; }
 function askWho() {
-  const d = $('#who'); $('#whoBtns').innerHTML = LIGA.jogadores.map(n => `<button class="who-b ${n === ME ? 'on' : ''}" data-n="${esc(n)}">${emb(n, 40)}<span>${esc(n)}</span></button>`).join('');
-  $('#whoBtns').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b) return; setMe(b.dataset.n); d.close(); toast(`Olá, ${b.dataset.n}!`); };
+  const d = $('#who'); $('#whoEscolha').hidden = false; $('#whoCodigo').hidden = true; $('#whoConv').hidden = true;
+  $('#whoBtns').innerHTML = LIGA.jogadores.map(n => `<button class="who-b ${n === ME ? 'on' : ''}" data-n="${esc(n)}">${emb(n, 40)}<span>${esc(n)}</span>${PERFIS_OK.includes(n) ? '' : '<small class="who-lock">🔒 código</small>'}</button>`).join('');
+  $('#whoBtns').onclick = e => { const b = e.target.closest('button[data-n]'); if (!b) return; const n = b.dataset.n;
+    if (PERFIS_OK.includes(n)) { setMe(n); d.close(); toast(`Olá, ${n}!`); return; }
+    $('#whoEscolha').hidden = true; $('#whoCodigo').hidden = false; $('#whoCodNome').innerHTML = `${emb(n, 34)}${esc(n)}`; $('#whoErr').hidden = true;
+    const inp = $('#whoPin'); inp.value = ''; setTimeout(() => inp.focus(), 80);
+    const entra = async () => { if (await codigoCerto(n, inp.value.trim())) { setMe(n); d.close(); toast(`Olá, ${n}!`); }
+      else { $('#whoErr').hidden = false; inp.value = ''; inp.focus(); $('#whoCodigo').classList.remove('mx-shake'); void $('#whoCodigo').offsetWidth; $('#whoCodigo').classList.add('mx-shake'); } };
+    $('#whoEntra').onclick = entra; inp.onkeydown = ev => { if (ev.key === 'Enter') entra(); };
+    inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(0, 4); if (inp.value.length === 4) entra(); };
+  };
+  $('#whoVolta').onclick = askWho;
+  $('#whoSouConv').onclick = () => { $('#whoEscolha').hidden = true; $('#whoConv').hidden = false; const i = $('#whoConvNome'); i.value = CONVIDADO || ''; setTimeout(() => i.focus(), 80); };
+  $('#whoConvVolta').onclick = askWho;
+  $('#whoConvOk').onclick = () => { const nome = $('#whoConvNome').value.trim().slice(0, 16); if (!nome) { $('#whoConvNome').focus(); return; }
+    setConvidado(nome); d.close(); toast(`Olá, ${nome}! Estás como convidado`); };
   if (!d.open) d.showModal();
 }
 
@@ -1660,14 +1728,23 @@ async function boot() {
   $('#verFoot').textContent = `versão ${APP_VER}`;
   $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length + OQ.length + MQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, jogadores pelo mundo, transferências, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
   renderHome(); heroAnim(); verVersao();
-  if (!ME) askWho();
   refreshLiga();
   const qs = new URLSearchParams(location.search), j = qs.get('jogo');
-  if (j) {   // desafio de um amigo (?jogo=semente&c=categoria&p=pontos)
-    const fp = qs.get('p'), c = catNorm(qs.get('c')), btn = $('#m-friend'); btn.hidden = false;
-    $('#friendTxt').textContent = (j === 'dia' ? 'O desafio de hoje' : 'As mesmas 7 perguntas') + (fp ? ` · fez ${fp} pontos` : '');
-    btn.onclick = () => { if (j === 'dia') startGame('dia'); else startGame('7', parseInt(j, 36) >>> 0, c); S.friend = true; S.friendScore = fp != null ? Number(fp) : null; };
-  }
+  if (j) {   // desafio de um amigo (?jogo=semente&c=categoria&p=pontos&de=quem desafiou[&d=dia do desafio do dia])
+    const fp = qs.get('p'), c = catNorm(qs.get('c')), de = (qs.get('de') || '').slice(0, 20), diaD = qs.get('d') || today(), btn = $('#m-friend'); btn.hidden = false;
+    const chave = de ? (j === 'dia' ? `dia-${diaD}` : j) + '_' + (j === 'dia' ? 'tudo' : c).replace(/[.#$\[\]\/]/g, '') + '_' + de.replace(/[.#$\[\]\/]/g, '') : null;
+    $('#friendTxt').textContent = (de ? `${de} desafiou-te · ` : '') + (j === 'dia' ? 'o desafio de hoje' : 'as mesmas 7 perguntas') + (fp ? ` · fez ${fp} pontos` : '');
+    const jogar = () => { if (j === 'dia') { if (diaD === today()) startGame('dia'); else startGame('7', hashStr(`dia:${LIGA.sal}:` + diaD), 'tudo'); } else startGame('7', parseInt(j, 36) >>> 0, c); S.friend = true; S.friendScore = fp != null ? Number(fp) : null; S.convite = {de, chave}; };
+    btn.onclick = jogar;
+    if (!ME) {   // quem não tem perfil neste telemóvel: entra como convidado (sem código)
+      const d = $('#conv');
+      $('#convDe').innerHTML = `${de ? emb(de, 40) : '<span style="font-size:34px">⚽</span>'}<span><b>${de ? esc(de) + ' desafiou-te!' : 'Desafiaram-te!'}</b><span>${j === 'dia' ? 'O desafio do dia' : '7 perguntas'}${fp ? ` · fez <b style="display:inline;font-size:inherit;font-family:inherit">${esc(fp)} pontos</b>` : ''}. Consegues fazer melhor?</span></span>`;
+      $('#convNome').value = CONVIDADO || '';
+      $('#convOk').onclick = () => { const nome = $('#convNome').value.trim().slice(0, 16); if (!nome) { $('#convNome').focus(); return; } setConvidado(nome); d.close(); jogar(); };
+      $('#convLiga').onclick = () => { d.close(); askWho(); };
+      d.showModal();
+    }
+  } else if (!ME && !CONVIDADO) askWho();
   show('s-home');
 }
 
@@ -1794,6 +1871,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261120194623"></script>
+<script src="modos.js?v=20261125145409"></script>
 </body>
 </html>

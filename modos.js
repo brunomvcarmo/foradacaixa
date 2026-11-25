@@ -76,6 +76,9 @@ const MX_CSS = `
 .du-rec{display:flex;flex-wrap:wrap;gap:8px}
 .du-rec span{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:14px}
 .du-vs{font-family:var(--display);font-size:22px;margin:4px 0}
+.cv-r{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}
+.cv-r span{flex:1}.cv-r small{color:var(--mute)}.cv-r b{font-family:var(--display);font-weight:400;font-size:16px}
+.cv-g{flex:none!important;width:18px;text-align:center}
 .du-card .emb{margin:0}
 .du-op{display:inline-flex;align-items:center;gap:2px}
 .du-click{cursor:pointer}
@@ -491,6 +494,11 @@ function duRender() {
   if (Object.keys(reg).length) h += `<div class="du-sec">Contra cada amigo</div><div class="du-rec">${Object.entries(reg).map(([o, [v, e, d]]) => `<span>${emb(ME, 16)}${esc(ME)} <b>${v}</b> – <b>${d}</b> ${esc(o)}${emb(o, 16)}${e ? ` · ${e} empate${e === 1 ? '' : 's'}` : ''}</span>`).join('')}</div>`;
   if (feitos.length) h += `<div class="du-sec">Últimos duelos</div>` + feitos.slice(0, 15).map(d => { const o = duOutro(d), a = duRes(d, ME), b = duRes(d, o), cl = a > b ? 'du-win' : a < b ? 'du-lose' : '';
     return `<div class="du-card du-click" data-ver="${d.id}">${emb(o, 30)}<div class="tx"><b class="${cl}">${a > b ? 'Ganhaste' : a < b ? 'Perdeste' : 'Empate'}</b> contra ${esc(o)}<small>${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})} · ${esc(catNome(d.cat))} · <u>ver respostas</u></small></div><div class="res">${a} – ${b}</div></div>`; }).join('');
+  const meus = Object.values(CV || {}).filter(c => c && c.de === ME && c.res).sort((a, b) => (b.info?.criado || 0) - (a.info?.criado || 0));
+  if (meus.length) h += `<div class="du-sec">Desafios por link</div><p class="cd-p" style="margin:-4px 2px 8px">Quem jogou os desafios que partilhaste (no fim de um jogo: "Desafiar amigo").</p>` + meus.slice(0, 10).map(c => {
+    const eu = c.info?.pontos ?? 0, rs = Object.values(c.res).sort((a, b) => (b.fim || 0) - (a.fim || 0));
+    return `<div class="du-card" style="flex-wrap:wrap"><div class="tx" style="flex-basis:100%"><b>${c.info?.cat === 'dia' ? 'Desafio do dia' : 'Jogo rápido'}</b> · fizeste ${eu}<small>${c.info?.criado ? new Date(c.info.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'}) : ''}</small></div>
+      ${rs.map(r => `<div class="cv-r">${r.perfil ? emb(r.nome, 18) : '<span class="cv-g">👤</span>'}<span>${esc(r.nome)}${r.perfil ? '' : ' <small>(convidado)</small>'}</span><b class="${r.pontos > eu ? 'du-lose' : r.pontos < eu ? 'du-win' : ''}">${r.pontos} – ${eu}</b></div>`).join('')}</div>`; }).join('');
   if (!ls.length) h += `<p class="cd-p" style="margin-top:14px">Ainda não há duelos. Escolhe um amigo: jogas as 7 perguntas e ele recebe o desafio no início da app.</p>`;
   el.innerHTML = h;
   el.querySelectorAll('[data-jogar]').forEach(b => b.onclick = () => duJogar(b.dataset.jogar));
@@ -523,7 +531,7 @@ function duVer(id) {
   el.innerHTML = h; window.scrollTo(0, 0);
   $('#duVolta').onclick = duRender;
 }
-async function openDuelo() { show('s-duelo'); duRender(); await duGet(); duRender(); duRenderHome(); }
+async function openDuelo() { show('s-duelo'); duRender(); await Promise.all([duGet(), cvGet()]); duRender(); duRenderHome(); }
 function duRecDe() { return {pontos:S.score, golos:S.shots.filter(s => s.tier).length, perguntas:S.shots.length, inicio:S.duelo.inicio, tiros:tirosDe(), resp:S.shots.map(s => s.p ? s.p.nome : null)}; }
 async function duCriar(op) {
   if (!LIGA.db || !ME) return;
@@ -681,7 +689,22 @@ $('#euBack').onclick = mxSair;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button>');
-endGame = (orig => function () { $('#endDuVer').hidden = true; return orig.apply(this, arguments); })(endGame);
+endGame = (orig => function () { $('#endDuVer').hidden = true; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
+// ---------- desafios por link (também para convidados): o resultado de quem joga fica em ligas/<id>/convites/<chave>/res ----------
+const chaveNome = n => String(n).replace(/[.#$\[\]\/]/g, '').slice(0, 20) || 'alguem';
+function conviteFim() {
+  const cv = S.convite, quem = ME || CONVIDADO, sub = $('#endSub');
+  if (cv.de && S.friendScore != null) {
+    const a = S.score, b = S.friendScore;
+    sub.innerHTML = `<div class="du-vs ${a > b ? 'du-win' : a < b ? 'du-lose' : ''}">${a > b ? '🏆 Ganhaste ao' : a < b ? 'Perdeste com o' : 'Empataste com o'} ${esc(cv.de)} · ${a} – ${b}</div>${esc(sub.textContent.replace(/ · o teu amigo fez \d+/, ''))}`;
+    if (a > b) confettiEnd();
+  }
+  if (!cv.chave || !quem || !LIGA.db || quem === cv.de) return;
+  const body = {nome: quem, perfil: !!ME, pontos: S.score, golos: S.shots.filter(x => x.tier).length, fim: Date.now()};
+  fetch(ligaUrl(`convites/${cv.chave}/res/${chaveNome(quem)}`), {method:'PUT', body: JSON.stringify(body)}).catch(() => {});
+}
+let CV = null;
+async function cvGet() { if (!LIGA.db) return; try { const r = await fetch(ligaUrl('convites'), {cache:'no-store'}); if (r.ok) CV = (await r.json()) || {}; } catch (e) {} }
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;
