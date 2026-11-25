@@ -358,6 +358,7 @@ details.all .chips{margin-top:6px}
 .lg-done{margin:12px 0 0;font-weight:600;text-align:center}
 .ligacard .btn{margin-top:12px}
 .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.cod-l{display:block;font-weight:700;font-size:14px;margin:6px 2px 4px}
 .who-lock{font-family:var(--sans);font-size:11.5px;font-weight:700;color:var(--mute)}
 .who-cn{display:flex;align-items:center;gap:8px}
 .who-pin{display:block;width:100%;font:inherit;font-family:var(--display);font-size:34px;letter-spacing:.6em;text-align:center;padding:12px 0 12px .6em;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);outline:none}
@@ -674,6 +675,16 @@ dialog .tiers b{width:52px}
     <div class="row2"><button class="btn ghost" id="whoConvVolta" type="button">Voltar</button><button class="btn" id="whoConvOk" type="button">Entrar</button></div>
   </div>
 </dialog>
+<dialog id="codDlg">
+  <h2>🔒 Mudar o código</h2>
+  <p style="color:var(--mute);margin:0 0 12px">Escolhe um código novo de 4 algarismos para o teu perfil. Passa a valer em todos os telemóveis (os que já entraram continuam entrados).</p>
+  <label class="cod-l" for="codNovo">Código novo</label>
+  <input id="codNovo" class="who-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+  <label class="cod-l" for="codRep">Repete o código novo</label>
+  <input id="codRep" class="who-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+  <p class="cd-msg" id="codMsg" hidden></p>
+  <div class="row2"><button class="btn ghost" id="codCancela" type="button">Cancelar</button><button class="btn" id="codGuarda" type="button">Guardar</button></div>
+</dialog>
 <dialog id="conv">
   <h2>⚔️ Desafio!</h2>
   <div class="conv-de" id="convDe"></div>
@@ -732,10 +743,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261125145409"></script>
-<script src="perguntas2.js?v=20261125145409"></script>
-<script src="perguntas3.js?v=20261125145409"></script>
-<script src="emblemas.js?v=20261125145409"></script>
+<script src="perguntas.js?v=20261125150206"></script>
+<script src="perguntas2.js?v=20261125150206"></script>
+<script src="perguntas3.js?v=20261125150206"></script>
+<script src="emblemas.js?v=20261125150206"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -745,7 +756,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261125145409';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261125150206';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1290,10 +1301,18 @@ function setMe(n) { ME = n; try { localStorage.setItem(ME_KEY, n); } catch (e) {
   if (!PERFIS_OK.includes(n)) { PERFIS_OK.push(n); try { localStorage.setItem(OK_KEY, JSON.stringify(PERFIS_OK)); } catch (e) {} }
   renderMe(); renderLigaCard(); if (typeof duRefresh === 'function') duRefresh(); }
 function setConvidado(nome) { CONVIDADO = nome; try { localStorage.setItem(CONV_KEY, nome); } catch (e) {} renderMe(); }
+async function hashCodigo(nome, cod) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`fdc:${nome}:${cod}`));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// o código de cada perfil: o que a pessoa escolheu (Firebase, ligas/<id>/perfil/<nome>/codigo) ou, se nunca mudou, o inicial (LIGA.codigos)
+async function codigoAtual(nome) {
+  if (LIGA.db) try { const r = await fetch(ligaUrl(`perfil/${nome}/codigo`), {cache:'no-store'}); if (r.ok) { const h = await r.json(); if (typeof h === 'string' && h.length === 64) return h; } } catch (e) {}
+  return LIGA.codigos?.[nome] || null;
+}
 async function codigoCerto(nome, cod) {
-  const h = LIGA.codigos?.[nome]; if (!h) return true;
-  try { const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`fdc:${nome}:${cod}`));
-    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('') === h; } catch (e) { return false; }
+  const h = await codigoAtual(nome); if (!h) return true;
+  try { return (await hashCodigo(nome, cod)) === h; } catch (e) { return false; }
 }
 // dias e semanas pela hora de Lisboa (para toda a gente mudar de dia à mesma hora)
 function lisDate(d = new Date()) { return new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit'}).format(d); }
@@ -1871,6 +1890,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261125145409"></script>
+<script src="modos.js?v=20261125150206"></script>
 </body>
 </html>

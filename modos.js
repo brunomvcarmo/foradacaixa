@@ -667,6 +667,7 @@ function renderEu() {
   const cat = catNorm(ST.cat);
   $('#euMe').innerHTML = `<span class="eu-emb">${ME ? `<img src="${emblemaPNG(ME, true)}" alt="">` : ''}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
   $('#euTroca').onclick = askWho;
+  $('#euCod').hidden = !ME;
   const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best));
   const dl = ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
   const v = dl.filter(d => duRes(d, ME) > duRes(d, duOutro(d))).length, dr = dl.filter(d => duRes(d, ME) < duRes(d, duOutro(d))).length;
@@ -674,6 +675,26 @@ function renderEu() {
   const it = [['⚡ Rajada', ST.bestRaj || 0, 'recorde'], ['🕵️ Quem é?', ST.bestQuem || 0, 'recorde'], ['📈 Mais ou menos', mm, 'melhor série'],
     ['⚔️ Duelos', dl.length ? `${v}–${dr}` : '—', 'vitórias–derrotas'], ['📅 Desafio do dia', hoje ?? '—', 'hoje'], ['🗂️ Perguntas', cat === 'tudo' ? 'Todas' : cat.split(',').length + ' tipos', 'tipo escolhido']];
   $('#euRecs').innerHTML = it.map(([t, val, sub]) => `<div class="eu-rec"><span>${t}</span><b>${esc(String(val))}</b><span>${sub}</span></div>`).join('');
+}
+// mudar o código do perfil: o novo duas vezes; se forem iguais, guarda o hash em ligas/<id>/perfil/<nome>/codigo
+function abrirMudarCodigo() {
+  if (!ME) return;
+  const d = $('#codDlg'), a = $('#codNovo'), b = $('#codRep'), m = $('#codMsg');
+  a.value = ''; b.value = ''; m.hidden = true;
+  const so4 = el => () => { el.value = el.value.replace(/\D/g, '').slice(0, 4); if (el === a && a.value.length === 4) b.focus(); };
+  a.oninput = so4(a); b.oninput = so4(b);
+  const erro = t => { m.textContent = t; m.hidden = false; mxShake(d); };
+  $('#codCancela').onclick = () => d.close();
+  $('#codGuarda').onclick = async () => {
+    if (!/^\d{4}$/.test(a.value)) return erro('O código tem de ter 4 algarismos.');
+    if (a.value !== b.value) { b.value = ''; b.focus(); return erro('Os dois códigos não são iguais. Repete o código novo.'); }
+    const bt = $('#codGuarda'); bt.disabled = true;
+    try { await ligaPut(`perfil/${ME}/codigo`, await hashCodigo(ME, a.value)); d.close(); toast('Código mudado! Usa o novo da próxima vez'); }
+    catch (e) { erro('Sem ligação: o código não foi mudado. Tenta outra vez.'); }
+    bt.disabled = false;
+  };
+  b.onkeydown = ev => { if (ev.key === 'Enter') $('#codGuarda').click(); };
+  d.showModal(); setTimeout(() => a.focus(), 80);
 }
 function openEu() { renderEu(); show('s-eu'); duGet().then(() => { if ($('#s-eu').classList.contains('on')) renderEu(); }); }
 $('#bnav').onclick = e => {
@@ -686,6 +707,8 @@ $('#bnav').onclick = e => {
   else openEu();
 };
 $('#euBack').onclick = mxSair;
+$('#euMe').insertAdjacentHTML('afterend', '<button class="st-btn" id="euCod" hidden>🔒 Mudar o código do perfil</button>');
+$('#euCod').onclick = abrirMudarCodigo;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button>');
