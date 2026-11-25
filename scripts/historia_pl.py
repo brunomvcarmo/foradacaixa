@@ -70,6 +70,11 @@ def main():
             else: home[r['fixture']] = int(r['opponent_team'])
         name2id = {v: k for k, v in teams.items()}
         st = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))   # jogador → equipa → estatística
+        jogos = {}   # resultado de cada jogo: fixture → (casa, fora, golos casa, golos fora)
+        for r in gw:
+            f = r['fixture']
+            if f in jogos or f not in home or f not in away or r.get('team_h_score') in (None, '', 'None'): continue
+            jogos[f] = (home[f], away[f], int(num(r['team_h_score'])), int(num(r['team_a_score'])))
         hat = set(); tot = defaultdict(lambda: defaultdict(int)); vs = defaultdict(Counter); vs_grande = defaultdict(Counter)
         for r in gw:
             el = int(r['element'])
@@ -79,7 +84,7 @@ def main():
             m = int(num(r['minutes'])); g = int(num(r['goals_scored'])); a = int(num(r['assists']))
             s = st[el][t]
             s['jogos'] += m > 0; s['golos'] += g; s['assist'] += a
-            for k in ('red_cards', 'own_goals', 'penalties_missed', 'clean_sheets'):
+            for k in ('red_cards', 'own_goals', 'penalties_missed', 'clean_sheets', 'yellow_cards', 'penalties_saved'):
                 tot[el][k] += int(num(r[k])) if (k != 'clean_sheets' or m >= 60) else 0
             tot[el]['golos'] += g; tot[el]['assist'] += a; tot[el]['pontos'] += int(num(r['total_points']))
             if g >= 3: hat.add(el)
@@ -87,7 +92,7 @@ def main():
                 adv = teams.get(int(num(r['opponent_team'])))
                 if adv:
                     vs[el][adv] += g
-                    if adv in GRANDES6: vs_grande[adv][el] += g
+                    if adv in GRANDES6 + ['Newcastle', 'Aston Villa', 'Everton', 'West Ham']: vs_grande[adv][el] += g
         fama = {el: num(p['selected_by_percent']) + num(p['total_points']) / 1000 for el, p in raw.items()}
         pos = {el: int(num(p['element_type'])) for el, p in raw.items()}
         code = {el: str(p['code']) for el, p in raw.items()}
@@ -133,12 +138,35 @@ def main():
         gk = [(el, pl(d['clean_sheets'], 'jogo') + ' sem sofrer') for el, d in tot.items() if pos.get(el) == 1 and d['clean_sheets'] >= 10]
         if len(gk) >= 5: q('gk10', f'Um guarda-redes com 10 ou mais jogos sem sofrer golos na Premier League {label}', sub, gk)
         df = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if pos.get(el) == 2 and d['golos'] >= 3]
-        if len(df) >= 5: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição oficial do jogador)', df)
+        if len(df) >= 5: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição do jogador no Fantasy oficial da Premier League)', df)
+        # (amarelos não: a FPL não conta os dois amarelos de quem é expulso, a lista podia ficar incompleta)
+        psv = [(el, f"{pl(d['penalties_saved'], 'penálti')} defendido{'s' if d['penalties_saved'] > 1 else ''}") for el, d in tot.items() if d['penalties_saved'] > 0]
+        if 5 <= len(psv) <= 30: q('pdef', f'Um guarda-redes que defendeu um penálti na Premier League {label}', sub, psv)
+        for lim in (10, 8, 7, 6):
+            md = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if pos.get(el) == 3 and d['golos'] >= lim]
+            if 5 <= len(md) <= 20: q(f'med{lim}', f'Um médio que marcou {lim} ou mais golos na Premier League {label}', sub + ' (posição do jogador no Fantasy oficial da Premier League)', md); break
+        dois = [(el, ' e '.join(teams[t] for t in d if d[t]['jogos'])) for el, d in st.items() if sum(1 for t in d if d[t]['jogos']) >= 2]
+        if 5 <= len(dois) <= 30: q('dois', f'Um jogador que jogou por dois clubes diferentes na mesma época da Premier League {label}', sub + ' (mudou de clube a meio da época)', dois)
         # clubes da época (os mais óbvios são os que somaram mais pontos FPL, ou seja, as equipas mais fortes)
         forca = defaultdict(int)
         for el, d in st.items():
             for t in d: forca[t] += d[t]['golos']
         clubs = sorted(teams, key=lambda t: -forca[t])
+        # resultados: quem venceu / empatou com cada um dos clubes grandes nesta época
+        def qc(qid, txt, itens):
+            itens = sorted(itens.items(), key=lambda x: clubs.index(x[0]))
+            if 5 <= len(itens) <= 19: perguntas.append({'id': f'h{label}-{qid}', 'ep': label, 'tipo': 'clube', 'txt': txt, 'sub': f'Premier League {label} (só jogos da liga)', 'r': [[teams[t], v] for t, v in itens]})
+        for alvo in [t for t in teams if teams[t] in GRANDES6 + ['Newcastle', 'Aston Villa', 'Everton', 'West Ham']]:
+            ven, emp = {}, {}
+            for f, (h, a, hg, ag) in sorted(jogos.items(), key=lambda x: int(x[0])):
+                if alvo not in (h, a): continue
+                adv = a if h == alvo else h; mg, og = (hg, ag) if h == alvo else (ag, hg)
+                res = f"{og}-{mg} {'fora' if h == alvo else 'em casa'}"
+                if og > mg: ven.setdefault(adv, res)
+                elif og == mg: emp.setdefault(adv, res)
+            nm = teams[alvo]
+            qc(f'venceu-{nm.replace(" ", "")}', f'Um clube que venceu o {nm} na Premier League {label}', ven)
+            qc(f'empatou-{nm.replace(" ", "")}', f'Um clube que empatou com o {nm} na Premier League {label}', emp)
         perguntas.append({'id': f'h{label}-clubes', 'ep': label, 'tipo': 'clube', 'txt': f'Um clube que jogou na Premier League {label}', 'sub': 'As 20 equipas dessa época', 'r': [[teams[t], ''] for t in clubs]})
         # jogadores que marcaram contra cada um dos 6 grandes nesta época (muitas respostas)
         for adv, cnt in vs_grande.items():

@@ -173,16 +173,24 @@ def main():
     for a0, a1, txt, per in DEC:
         ms = [m for y in J if isinstance(y, int) and a0 <= y <= a1 for m in J[y]]
         if not ms: continue
-        for g in ('Benfica', 'FC Porto', 'Sporting'):
-            ven = Counter()
-            for d, rnd, h, a, hg, ag in ms:
+        for g in ('Benfica', 'FC Porto', 'Sporting', 'Braga'):
+            ven, emp, tres, gol = Counter(), Counter(), {}, {}
+            for d, rnd, h, a, hg, ag in sorted(ms):
                 if g in (h, a):
                     adv = a if h == g else h; mg, og = (hg, ag) if h == g else (ag, hg)
                     if og > mg: ven[adv] += 1
+                    elif og == mg: emp[adv] += 1
+                    if og >= 3: tres.setdefault(adv, f'{og}-{mg} ({d[:4]})')
+                    if mg - og >= 5: gol.setdefault(adv, f'{mg}-{og} ({d[:4]})')
             fam = lambda t: PRESTIGIO.get(t, 0)
-            r = [[t, f'{v} vitória' + ('s' if v > 1 else '')] for t, v in sorted(ven.items(), key=lambda x: (-fam(x[0]), -x[1]))]
-            if 5 <= len(r) <= 30:
-                perguntas.append({'id': f'ptdec{a0}-venceu-{g}', 'per': per, 'ep': txt, 'txt': f'Um clube que venceu {ART[g]} na 1.ª Liga {txt}', 'sub': '1.ª Liga, todas as épocas desse período', 'r': r})
+            def dq(qid, frase, cnt, unid=None, mx=30):
+                if unid: r = [[t, pl(v, unid, unid + 's')] for t, v in sorted(cnt.items(), key=lambda x: (-fam(x[0]), -x[1]))]
+                else: r = [[t, v] for t, v in sorted(cnt.items(), key=lambda x: -fam(x[0]))]
+                if 5 <= len(r) <= mx: perguntas.append({'id': f'ptdec{a0}-{qid}-{g}', 'per': per, 'ep': txt, 'txt': frase, 'sub': '1.ª Liga, todas as épocas desse período', 'r': r})
+            if g != 'Braga': dq('venceu', f'Um clube que venceu {ART[g]} na 1.ª Liga {txt}', ven, 'vitória')
+            dq('empatou', f'Um clube que empatou com {ART[g]} na 1.ª Liga {txt}', emp, 'empate')
+            dq('tres', f'Um clube que marcou 3 ou mais golos ao {g} num jogo da 1.ª Liga {txt}', tres)
+            dq('goleou', f'Um clube que {ART[g]} venceu por 5 ou mais golos de diferença na 1.ª Liga {txt}', gol)
         clubes = Counter(t for y in J if isinstance(y, int) and a0 <= y <= a1 for t in {m[2] for m in J[y]})
         r = [[t, f'{v} época' + ('s' if v > 1 else '')] for t, v in sorted(clubes.items(), key=lambda x: (-PRESTIGIO.get(x[0], 0), -x[1]))]
         if len(r) >= 5: perguntas.append({'id': f'ptdec{a0}-clubes', 'per': per, 'ep': txt, 'txt': f'Um clube que jogou a 1.ª Liga {txt}', 'sub': 'Pelo menos uma época nesse período', 'r': r})
