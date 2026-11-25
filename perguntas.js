@@ -150,6 +150,30 @@ window.ALIASES = {
   'Alemanha':['RFA','Alemanha Ocidental'], 'Países Baixos':['Holanda'], 'União Soviética':['URSS'], 'Estados Unidos':['EUA'], 'RD Congo':['Zaire','República Democrática do Congo'],
   'Congo':['Congo-Brazzaville'], 'Catar':['Qatar'], 'Coreia do Sul':['Coreia'], 'País de Gales':['Gales'], 'Checoslováquia':['Checoslovaquia'],
 };
+// Alcunhas e nomes curtos (juntam-se aos de cima; valem também para os nomes completos da Premier League, ex. "Bruno Borges Fernandes")
+(function () {
+  const A = window.ALIASES, mais = {
+    'Cristiano Ronaldo dos Santos Aveiro':['CR7','Cristiano Ronaldo'], 'Diogo Teixeira da Silva':['Diogo Jota','Jota'], 'Diogo J.':['Diogo Jota'],
+    'Bruno Borges Fernandes':['Bruno Fernandes','Bruno'], 'Kevin De Bruyne':['KDB'], 'Virgil van Dijk':['VVD','Van Dijk'], 'Trent Alexander-Arnold':['TAA','Trent'],
+    'Mohamed Salah':['Mo Salah','Salah'], 'M.Salah':['Mo Salah','Mohamed Salah'], 'Zlatan Ibrahimović':['Ibra'], 'Zlatan Ibrahimovic':['Ibra'], 'Sergio Agüero':['Kun Agüero','Kun'],
+    'Son Heung-min':['Sonny','Heung-min Son'], 'Zinedine Zidane':['Zizou'], 'Zinédine Zidane':['Zizou'], 'Fernando Torres':['El Niño'], 'Gonzalo Higuaín':['Pipita'],
+    'Neymar':['Neymar Jr','Neymar Júnior'], 'Vinícius Júnior':['Vini Jr','Vini Júnior','Vinícius'], 'Gianluigi Buffon':['Gigi Buffon'], "N'Golo Kanté":['Ngolo Kanté','Kanté'],
+    'Kylian Mbappé':['Mbappé'], 'Luka Modrić':['Modric'], 'Erling Haaland':['Erling Braut Haaland'], 'Harry Kane':['Kane'], 'Jude Bellingham':['Bellingham'],
+    'Ricardo Quaresma':['Quaresma','Mustang'], 'Rúben dos Santos Gato Alves Dias':['Rúben Dias'], 'Rúben da Silva Neves':['Rúben Neves'], 'João Cavaco Cancelo':['João Cancelo'],
+    'João Félix Sequeira':['João Félix'], 'Bernardo Mota Veiga de Carvalho e Silva':['Bernardo Silva'], 'Gabriel Fernando de Jesus':['Gabriel Jesus'],
+    'João Filipe Iria Santos Moutinho':['João Moutinho'], 'Gonçalo Manuel Ganchinho Guedes':['Gonçalo Guedes'], 'Ruben Filipe Marques Diogo Amorim':['Rúben Amorim'],
+    'Jürgen Klopp':['Klopp'], 'José Mourinho':['Mourinho','Special One'], 'Arsène Wenger':['Wenger'], 'Carlo Ancelotti':['Ancelotti'], 'Diego Maradona':['Maradona','El Pibe'],
+    'Manchester United':['Man United','Man Utd','United','Red Devils'], 'Manchester City':['Man City','City'], 'Tottenham':['Spurs','Tottenham Hotspur'],
+    'Wolverhampton':['Wolves'], 'Middlesbrough':['Boro'], 'Nottingham Forest':['Forest'], 'Newcastle':['Newcastle United'], 'Sheffield United':['Sheffield Utd'],
+    'Barcelona':['Barça','Barca','FC Barcelona'], 'Atlético de Madrid':['Atleti','Atlético Madrid'], 'Juventus':['Juve'], 'Inter':['Internazionale','Inter de Milão'],
+    'Milan':['AC Milan'], 'PSG':['Paris Saint-Germain','Paris SG'], 'Bayern':['Bayern Munique','Bayern de Munique'], 'Borussia Dortmund':['BVB'],
+    'Bayer Leverkusen':['Leverkusen'], 'Beşiktaş':['Besiktas'], 'PSV':['PSV Eindhoven'], 'Athletic Bilbao':['Athletic Club'],
+    'Benfica':['SLB'], 'FC Porto':['FCP'], 'Sporting':['SCP','Sporting de Lisboa'], 'Vitória de Guimarães':['Vitória SC','Guimarães'],
+    'Países Baixos':['Holanda'], 'Estados Unidos':['EUA','USA'], 'Chéquia':['República Checa'], 'Coreia do Sul':['Coreia'],
+    'Kjøbenhavns Boldklub':['KB','KB Copenhaga']
+  };
+  for (const k in mais) A[k] = [...(A[k] || []), ...mais[k]];
+})();
 
 // Opções extra na caixa de resposta (para a lista não denunciar as respostas certas)
 window.EXTRAS = {

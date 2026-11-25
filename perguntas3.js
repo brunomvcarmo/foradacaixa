@@ -56,7 +56,7 @@
     ['adebayor', 'Emmanuel Adebayor', 'mundo', ['Arsenal', 'Manchester City', 'Real Madrid', 'Tottenham', 'Monaco', 'Crystal Palace', 'Metz', 'İstanbul Başakşehir', 'Kayserispor', 'Olimpia']],
     ['kpboateng', 'Kevin-Prince Boateng', 'mundo', ['Milan', 'Barcelona', 'Borussia Dortmund', 'Tottenham', 'Schalke 04', 'Eintracht Frankfurt', 'Fiorentina', 'Beşiktaş', 'Hertha Berlim', 'Las Palmas', 'Sassuolo', 'Monza', 'Portsmouth']],
     ['morientes', 'Fernando Morientes', 'mundo', ['Real Madrid', 'Liverpool', 'Valência', 'Monaco', 'Marseille', 'Zaragoza', 'Albacete']],
-    ['laudrup', 'Michael Laudrup', 'mundo', ['Barcelona', 'Real Madrid', 'Juventus', 'Ajax', 'Lazio', 'Brøndby', 'Vissel Kobe', 'KB']],
+    ['laudrup', 'Michael Laudrup', 'mundo', ['Barcelona', 'Real Madrid', 'Juventus', 'Ajax', 'Lazio', 'Brøndby', 'Vissel Kobe', 'Kjøbenhavns Boldklub']],
     ['hagi', 'Gheorghe Hagi', 'mundo', ['Real Madrid', 'Barcelona', 'Galatasaray', 'Steaua Bucareste', 'Brescia', 'Farul Constança', 'Sportul Studențesc']],
     ['klinsmann', 'Jürgen Klinsmann (como jogador)', 'mundo', ['Bayern', 'Inter', 'Tottenham', 'Monaco', 'Estugarda', 'Sampdoria', 'Stuttgarter Kickers', 'Orange County Blue Star']],
     ['desailly', 'Marcel Desailly', 'mundo', ['Milan', 'Chelsea', 'Marseille', 'Nantes', 'Al-Gharafa', 'Qatar SC']],
@@ -119,7 +119,7 @@
     'Dínamo Tbilisi': ['Dinamo Tbilisi'], 'Magdeburg': ['Magdeburgo'], 'Wigan Athletic': ['Wigan'], 'AEL Larissa': ['Larissa'], 'Farul Constança': ['Farul'],
     'Guangzhou Evergrande': ['Guangzhou'], 'Hebei China Fortune': ['Hebei'], 'Jiangsu Suning': ['Jiangsu'], 'Dalian Professional': ['Dalian'], 'İstanbul Başakşehir': ['Başakşehir', 'Basaksehir'],
     'New York Red Bulls': ['MetroStars', 'New York MetroStars'], 'Orange County Blue Star': ['Orange County'], 'América-RJ': ['América do Rio'], 'Lorca Deportiva': ['Lorca'],
-    'Olympique Lillois': ['Lillois'], 'KB': ['Kjøbenhavns Boldklub'], 'Lanceros Boyacá': ['Lanceros'], 'Racing Paris': ['Racing Club de France'], 'Swansea City': ['Swansea'], 'Stoke City': ['Stoke'], 'Hull City': ['Hull'],
+    'Olympique Lillois': ['Lillois'], 'Lanceros Boyacá': ['Lanceros'], 'Racing Paris': ['Racing Club de France'], 'Swansea City': ['Swansea'], 'Stoke City': ['Stoke'], 'Hull City': ['Hull'],
     'Xavi': ['Xavi Hernández'], 'Tito Vilanova': ['Vilanova'], 'Rui Borges': ['Borges'], 'Arne Slot': ['Slot'], 'László Bölöni': ['Bölöni', 'Boloni'],
   });
   X.clube.push('Lens', 'Reims', 'Montpellier', 'Auxerre', 'Sochaux', 'Strasbourg', 'Guingamp', 'Lorient', 'Rennes', 'Toulouse', 'Metz', 'Cannes', 'Grenoble',

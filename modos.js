@@ -21,7 +21,7 @@ const MX_CSS = `
 .mx-bar i{display:block;height:100%;width:100%;background:var(--acc);transition:width .25s linear}
 .mx-bar.low i{background:var(--red)}
 .mx-msg{font-size:14px;font-weight:600;color:var(--bad);min-height:20px;margin:2px 2px 6px}
-.mx-msg.ok{color:var(--acc)}
+.mx-msg.ok{color:var(--acc-t)}
 .mx-found{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .mx-found .chip{animation:mxpop .3s}
 .mx-cnt{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin:10px 2px 4px}
@@ -40,6 +40,25 @@ const MX_CSS = `
 .mx-stake{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute);margin:4px 2px 10px}
 .mx-stake i{width:12px;height:12px;border-radius:50%;flex:none}
 .mx-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.eu-push{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px 10px 14px;margin:10px 0 0}
+.eu-push .tx{flex:1;min-width:0}.eu-push b{display:block}.eu-push small{color:var(--mute);font-size:13px;line-height:1.3;display:block}
+.du-btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.eu-tema{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px 8px 14px;margin:10px 0 4px;font-weight:600}
+.eu-tema .seg{display:flex;gap:4px;background:var(--bg);border-radius:999px;padding:3px}
+.eu-tema .seg button{border:0;background:transparent;color:var(--mute);font:600 13.5px var(--sans);padding:7px 11px;border-radius:999px;cursor:pointer}
+.eu-tema .seg button.on{background:var(--ink);color:var(--bg)}
+.med-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 14px}
+.med{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;opacity:.62}
+.med.tem{opacity:1;border:2px solid var(--t3);background:linear-gradient(180deg,var(--panel),var(--bg2))}
+.med-ic{font-size:30px;line-height:1.1;filter:grayscale(1)}.med.tem .med-ic{filter:none}
+.med b{font-size:13.5px;line-height:1.15}.med small{font-size:11.5px;color:var(--mute);line-height:1.2}
+.med em{font-style:normal;font-size:11.5px;font-weight:700;color:var(--mute);margin-top:2px}.med.tem em{color:var(--acc-t)}
+.med-bar{display:block;width:80%;height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}.med-bar i{display:block;height:100%;background:var(--acc)}
+.med-n{font-family:var(--sans);font-size:13px;color:var(--mute);margin-left:4px}
+.qe-pagas{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}.qe-pagas:empty{display:none}
+.qe-paga{border:1.5px dashed var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:7px 12px;font:600 14px var(--sans);cursor:pointer}
+.qe-paga small{color:var(--red);font-weight:700;margin-left:2px}
+.qe-dica{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:14px}.qe-dica b{letter-spacing:.04em}
 .mx-row .btn{margin-top:0;font-size:16px;padding:13px 8px}
 .mx-end{text-align:center;padding:10px 0 4px}
 .mx-big{font-family:var(--display);font-size:60px;line-height:1;margin:6px 0}
@@ -51,7 +70,7 @@ const MX_CSS = `
 .mm-n{font-family:var(--display);font-size:22px;line-height:1.15}
 .mm-l{color:var(--mute);font-size:13px;margin-top:4px}
 .mm-t{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:14px}
-.mm-v{font-family:var(--display);font-size:36px;color:var(--acc);margin-top:4px;min-height:44px}
+.mm-v{font-family:var(--display);font-size:36px;color:var(--acc-t);margin-top:4px;min-height:44px}
 .mm-v.q{color:var(--mute)}
 .mm-v.bad{color:var(--red)}
 .mm-d{color:var(--mute);font-size:13px;min-height:18px}
@@ -79,7 +98,7 @@ const MX_CSS = `
 .cv-r{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}
 .cv-r span{flex:1}.cv-r small{color:var(--mute)}.cv-r b{font-family:var(--display);font-weight:400;font-size:16px}
 .cv-g{flex:none!important;width:18px;text-align:center}
-.du-link{border-style:dashed;color:var(--acc)}
+.du-link{border-style:dashed;color:var(--acc-t)}
 .tc-mini,.mu-mini{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:0 0 12px}
 .tc-mini{display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid var(--t3)}
 .tc-mini .ic{font-size:26px}.tc-mini .tx{flex:1;min-width:0}.tc-mini .tx b{font-family:var(--display);font-weight:400;font-size:17px;display:block}
@@ -101,7 +120,7 @@ const MX_CSS = `
 .tc-p{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);font-weight:600}
 .tc-p+.tc-p{border-top:1px solid var(--line)}
 .tc-p span{flex:1}.tc-p em{font-style:normal;font-family:var(--display);font-size:17px}
-.tc-p.venc{background:#e3f0e1}.tc-p.venc span::after{content:' ✓';color:var(--acc)}.tc-p.perd{opacity:.55}
+.tc-p.venc{background:#e3f0e1}.tc-p.venc span::after{content:' ✓';color:var(--acc-t)}.tc-p.perd{opacity:.55}
 .tc-p.eu span{text-decoration:underline;text-underline-offset:3px}
 .tc-p.tbd{color:var(--mute);font-weight:500}.emb-v{width:24px;text-align:center}
 .tc-bye{font-size:13.5px;color:var(--mute);margin:6px 2px 2px}.tc-bye .emb{margin:0 2px 0 4px}
@@ -116,8 +135,8 @@ const MX_CSS = `
 .du-card .emb{margin:0}
 .du-op{display:inline-flex;align-items:center;gap:2px}
 .du-click{cursor:pointer}
-.du-click u{color:var(--acc);font-weight:700}
-.du-ver{flex:none;font-size:13px;font-weight:700;color:var(--acc);padding:6px 4px}
+.du-click u{color:var(--acc-t);font-weight:700}
+.du-ver{flex:none;font-size:13px;font-weight:700;color:var(--acc-t);padding:6px 4px}
 .du-head{display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0 2px}
 .du-p{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px}
 .du-p .emb{margin:0 0 2px}
@@ -131,7 +150,7 @@ const MX_CSS = `
 .eu-v{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:14px;background:var(--panel);border:2px solid var(--line);font-weight:700;font-size:14px}
 .eu-v img{width:84px;height:105px}
 .eu-v.on{border-color:var(--acc);background:color-mix(in oklab,var(--acc) 10%,var(--panel));box-shadow:2px 2px 0 var(--acc)}
-.du-win{color:var(--acc)} .du-lose{color:var(--red)}
+.du-win{color:var(--acc-t)} .du-lose{color:var(--red)}
 `;
 (() => { const st = document.createElement('style'); st.textContent = MX_CSS; document.head.appendChild(st); })();
 
@@ -226,9 +245,9 @@ async function mxJSON(f) { try { const r = await fetch(fvUrl(f)); return r.ok ? 
 function mSearch(txt, tipo, excl) {
   const q = norm(txt); if (q.length < 2) return [];
   const res = [];
+  const qw = q.split(' ');
   for (const p of (POOL[tipo] || [])) {
-    let s = -1;
-    if (p.nWeb.startsWith(q)) s = 0; else if (p.nAll.split(' ').some(w => w.startsWith(q))) s = 1; else if (p.nAll.includes(q)) s = 2;
+    const s = matchScore(p, q, qw);
     if (s >= 0 && !(excl && excl.has(p))) res.push([s, p]);
   }
   res.sort((a, b) => a[0] - b[0] || b[1].fama - a[1].fama || a[1].nome.localeCompare(b[1].nome, 'pt'));
@@ -316,7 +335,7 @@ function rajFim() {
   if (!RJ || RJ.ended) return;
   RJ.ended = true; clearInterval(RJ.t); RJ.caixa.inp.blur();
   const best = mxST('bestRaj'), rec = RJ.score > best && RJ.score > 0;
-  if (rec) ST.bestRaj = RJ.score; ST.jogos++; saveStats(ST);
+  if (rec) ST.bestRaj = RJ.score; ST.jogos++; saveStats(ST); medEvento('raj', {n: RJ.found.length});
   mxRegistar({modo:'raj', pontos:RJ.score, respostas:RJ.found.length, total:RJ.q.valid.length, erros:RJ.erros.length, raras:RJ.found.filter(f => f.tier >= 5).length, chave:RJ.q.key, cat:RJ.q.cat});
   const q = RJ.q, achou = new Set(RJ.found.map(f => f.e));
   $('#rjBar i').style.width = '0%'; $('#rjT').textContent = '0';
@@ -345,7 +364,11 @@ async function loadCarreiras() {
 }
 // tier pelo número de clubes mostrados (k) de L: 1 clube = 50 m; até 1/3 = 35 m; até metade = 25 m; até 3/4 = 18 m; mais = 11 m; com a pista extra = 5 pontos
 function qeTier(k, L) { if (k <= 1) return 5; const f = k / L; return f <= 1 / 3 ? 4 : f <= .5 ? 3 : f <= .75 ? 2 : 1; }
-const qePts = c => c.extra ? 5 : TIERS[qeTier(c.k, c.p.c.length)].pts;
+// pistas pagas (só neste modo): cada uma custa QE_CUSTO pontos ao que valeria acertar (nunca menos de 5)
+const QE_CUSTO = 10, QE_PAGAS = [['nac', '🌍 Nacionalidade'], ['ini', '🔤 Iniciais']];
+const qeBase = c => c.extra ? 5 : TIERS[qeTier(c.k, c.p.c.length)].pts;
+const qePts = c => Math.max(5, qeBase(c) - QE_CUSTO * (c.pagas?.length || 0));
+const qeIniciais = n => n.split(/\s+/).map(w => w[0] + '•'.repeat(Math.max(0, [...w].length - 1))).join(' ');
 async function startQuem() {
   const b = $('#m-quem'); b.disabled = true;
   const c = await loadCarreiras(); b.disabled = false;
@@ -359,11 +382,12 @@ async function startQuem() {
 }
 function qeNext() {
   const p = QE.lista[QE.i];
-  QE.cur = {p, k:1, extra:false, tries:[], done:false};
+  QE.cur = {p, k:1, extra:false, tries:[], done:false, pagas:[]};
   [...$('#qeProg').children].forEach((e, i) => { e.className = i === QE.i ? 'cur' : ''; const r = QE.res[i]; e.style.background = r ? (r.pts ? TIERS[r.tier].hex : TIERS[0].hex) : ''; });
   $('#qeBody').innerHTML = `<div class="qcard enter"><div class="qnum">🕵️ Jogador ${QE.i + 1} de ${QE_N}</div><div class="qtxt">Quem é este jogador?</div>
       <div class="qsub">Clubes por onde passou (equipa principal), do primeiro para o último · ${p.c.length} clubes · Transfermarkt, até out. 2025</div></div>
     <ul class="mx-path" id="qePath"></ul><div class="mx-stake" id="qeStake"></div>
+    <div class="qe-pagas" id="qePagas"></div>
     <div id="qeBox"></div><div class="mx-msg" id="qeMsg"></div>
     <div class="mx-row"><button class="btn ghost" id="qeMais">Mais uma pista</button><button class="btn ghost" id="qeDes">Desisto</button></div>`;
   QE.caixa = caixaResposta($('#qeBox'), {tipo: () => 'jogador', excl: () => new Set(QE.cur.tries), onPick: qeGuess,
@@ -377,9 +401,14 @@ function qeRender(novo) {
   $('#qePath').innerHTML = p.c.slice(0, c.done ? L : c.k).map(([cl, ano, emp], i) => `<li class="${i === novo ? 'new' : ''}"><i>${ano || ''}</i>${esc(cl)}${emp ? '<small>empréstimo</small>' : ''}</li>`).join('')
     + (falta ? `<li class="hid"><i>····</i>+ ${falta} clube${falta === 1 ? '' : 's'} por mostrar</li>` : '')
     + (c.extra || c.done ? `<li class="extra ${c.extra && novo === L ? 'new' : ''}"><i>pista</i>${esc(p.nac || '')}${p.pos ? ' · ' + esc(p.pos) : ''}</li>` : '');
+  const pg = $('#qePagas');
+  if (pg) pg.innerHTML = QE_PAGAS.map(([id, nome]) => c.pagas.includes(id) || c.done
+      ? (c.pagas.includes(id) ? `<span class="qe-dica">${nome}: <b>${esc(id === 'nac' ? (p.nac || '?') : qeIniciais(p.n))}</b></span>` : '')
+      : `<button class="qe-paga" data-pg="${id}">${nome} <small>−${QE_CUSTO}</small></button>`).join('');
+  if (pg && !c.done) pg.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { if (!c.pagas.includes(b.dataset.pg)) { c.pagas.push(b.dataset.pg); qeRender(); QE.caixa.foco(); } });
   if (c.done) return;
-  const tier = c.extra ? 1 : qeTier(c.k, L), t = TIERS[tier];
-  $('#qeStake').innerHTML = `<i style="background:${t.hex}"></i>Se acertares agora: <b style="color:var(--ink)">${c.extra ? 'penálti · 5 pontos' : `${t.m} m · ${t.pts} pontos`}</b>`;
+  const tier = c.extra ? 1 : qeTier(c.k, L), t = TIERS[tier], vale = qePts(c);
+  $('#qeStake').innerHTML = `<i style="background:${t.hex}"></i>Se acertares agora: <b style="color:var(--ink)">${c.extra ? 'penálti' : `${t.m} m`} · ${vale} pontos</b>${c.pagas.length ? ` <small>(−${qeBase(c) - vale} das pistas)</small>` : ''}`;
   $('#qeMais').textContent = c.k < L ? 'Mais uma pista' : c.extra ? 'Sem mais pistas' : 'Nacionalidade e posição';
   $('#qeMais').disabled = c.extra;
 }
@@ -396,14 +425,14 @@ function qeGuess(e) {
 function qeAcaba(certo) {
   const c = QE.cur; if (c.done) return; c.done = true;
   const tier = certo ? (c.extra ? 1 : qeTier(c.k, c.p.c.length)) : 0, pts = certo ? qePts(c) : 0, t = TIERS[tier];
-  QE.score += pts; QE.res.push({n:c.p.n, tier, pts, k:c.k, extra:c.extra, tries:c.tries.length});
+  QE.score += pts; QE.res.push({n:c.p.n, tier, pts, k:c.k, extra:c.extra, tries:c.tries.length, pagas:c.pagas.length});
   countUp($('#qeScore'), QE.score - pts, QE.score); QE.caixa.inp.blur();
   if (certo) mxPop(tier >= 4 ? `GOLAÇO! +${pts}` : `GOLO! +${pts}`, t.hex); else mxPop('DEFENDIDO', '#f05a3c');
   qeRender();
   const last = QE.i >= QE_N - 1;
   $('#qeStake').innerHTML = ''; $('#qeMsg').textContent = '';
   $('#qeBox').innerHTML = `<div class="reveal on" style="margin:0"><div class="rhead">${certo ? `<div class="badge" style="background:${t.hex}">${c.extra ? '11' : t.m}<br>m</div>` : '<div class="badge miss">✕</div>'}
-    <div><b>${esc(c.p.n)}</b><span>${certo ? `Acertaste com ${c.k} de ${c.p.c.length} clubes${c.extra ? ' e a pista extra' : ''}` : 'Não acertaste'}${c.tries.length ? ` · ${c.tries.length} erro${c.tries.length === 1 ? '' : 's'}` : ''}</span></div>
+    <div><b>${esc(c.p.n)}</b><span>${certo ? `Acertaste com ${c.k} de ${c.p.c.length} clubes${c.extra ? ' e a pista extra' : ''}${c.pagas.length ? ` · ${c.pagas.length} pista${c.pagas.length > 1 ? 's' : ''} paga${c.pagas.length > 1 ? 's' : ''}` : ''}` : 'Não acertaste'}${c.tries.length ? ` · ${c.tries.length} erro${c.tries.length === 1 ? '' : 's'}` : ''}</span></div>
     <div class="pts" style="color:${certo ? t.hex : 'var(--mute)'}">${pts ? '+' + pts : '0'}</div></div></div>
     <button class="btn" id="qeNext">${last ? 'Ver resultado' : 'Próximo jogador ›'}</button>`;
   $('#qeMais').parentNode.remove();
@@ -413,6 +442,7 @@ function qeFim() {
   const best = mxST('bestQuem'), rec = QE.score > best && QE.score > 0;
   if (rec) ST.bestQuem = QE.score; ST.jogos++; saveStats(ST);
   const certos = QE.res.filter(r => r.pts);
+  medEvento('quem', {acertos: certos.length, olho: certos.some(r => r.k === 1 && !r.extra && !r.pagas)});
   mxRegistar({modo:'quem', pontos:QE.score, acertos:certos.length, jogadores:QE.res.length, pistas:certos.reduce((s, r) => s + r.k + (r.extra ? 1 : 0), 0), erros:QE.res.reduce((s, r) => s + r.tries, 0)});
   [...$('#qeProg').children].forEach((e, i) => { const r = QE.res[i]; e.className = ''; e.style.background = r && r.pts ? TIERS[r.tier].hex : TIERS[0].hex; });
   $('#qeBody').innerHTML = `<div class="mx-end"><div class="lbl">🕵️ Quem é?</div><div class="mx-big">${QE.score}</div>
@@ -476,7 +506,7 @@ async function mmResp(d) {
 }
 function mmFim() {
   const best = mxST('bestMm'), id = MM.t.id, rec = MM.serie > (best[id] || 0);
-  if (rec) best[id] = MM.serie; ST.jogos++; saveStats(ST);
+  if (rec) best[id] = MM.serie; ST.jogos++; saveStats(ST); medEvento('mm', {serie: MM.serie});
   mxRegistar({modo:'mm', tema:id, serie:MM.serie});
   $('#mmBody').insertAdjacentHTML('afterbegin', `<div class="mx-end"><div class="lbl">Errado! Série final</div><div class="mx-big">${MM.serie}</div>${rec && MM.serie ? '<span class="mx-rec">Novo recorde!</span>' : `<div class="lbl">Recorde neste tema: ${best[id] || 0}</div>`}</div>
     <div class="mx-row" style="margin:10px 0 14px"><button class="btn" id="mmAgain">Outra vez</button><button class="btn ghost" id="mmTemas">Outro tema</button></div>`);
@@ -589,6 +619,7 @@ async function duCriar(op) {
   (DU.dados = DU.dados || {})[id] = d;
   startGame('7', f[0], cat, qs); S.duelo = {id, op, inicio, link: op === '*'};
   toast(op === '*' ? 'Joga as 7 perguntas e no fim envia o link' : `Duelo com o ${op}: boa sorte!`);
+  if (op !== '*') avisar(op, `⚔️ O ${ME} desafiou-te para um duelo`, `7 perguntas · ${catNome(cat)}. Ganha-lhe!`, './?ir=duelos', 'duelo-' + id);
 }
 async function duJogar(id) {
   await duGet(); const d = DU.dados?.[id];
@@ -630,6 +661,8 @@ async function dueloFim() {
     const a = S.score, b = r.pontos || 0;
     sub.innerHTML = `<div class="du-vs ${a > b ? 'du-win' : a < b ? 'du-lose' : ''}">${a > b ? '🏆 Ganhaste' : a < b ? 'Perdeste' : 'Empate'} ${a} – ${b}</div>${esc(sub.textContent)}`;
     if (a > b) confettiEnd();
+    if (du.chave) avisar(op, `🔗 ${CONVIDADO || 'Um convidado'} jogou o teu duelo`, `${a > b ? 'Ganhou-te' : a < b ? 'Ganhaste' : 'Empataram'}: ${b} – ${a}`, './?ir=duelos', 'duelo-' + du.id);
+    else avisar(op, a > b ? `⚔️ O ${ME} ganhou-te o duelo` : a < b ? `⚔️ Ganhaste o duelo ao ${ME}!` : `⚔️ Empate no duelo com o ${ME}`, `${b} – ${a}`, './?ir=duelos', 'duelo-' + du.id);
   } else sub.innerHTML = `${esc(sub.textContent)}<br><b>Agora é a vez do ${esc(op)}</b>: ele vê o desafio no início da app.`;
   const bv = $('#endDuVer'); bv.hidden = false; bv.textContent = r && duAcabou(r) ? `📝 Ver as tuas respostas e as do ${op}` : '📝 Ver as tuas respostas';
   const bi = $('#endDuImg'); bi.hidden = !(r && duAcabou(r)); bi.onclick = () => duImagem(du.id, du.chave || ME, op);
@@ -728,7 +761,7 @@ async function duPeloLink(id) {
   $('#convLiga').onclick = () => { dl.close(); askWho(); };
   dl.showModal();
 }
-function aoArrancar() { const id = new URLSearchParams(location.search).get('duelo'); if (id && /^[a-z0-9]{4,20}$/.test(id)) duPeloLink(id); }
+function aoArrancar() { const id = new URLSearchParams(location.search).get('duelo'); if (id && /^[a-z0-9]{4,20}$/.test(id)) duPeloLink(id); else irPara(); }
 // ======================================================================
 // ESTATÍSTICAS dos outros modos (separadores no ecrã de estatísticas; os jogos vêm de ligas/<id>/todos/<nome>, os duelos de duelos/)
 // ======================================================================
@@ -798,7 +831,7 @@ function renderStatsDuelos() {
   h += barCard('Duelos', '', rows, 'jogos', v => v ?? '—');
   h += `<div class="sc"><div class="sc-h"><b>Frente a frente</b><span>vitórias – derrotas de quem está na linha contra quem está na coluna</span></div><div class="ct-w"><table class="ct"><thead><tr><th></th>${J.map(n => `<th>${emb(n, 18)}<br>${esc(n)}</th>`).join('')}</tr></thead>
     <tbody>${J.map(a => `<tr><th>${esc(a)}</th>${J.map(b => { if (a === b) return '<td class="ct-e">·</td>'; const [v, e, d] = h2h[a][b]; if (!v && !e && !d) return '<td class="ct-e">—</td>';
-      return `<td style="${v > d ? 'background:#1e5a37;color:#fffaf0' : v < d ? 'background:#f3d6cf' : ''}">${v}–${d}${e ? `<small>${e} emp.</small>` : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+      return `<td style="${v > d ? 'background:#1e5a37;color:#fffaf0' : v < d ? 'background:color-mix(in oklab, var(--red) 24%, var(--panel))' : ''}">${v}–${d}${e ? `<small>${e} emp.</small>` : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>`;
   el.innerHTML = h;
 }
 
@@ -817,6 +850,11 @@ function renderEu() {
   const cat = catNorm(ST.cat);
   $('#euMe').innerHTML = `<span class="eu-emb">${ME ? `<img src="${emblemaPNG(ME, true)}" alt="">` : ''}</span><span style="flex:1;min-width:0"><b>${ME ? esc(ME) : 'Ainda não escolheste'}</b><small>${ME ? LIGA.nome : 'Escolhe quem és para jogar a liga e os duelos'}</small></span><button class="du-btn" id="euTroca">${ME ? 'Trocar' : 'Escolher'}</button>`;
   $('#euTroca').onclick = askWho;
+  if (!$('#euPush')) $('#euCod').insertAdjacentHTML('afterend', '<div class="eu-push" id="euPush"></div>');
+  pushRender();
+  if (!$('#euTema')) $('#euPush').insertAdjacentHTML('afterend', `<div class="eu-tema" id="euTema"><span>🎨 Aspeto</span><div class="seg">${[['auto', 'Automático'], ['light', '☀️ Claro'], ['dark', '🌙 Escuro']].map(([v, t]) => `<button data-tema="${v}">${t}</button>`).join('')}</div></div>`);
+  const temaAgora = temaGuardado();
+  document.querySelectorAll('#euTema [data-tema]').forEach(b => { b.classList.toggle('on', b.dataset.tema === temaAgora); b.onclick = () => { temaPor(b.dataset.tema); renderEu(); }; });
   $('#euCod').hidden = !ME;
   const best = ST.bestMm || {}, mm = Math.max(0, ...Object.values(best));
   const dl = ME ? duLista().filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para])) : [];
@@ -824,6 +862,8 @@ function renderEu() {
   const hoje = ST.dia?.[today()];
   const it = [['⚡ Rajada', ST.bestRaj || 0, 'recorde'], ['🕵️ Quem é?', ST.bestQuem || 0, 'recorde'], ['📈 Mais ou menos', mm, 'melhor série'],
     ['⚔️ Duelos', dl.length ? `${v}–${dr}` : '—', 'vitórias–derrotas'], ['📅 Desafio do dia', hoje ?? '—', 'hoje'], ['🗂️ Perguntas', cat === 'tudo' ? 'Todas' : cat.split(',').length + ' tipos', 'tipo escolhido']];
+  if (!$('#euMed')) $('#euRecs').insertAdjacentHTML('afterend', '<div id="euMed"></div>');
+  medRender();
   $('#euRecs').innerHTML = it.map(([t, val, sub]) => `<div class="eu-rec"><span>${t}</span><b>${esc(String(val))}</b><span>${sub}</span></div>`).join('');
 }
 // mudar o código do perfil: o novo duas vezes; se forem iguais, guarda o hash em ligas/<id>/perfil/<nome>/codigo
@@ -862,7 +902,7 @@ $('#euCod').onclick = abrirMudarCodigo;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button><button class="st-btn du-img" id="endDuImg" hidden>📸 Enviar imagem do resultado</button>');
-endGame = (orig => function () { $('#endDuVer').hidden = true; $('#endDuImg').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); if (S?.taca) tacaFim(); return r; })(endGame);
+endGame = (orig => function () { $('#endDuVer').hidden = true; $('#endDuImg').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); if (S?.taca) tacaFim(); try { medEvento('jogo', S); } catch (e) {} return r; })(endGame);
 // ---------- desafios por link (também para convidados): o resultado de quem joga fica em ligas/<id>/convites/<chave>/res ----------
 const chaveNome = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20) || 'alguem';   // só letras sem acento, números e traços (chave do Firebase)
 function conviteFim() {
@@ -874,6 +914,7 @@ function conviteFim() {
   }
   if (!cv.chave || !quem || !LIGA.db || quem === cv.de) return;
   const body = {nome: quem, perfil: !!ME, pontos: S.score, golos: S.shots.filter(x => x.tier).length, fim: Date.now()};
+  avisar(cv.de, `🔗 ${quem} jogou o teu desafio`, S.friendScore != null ? `${S.score > S.friendScore ? 'Ganhou-te' : S.score < S.friendScore ? 'Ganhaste' : 'Empataram'}: ${S.friendScore} – ${S.score}` : `Fez ${S.score} pontos`, './?ir=duelos');
   fetch(ligaUrl(`convites/${cv.chave}/res/${chaveNome(quem)}`), {method:'PUT', body: JSON.stringify(body)}).catch(() => {});
 }
 let CV = null;
@@ -990,7 +1031,9 @@ async function tacaGuardaCats(k, dono, cats) {
 }
 async function tacaEscolher(k, op, ronda) {
   const c = await tacaEscolherDlg(op, ronda); if (!c) return null;
-  try { const f = await tacaGuardaCats(k, ME, c); toast(f === c ? `🏠 Em casa: ${tcCatsNome(c)}` : 'Já tinhas escolhido os tipos'); return f; }
+  try { const f = await tacaGuardaCats(k, ME, c); toast(f === c ? `🏠 Em casa: ${tcCatsNome(c)}` : 'Já tinhas escolhido os tipos');
+    if (f === c) avisar(op, `🏆 O ${ME} escolheu as perguntas do jogo em casa dele`, `${ronda}: ${tcCatsNome(c)}. Já podes jogar ✈️ fora.`, './?ir=taca', `taca-cats-${k}`);
+    return f; }
   catch (e) { toast('Sem ligação: tenta outra vez'); return null; }
 }
 async function startTaca(mao) {
@@ -1039,6 +1082,9 @@ async function tacaFim() {
     if (m.venc) { h += `<div class="du-vs ${m.venc === ME ? 'du-win' : 'du-lose'}">${m.venc === ME ? '🏆 Passaste!' : 'Eliminado…'} No total: ${eu} – ${ele}${eu === ele ? ' (desempate)' : ''}</div>`; if (m.venc === ME) confettiEnd(); }
     else h += `<p class="tc-fimtot">No total: <b>${eu} – ${ele}</b>${meu.falta.length ? ` · ainda tens o jogo ${meu.falta[0] === 'casa' ? '🏠 em casa' : '✈️ fora'}` : ''}${['casa', 'fora'].some(x => !tcFechado((m.a === ME ? m.jb : m.ja)[x])) ? ` · o ${esc(t.op)} ainda tem jogos por fazer (até à meia-noite)` : ''}</p>`; }
   sub.innerHTML = h + base;
+  if (m) { const ele = m.a === ME ? m.jb : m.ja, eu = m.a === ME ? m.ta : m.tb, el = m.a === ME ? m.tb : m.ta, faltaEle = ['casa', 'fora'].filter(x => !ele[x]);
+    if (m.venc) avisar(t.op, m.venc === t.op ? `🏆 Passaste na ${tacaNome(t.id)}!` : `🏆 Foste eliminado da ${tacaNome(t.id)}`, `${t.ronda} contra o ${ME}: ${el} – ${eu} no total`, './?ir=taca', `taca-${t.id}-${t.k}`);
+    else if (faltaEle.length) avisar(t.op, `🏆 O ${ME} já jogou ${t.mao === 'casa' ? 'em casa' : 'fora'} (${S.score} pontos)`, `${t.ronda} da taça: faltam os teus jogos (${faltaEle.map(x => x === 'casa' ? '🏠 casa' : '✈️ fora').join(' e ')}) até à meia-noite.`, './?ir=taca', `taca-${t.id}-${t.k}`); }
   if (meu?.m && meu.r.k === t.k && meu.falta.length) { $('#again').textContent = `Jogar ${meu.falta[0] === 'casa' ? '🏠 em casa' : '✈️ fora'} ›`; $('#again').onclick = () => { $('#again').onclick = againOrig; startTaca(meu.falta[0]); }; }
   else { $('#again').textContent = 'Ver a taça'; $('#again').onclick = () => { $('#again').onclick = againOrig; openTaca(); }; }
 }
@@ -1131,6 +1177,12 @@ function muralEventos() {
         add(t, '⚔️', l === ME ? `${nb(w)} ganhou-te um duelo por ${pw - pl} pontos (${pw}–${pl})` : w === ME ? `Ganhaste um duelo ao ${nb(l)} por ${pw - pl} pontos (${pw}–${pl})` : `${nb(w)} ganhou um duelo ao ${nb(l)} (${pw}–${pl})`, w); } }
     else add(d.criado, '⚔️', d.para === ME ? `${nb(d.de)} desafiou-te para um duelo` : `${nb(d.de)} desafiou o ${nb(d.para)} para um duelo`, d.de);
   }
+  // medalhas
+  for (const n of LIGA.jogadores) {   // as ganhas ao mesmo tempo (no mesmo minuto) vão numa só linha
+    const grupos = {}; for (const [id, t] of Object.entries(PERF?.[n]?.medalhas || {})) if (MED_POR_ID[id]) (grupos[Math.floor(t / 60e3)] = grupos[Math.floor(t / 60e3)] || []).push([id, t]);
+    for (const g of Object.values(grupos)) { const ms = g.map(([id]) => MED_POR_ID[id]), t = Math.max(...g.map(x => x[1]));
+      add(t, '🎖️', ms.length === 1 ? `${vs(n, 'Ganhaste', nb(n) + ' ganhou')} a medalha ${ms[0][1]} <b>${esc(ms[0][2])}</b>` : `${vs(n, 'Ganhaste', nb(n) + ' ganhou')} ${ms.length} medalhas: ${ms.map(m => `${m[1]} <b>${esc(m[2])}</b>`).join(', ')}`, n); }
+  }
   // taças
   for (const q of ['ant', 'id']) { if (!TC[q] || !(q === 'id' ? TC.jogos : TC.antJogos)) continue;
     const e = tacaEst(q);
@@ -1182,8 +1234,149 @@ function inicioExtra() {
     $('#muVer').onclick = () => { LTAB = 'mural'; openLiga(); }; }
 }
 renderLigaCard = (orig => function () { const r = orig.apply(this, arguments); try { inicioExtra(); } catch (e) {} return r; })(renderLigaCard);
-async function tacaRefresh() { await tacaGet(); inicioExtra(); if ($('#s-liga').classList.contains('on') && (LTAB === 'taca' || LTAB === 'mural' || LTAB === 'trofeus')) renderLiga(); }
+async function tacaRefresh() { await Promise.all([tacaGet(), medGet()]); inicioExtra(); if ($('#s-liga').classList.contains('on') && (LTAB === 'taca' || LTAB === 'mural' || LTAB === 'trofeus')) renderLiga(); }
 tacaRefresh(); setInterval(() => { if (LIGA.db && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-liga').classList.contains('on'))) tacaRefresh(); }, 30000);
+
+// ======================================================================
+// 🎖️ MEDALHAS — conquistas de cada um. Contadores no browser (ST.mc) + dados da liga/duelos/taças; as ganhas ficam em
+// ST.med = {id: quando} e, com perfil, em ligas/<id>/perfil/<nome>/medalhas/<id> (assim valem em todos os telemóveis e
+// aparecem no mural). Para juntar uma: uma linha em MEDALHAS [id, ícone, nome, como se ganha, valor atual(), alvo].
+// ======================================================================
+const mcV = k => () => (ST.mc || {})[k] || 0;
+function ligaSeguidos() {
+  const ds = Object.keys(LG.dados?.[ME] || {}).filter(d => feitosDia(ME, d) >= LIGA.porDia).sort(); let m = 0, s = 0, ant = null;
+  for (const d of ds) { s = ant && diaMais(ant, 1) === d ? s + 1 : 1; m = Math.max(m, s); ant = d; } return m;
+}
+function duelosGanhos() { return !ME || !DU.dados ? 0 : Object.values(DU.dados).filter(d => d && d.para !== '*' && (d.de === ME || d.para === ME) && duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para]) && duRes(d, ME) > duRes(d, duOutro(d))).length; }
+const MEDALHAS = [
+  ['estreia', '⚽', 'Estreia', 'Acaba o primeiro jogo', () => ST.jogos || 0, 1],
+  ['j50', '🎽', 'Da casa', 'Joga 50 jogos', () => ST.jogos || 0, 50],
+  ['j200', '🏟️', 'Lenda do relvado', 'Joga 200 jogos', () => ST.jogos || 0, 200],
+  ['g50', '🎯', 'Do meio-campo', '25 golos de 50 m ou mais', () => ST.golacos || 0, 25],
+  ['g100', '🚀', 'Baliza a baliza', 'Um golo de 100 m', mcV('g100'), 1],
+  ['g100x10', '🛰️', 'Míssil teleguiado', '10 golos de 100 m', mcV('g100'), 10],
+  ['s7', '✨', 'Sete em sete', '7 golos em 7 perguntas num jogo', mcV('s7'), 1],
+  ['s7x3', '🔥', 'Em chamas', '7 em 7 em três dias seguidos', mcV('s7max'), 3],
+  ['p400', '💯', 'Noite de gala', '400 pontos ou mais num jogo de 7 perguntas', mcV('pts7'), 400],
+  ['fim20', '♾️', 'Maratonista', 'Série de 20 golos no Sem fim', mcV('serieFim'), 20],
+  ['raj12', '⚡', 'Metralhadora', '12 respostas certas numa Rajada', mcV('raj'), 12],
+  ['quem1', '🔎', 'Olho de lince', 'Acerta no Quem é? só com o 1.º clube, sem pistas', mcV('quem1'), 1],
+  ['quem7', '🕵️', 'Detetive', '7 em 7 no Quem é?', mcV('quem7'), 7],
+  ['mm15', '📈', 'Bola de cristal', 'Série de 15 no Mais ou menos', mcV('mm'), 15],
+  ['liga7', '📅', 'Assíduo', 'Os 3 jogos da liga em 7 dias seguidos', () => ME && LG.dados ? ligaSeguidos() : 0, 7],
+  ['duelo5', '⚔️', 'Duelista', 'Ganha 5 duelos', duelosGanhos, 5],
+  ['semana', '👑', 'Rei da semana', 'Sê campeão de uma semana da liga', () => ME ? semanasFechadas().filter(s => s.vencedores.includes(ME)).length : 0, 1],
+  ['taca', '🏆', 'Ganhador de taças', 'Ganha uma Taça dos Amigos', () => ME ? Object.values(TC.campeoes || {}).filter(n => n === ME).length : 0, 1],
+];
+const MED_POR_ID = Object.fromEntries(MEDALHAS.map(m => [m[0], m]));
+let PERF = null;   // ligas/<id>/perfil (medalhas de todos, para o mural)
+// o que aconteceu num jogo → contadores
+function medEvento(tipo, x) {
+  const mc = ST.mc = ST.mc || {}, mx = (k, v) => { mc[k] = Math.max(mc[k] || 0, v || 0); };
+  if (tipo === 'jogo' && x?.shots) {
+    mc.g100 = (mc.g100 || 0) + x.shots.filter(s => s.tier >= 6).length;
+    if (x.mode === 'fim') mx('serieFim', x.bestStreak);
+    else if (x.shots.length === 7) {
+      mx('pts7', x.score);
+      if (x.shots.every(s => s.tier > 0)) { mc.s7 = (mc.s7 || 0) + 1; const d = lisDate();
+        if (mc.s7dia !== d) { mc.s7seq = mc.s7dia === diaMais(d, -1) ? (mc.s7seq || 0) + 1 : 1; mc.s7dia = d; mx('s7max', mc.s7seq); } }
+    }
+  }
+  if (tipo === 'raj') mx('raj', x.n);
+  if (tipo === 'quem') { mx('quem7', x.acertos); if (x.olho) mx('quem1', 1); }
+  if (tipo === 'mm') mx('mm', x.serie);
+  saveStats(ST); medVerificar();
+}
+// medalhas novas: guarda, avisa e (com perfil) põe no Firebase
+function medVerificar() {
+  const ja = ST.med = ST.med || {}, novas = [];
+  for (const [id, , , , val, alvo] of MEDALHAS) if (!ja[id]) { let v = 0; try { v = val(); } catch (e) {} if (v >= alvo) { ja[id] = Date.now(); novas.push(id); } }
+  if (!novas.length) return;
+  saveStats(ST);
+  if (ME && LIGA.db) for (const id of novas) ligaPut(`perfil/${ME}/medalhas/${id}`, ja[id]).catch(() => {});
+  const m = MED_POR_ID[novas[0]];
+  setTimeout(() => toast(novas.length === 1 ? `🎖️ Medalha nova: ${m[1]} ${m[2]}!` : `🎖️ ${novas.length} medalhas novas! Vê no ecrã Eu`), 1200);
+  if ($('#s-eu')?.classList.contains('on')) medRender();
+}
+// junta as medalhas guardadas no Firebase (de outros telemóveis) às deste
+async function medGet() {
+  if (!LIGA.db) return;
+  try { const r = await fetch(ligaUrl('perfil'), {cache:'no-store'}); if (!r.ok) return; PERF = (await r.json()) || {}; } catch (e) { return; }
+  if (ME && PERF[ME]?.medalhas) { const ja = ST.med = ST.med || {}; let mud = false;
+    for (const [id, t] of Object.entries(PERF[ME].medalhas)) if (MED_POR_ID[id] && !ja[id]) { ja[id] = t; mud = true; }
+    if (mud) saveStats(ST); }
+  if (ME) { const fb = PERF[ME]?.medalhas || {}; for (const id in (ST.med || {})) if (!fb[id] && MED_POR_ID[id]) ligaPut(`perfil/${ME}/medalhas/${id}`, ST.med[id]).catch(() => {}); }   // as que só estão neste telemóvel
+  medVerificar();
+}
+function medRender() {
+  const el = $('#euMed'); if (!el) return;
+  const ja = ST.med || {}, n = MEDALHAS.filter(m => ja[m[0]]).length;
+  el.innerHTML = `<div class="du-sec">🎖️ Medalhas <small class="med-n">${n} de ${MEDALHAS.length}</small></div><div class="med-grid">${MEDALHAS.map(([id, ic, nome, desc, val, alvo]) => {
+    const tem = !!ja[id]; let v = 0; try { v = Math.min(alvo, val()); } catch (e) {}
+    return `<div class="med ${tem ? 'tem' : ''}"><span class="med-ic">${ic}</span><b>${esc(nome)}</b><small>${esc(desc)}</small>${tem ? `<em>${new Date(ja[id]).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})}</em>` : alvo > 1 ? `<i class="med-bar"><i style="width:${Math.round(100 * v / alvo)}%"></i></i><em>${v} / ${alvo}</em>` : '<em>por ganhar</em>'}</div>`; }).join('')}</div>`;
+}
+
+// ======================================================================
+// 🔔 NOTIFICAÇÕES — a app põe cada aviso em ligas/<id>/pushfila (avisar); a GitHub Action push.yml (scripts/push.py)
+// manda-os de 10 em 10 min para os telemóveis que os ligaram no ecrã Eu (ligas/<id>/push/<nome>/<chave>).
+// No iPhone só funciona com a app no ecrã principal (Partilhar → Adicionar ao ecrã principal), iOS 16.4 ou mais recente.
+// ======================================================================
+const PUSH_CHAVE = 'BPk2X0yK3ADSt1-2OW6HpQnbeqk3uexKhUWcdfvl5ZeRvDiFyAA45JqcPKHP8wzI8kTYBLi1VLhkKh8gDYy8oA8';   // chave pública VAPID (a privada é o segredo VAPID_PRIVATE do GitHub)
+function avisar(para, titulo, texto, url, tag) {
+  const de = ME || CONVIDADO; if (!LIGA.db || !de || !para || para === ME || !LIGA.jogadores.includes(para)) return;
+  fetch(ligaUrl('pushfila'), {method:'POST', body: JSON.stringify({para, titulo, texto, url: url || './', tag: tag || null, de, criado: Date.now()})}).catch(() => {});
+}
+const pushPode = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushIOSsemEcra = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
+const pushChaveDe = ep => hashStr(ep).toString(36);
+async function pushSub() { try { const r = await navigator.serviceWorker.getRegistration(); return r ? await r.pushManager.getSubscription() : null; } catch (e) { return null; } }
+async function pushLigar() {
+  if (!ME) { askWho(); return; }
+  try {
+    if (await Notification.requestPermission() !== 'granted') { toast('As notificações ficaram bloqueadas: muda nas definições do telemóvel'); return pushRender(); }
+    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const k = Uint8Array.from(atob(PUSH_CHAVE.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: k});
+    const j = sub.toJSON();
+    await ligaPut(`push/${ME}/${pushChaveDe(j.endpoint)}`, {endpoint: j.endpoint, keys: j.keys, criado: Date.now(), ua: navigator.userAgent.slice(0, 120)});
+    try { localStorage.setItem('fora-da-caixa-push', ME); } catch (e) {}
+    toast('🔔 Notificações ligadas');
+  } catch (e) { toast('Não deu para ligar as notificações neste telemóvel'); }
+  pushRender();
+}
+async function pushDesligar() {
+  const sub = await pushSub();
+  if (sub) { try { await ligaPut(`push/${ME}/${pushChaveDe(sub.endpoint)}`, null); } catch (e) {} try { await sub.unsubscribe(); } catch (e) {} }
+  try { localStorage.removeItem('fora-da-caixa-push'); } catch (e) {}
+  toast('🔕 Notificações desligadas'); pushRender();
+}
+async function pushRender() {
+  const el = $('#euPush'); if (!el) return;
+  let estado, botao = '';
+  if (!ME) estado = 'Escolhe primeiro quem és.';
+  else if (pushIOSsemEcra()) estado = 'No iPhone: toca em <b>Partilhar</b> → <b>Adicionar ao ecrã principal</b> e abre a app por esse ícone. Depois liga aqui.';
+  else if (!pushPode()) estado = 'Este browser não tem notificações.';
+  else if (Notification.permission === 'denied') estado = 'Bloqueadas nas definições do telemóvel.';
+  else { const sub = await pushSub(); let dono = null; try { dono = localStorage.getItem('fora-da-caixa-push'); } catch (e) {}
+    if (sub && dono === ME) { estado = 'Ligadas: avisa-te quando te desafiam, quando jogam o teu duelo e na taça.'; botao = '<button class="du-btn ghost" id="pushOff">Desligar</button>'; }
+    else { estado = 'Avisa-te quando te desafiam, quando jogam o teu duelo e quando é a tua vez na taça.'; botao = '<button class="du-btn" id="pushOn">Ligar</button>'; } }
+  el.innerHTML = `<span class="tx"><b>🔔 Notificações</b><small>${estado}</small></span>${botao}`;
+  const on = $('#pushOn'), off = $('#pushOff'); if (on) on.onclick = pushLigar; if (off) off.onclick = pushDesligar;
+}
+// ?ir=duelos / ?ir=taca (das notificações)
+function irPara() { const ir = new URLSearchParams(location.search).get('ir'); if (!ir) return;
+  history.replaceState(null, '', location.pathname);
+  setTimeout(() => { if (ir === 'duelos') openDuelo(); else if (ir === 'taca') openTaca(); else if (ir === 'mural') { LTAB = 'mural'; openLiga(); } }, 300); }
+
+// ---------- aspeto: automático (como o telemóvel), claro ou escuro ----------
+function temaGuardado() { try { return localStorage.getItem('fora-da-caixa-tema') || 'auto'; } catch (e) { return 'auto'; } }
+function temaMeta() { const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f3ead6'; }
+function temaPor(v) {
+  try { localStorage.setItem('fora-da-caixa-tema', v); } catch (e) {}
+  if (v === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+  temaMeta(); if (typeof drawPitch === 'function' && $('#s-home').classList.contains('on')) renderHome();
+}
+temaMeta(); matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', temaMeta);
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;

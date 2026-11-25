@@ -6,6 +6,7 @@
 <title>Fora da Caixa</title>
 <meta name="description" content="Quiz de futebol: o óbvio não marca. Quanto mais rara a resposta certa, mais longe o remate. Joga quantas vezes quiseres.">
 <meta name="theme-color" content="#f3ead6">
+<script>try { const t = localStorage.getItem('fora-da-caixa-tema'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="icon" href="icones/icone-32.png" type="image/png">
 <link rel="apple-touch-icon" href="icones/icone-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,16 +18,41 @@
 :root{
   /* estilo "caderneta retro": creme, verde-relva, vermelho de equipamento */
   --bg:#f3ead6; --bg2:#fbf6ea; --panel:#fffaf0; --panel2:#f6eedc; --line:#ddd0b3;
-  --ink:#1d2b22; --mute:#6c6a58; --acc:#1e5a37; --acc-ink:#f3ead6; --bad:#b8321f; --warn:#b86e0c;
+  --ink:#1d2b22; --mute:#6c6a58; --acc:#1e5a37; --acc-t:#1e5a37; --acc-ink:#f3ead6; --bad:#b8321f; --warn:#b86e0c;
   --red:#d6452f; --dark:#1d2b22; --cream:#f3ead6; --shadow:3px 3px 0 var(--dark);
   --t0:#d9cdb1; --t1:#c9bd9c; --t2:#6fa86a; --t3:#e8b33a; --t4:#e07a34; --t5:#d6452f; --t6:#6b3fa0;
   --r:18px; --display:'Alfa Slab One',Georgia,serif; --sans:'Barlow',system-ui,-apple-system,sans-serif;
+}
+/* ---------- modo escuro (automático pelo telemóvel ou escolhido no ecrã Eu: html[data-theme]) ---------- */
+:root[data-theme="dark"]{--bg:#151b17; --bg2:#1b231e; --panel:#212b24; --panel2:#29342c; --line:#3a473e; --ink:#ece4cf; --mute:#a7a28c; --acc:#2f7d4f; --acc-t:#5fb47f; --acc-ink:#f3ead6; --bad:#e2644c; --warn:#e5a13a; --red:#d9533c; --dark:#0a0e0b; --glow:#25302a; color-scheme:dark;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151b17; --bg2:#1b231e; --panel:#212b24; --panel2:#29342c; --line:#3a473e; --ink:#ece4cf; --mute:#a7a28c; --acc:#2f7d4f; --acc-t:#5fb47f; --acc-ink:#f3ead6; --bad:#e2644c; --warn:#e5a13a; --red:#d9533c; --dark:#0a0e0b; --glow:#25302a; color-scheme:dark;}}
+:root[data-theme="dark"] .ladder span{background:rgba(33,43,36,.9)}
+:root[data-theme="dark"] .bnav{background:rgba(27,35,30,.96)}
+:root[data-theme="dark"] .qinfo .q100{background:#2d2340;border-color:#5b4685;color:#d9c6f5}
+:root[data-theme="dark"] .lg-campeao,:root[data-theme="dark"] .mu-falta{background:#3a3220;border-color:#6d5a2a}
+:root[data-theme="dark"] .mu-falta.ok,:root[data-theme="dark"] .tc-p.venc{background:#20352a;border-color:#2f5a3e}
+:root[data-theme="dark"] .sug li.sel,:root[data-theme="dark"] .sug li:hover,:root[data-theme="dark"] .mx-path li.extra{background:#2f3b32}
+:root[data-theme="dark"] .sb-t{background:#2a342d}
+:root[data-theme="dark"] .mode.friend{background:linear-gradient(135deg,#4a2620,var(--panel))}
+:root[data-theme="dark"] .mcard h3{color:color-mix(in oklab, var(--mc) 55%, #f3ead6)}:root[data-theme="dark"] .mcard[data-m="duelo"]{--mc:#46564b!important}:root[data-theme="dark"] .mcard[data-m="duelo"] h3{color:var(--ink)}
+:root[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.72)}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) .ladder span{background:rgba(33,43,36,.9)}
+:root:not([data-theme="light"]) .bnav{background:rgba(27,35,30,.96)}
+:root:not([data-theme="light"]) .qinfo .q100{background:#2d2340;border-color:#5b4685;color:#d9c6f5}
+:root:not([data-theme="light"]) .lg-campeao,:root:not([data-theme="light"]) .mu-falta{background:#3a3220;border-color:#6d5a2a}
+:root:not([data-theme="light"]) .mu-falta.ok,:root:not([data-theme="light"]) .tc-p.venc{background:#20352a;border-color:#2f5a3e}
+:root:not([data-theme="light"]) .sug li.sel,:root:not([data-theme="light"]) .sug li:hover,:root:not([data-theme="light"]) .mx-path li.extra{background:#2f3b32}
+:root:not([data-theme="light"]) .sb-t{background:#2a342d}
+:root:not([data-theme="light"]) .mode.friend{background:linear-gradient(135deg,#4a2620,var(--panel))}
+:root:not([data-theme="light"]) .mcard h3{color:color-mix(in oklab, var(--mc) 55%, #f3ead6)}:root:not([data-theme="light"]) .mcard[data-m="duelo"]{--mc:#46564b!important}:root:not([data-theme="light"]) .mcard[data-m="duelo"] h3{color:var(--ink)}
+:root:not([data-theme="light"]) dialog::backdrop{background:rgba(0,0,0,.72)}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html{font-synthesis:none}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.4}
-body{min-height:100dvh;background:radial-gradient(1000px 520px at 50% -220px,#fbf5e6 0%,var(--bg) 62%) fixed}
+body{min-height:100dvh;background:radial-gradient(1000px 520px at 50% -220px,var(--glow,#fbf5e6) 0%,var(--bg) 62%) fixed}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .wrap{max-width:520px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
 .screen{display:none}
@@ -125,7 +151,7 @@ body.has-nav .wrap{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 .atraso{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 .atraso summary{list-style:none;display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 2px;font-size:15px}
 .atraso summary::-webkit-details-marker{display:none}
-.atraso summary em{margin-left:auto;font-style:normal;color:var(--acc);font-weight:700;font-size:14px}
+.atraso summary em{margin-left:auto;font-style:normal;color:var(--acc-t);font-weight:700;font-size:14px}
 .atraso[open] summary em{visibility:hidden}
 .tbar{position:relative;height:8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin:0 0 8px}
 .tbar i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--acc);transition:width .2s linear}
@@ -173,10 +199,10 @@ body.has-nav .wrap{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 .cats button{flex:none;padding:8px 13px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--mute);transition:all .15s}
 .cats button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 details.all{margin-top:4px}
-details.all summary{cursor:pointer;font-size:13px;color:var(--acc);font-weight:600;padding:4px 0}
+details.all summary{cursor:pointer;font-size:13px;color:var(--acc-t);font-weight:600;padding:4px 0}
 details.all .chips{margin-top:6px}
 .foot a{color:var(--mute)}
-.linkbtn{color:var(--acc);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.linkbtn{color:var(--acc-t);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:6px}
 
 /* ---------- jogo ---------- */
 .top{display:flex;align-items:center;gap:10px;margin:4px 0 10px;min-height:44px}
@@ -389,7 +415,7 @@ details.all .chips{margin-top:6px}
 .lg-day div{display:flex;align-items:center;gap:6px;padding:2px 0}
 .lg-day div span{flex:1;color:var(--mute)}
 .lg-day i{font-style:normal;min-width:38px;text-align:center;padding:3px 6px;border-radius:8px;background:var(--bg2);color:var(--mute);font-weight:700;font-size:13px}
-.lg-day i.done{background:rgba(30,90,55,.12);color:var(--acc)}
+.lg-day i.done{background:rgba(30,90,55,.12);color:var(--acc-t)}
 .lg-day i.live{background:rgba(255,176,32,.15);color:var(--warn)}
 /* ---------- estatísticas ---------- */
 .lg-links{display:flex;gap:12px;align-items:center}
@@ -746,9 +772,9 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=dcb8e59d67"></script>
+<script src="perguntas.js?v=1fe52bfba2"></script>
 <script src="perguntas2.js?v=7a22234356"></script>
-<script src="perguntas3.js?v=108ced668f"></script>
+<script src="perguntas3.js?v=dc057a634c"></script>
 <script src="emblemas.js?v=b076c185d3"></script>
 <script>
 'use strict';
@@ -759,8 +785,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261125190258';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"dcb8e59d67","perguntas2.js":"7a22234356","perguntas3.js":"108ced668f","emblemas.js":"b076c185d3","modos.js":"fc3a7bc111","historia.json":"4266784294","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261125203805';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"2390c069c4","historia.json":"4266784294","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
@@ -834,6 +860,16 @@ let ST = loadStats();
 // Banco de perguntas de futebol em geral (perguntas.js)
 // ======================================================================
 const ENT = {};   // tipo → nome → entidade (as opções da caixa de resposta)
+const apelidos = (...ns) => ns.flatMap(n => (window.ALIASES || {})[n] || []);
+// pontuação de uma opção para o que se escreveu: 0 começa pelo nome, 1 uma palavra começa assim, 2 contém, 3 todas as palavras escritas começam palavras do nome ("bruno fernandes" → Bruno Borges Fernandes)
+function matchScore(p, q, qw) {
+  if (p.nWeb.startsWith(q)) return 0;
+  const ws = p._w || (p._w = p.nAll.split(' '));
+  if (ws.some(w => w.startsWith(q))) return 1;
+  if (p.nAll.includes(q)) return 2;
+  if (qw.length > 1 && qw.every(t => ws.some(w => w.startsWith(t)))) return 3;
+  return -1;
+}
 function getEnt(tipo, nome, extra) {
   ENT[tipo] = ENT[tipo] || {};
   const k = tipo === 'plh' ? nome : norm(nome);   // o mesmo nome com ou sem acentos é a mesma resposta (Eder = Éder)
@@ -866,7 +902,7 @@ function buildGen(G, cat0) {
 let HQ = [];
 function buildHistory(H) {
   const byCode = {};
-  for (const code in H.jogadores) { const [web, full] = H.jogadores[code]; byCode[code] = getEnt('plh', code, {code, nome:web, completo:full, nWeb:norm(web), nAll:norm(full + ' ' + web)}); }
+  for (const code in H.jogadores) { const [web, full] = H.jogadores[code]; byCode[code] = getEnt('plh', code, {code, nome:web, completo:full, nWeb:norm(web), nAll:norm([full, web, ...apelidos(full, web)].join(' '))}); }
   HQ = H.perguntas.map(h => {
     const tipo = h.tipo === 'clube' ? 'clube' : 'plh', stats = new Map();
     const valid = h.r.map(([c, st]) => { const e = tipo === 'clube' ? getEnt('clube', c) : byCode[c]; stats.set(e, st); return e; }).filter(Boolean);
@@ -1138,9 +1174,9 @@ function stopTimer() { clearInterval(timerId); const fg = $('#tfg'); const cs = 
 function search(txt) {
   const q = norm(txt); if (q.length < 2) return [];
   const pool = S.q.tipo === 'pl' ? P : (POOL[S.q.tipo] || []), res = [];
+  const qw = q.split(' ');
   for (const p of pool) {
-    let s = -1;
-    if (p.nWeb.startsWith(q)) s = 0; else if (p.nAll.split(' ').some(w => w.startsWith(q))) s = 1; else if (p.nAll.includes(q)) s = 2;
+    const s = matchScore(p, q, qw);
     if (s >= 0 && !S.tries.includes(p)) res.push([s, p]);
   }
   res.sort((a, b) => a[0] - b[0] || b[1].fama - a[1].fama || a[1].nome.localeCompare(b[1].nome, 'pt'));
@@ -1631,7 +1667,7 @@ function catTable(rows) {
   const cats = Object.keys(CAT_NOME).filter(c => rows.some(r => r.cat[c]));
   if (!cats.length) return '';
   const cell = k => { if (!k || !k.n) return '<td class="ct-e">—</td>'; const v = k.golos / k.n;
-    const bg = `color-mix(in oklab, #1e5a37 ${Math.round(12 + v * 78)}%, #fbf6ea)`; return `<td style="background:${bg};color:${v > .55 ? '#fffaf0' : '#1d2b22'}" title="${k.golos} golos em ${k.n} perguntas">${Math.round(v * 100)}%<small>${k.n}</small></td>`; };
+    const bg = `color-mix(in oklab, #1e5a37 ${Math.round(12 + v * 78)}%, var(--bg2))`; return `<td style="background:${bg};color:${v > .55 ? '#fffaf0' : 'var(--ink)'}" title="${k.golos} golos em ${k.n} perguntas">${Math.round(v * 100)}%<small>${k.n}</small></td>`; };
   return `<div class="sc"><div class="sc-h"><b>Golos por categoria</b><span>% de perguntas com golo · em baixo, quantas jogou</span></div>
     <div class="ct-w"><table class="ct"><thead><tr><th></th>${rows.map(r => `<th>${emb(r.nome, 18)}<br>${esc(r.nome)}</th>`).join('')}</tr></thead>
     <tbody>${cats.map(c => `<tr><th>${CAT_NOME[c]}</th>${rows.map(r => cell(r.cat[c])).join('')}</tr>`).join('')}</tbody></table></div></div>`;
@@ -1746,7 +1782,7 @@ async function boot() {
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
-    P = D.jogadores.map(a => { const o = {}; D.campos.forEach((k, i) => o[k] = a[i]); o.equipa = Number(o.equipa); o.nWeb = norm(o.nome); o.nAll = norm(o.completo + ' ' + o.nome); o.fama = o.popular + o.pontos / 1000 + o.minutos / 1e6; return o; });
+    P = D.jogadores.map(a => { const o = {}; D.campos.forEach((k, i) => o[k] = a[i]); o.equipa = Number(o.equipa); o.nWeb = norm(o.nome); o.nAll = norm([o.completo, o.nome, ...apelidos(o.completo, o.nome)].join(' ')); o.fama = o.popular + o.pontos / 1000 + o.minutos / 1e6; return o; });
     if (G >= 1 && P.length) buildTemplates();
   } catch (e) { console.warn('Sem dados da Premier League:', e); }
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
@@ -1905,6 +1941,6 @@ boot();
 // app mais rápida e sem rede (sw.js); nos testes locais com ?nosw não se instala
 if ('serviceWorker' in navigator && !/[?&]nosw/.test(location.search)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
-<script src="modos.js?v=fc3a7bc111"></script>
+<script src="modos.js?v=2390c069c4"></script>
 </body>
 </html>

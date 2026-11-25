@@ -1,0 +1,35 @@
+# Envia as notificações que a app pôs na fila (duelos, taça, desafios) para os telemóveis que as ligaram.
+# Precisa do segredo VAPID_PRIVATE (Settings → Secrets and variables → Actions). Ver scripts/push.py.
+name: Notificações
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # de 10 em 10 minutos (o GitHub às vezes atrasa uns minutos)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: push
+  cancel-in-progress: false
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            index.html
+            scripts/push.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet cryptography
+      - name: Enviar
+        env:
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+        run: python scripts/push.py
