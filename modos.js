@@ -80,6 +80,7 @@ const MX_CSS = `
 .cv-r span{flex:1}.cv-r small{color:var(--mute)}.cv-r b{font-family:var(--display);font-weight:400;font-size:16px}
 .cv-g{flex:none!important;width:18px;text-align:center}
 .du-link{border-style:dashed;color:var(--acc)}
+.st-btn.du-img{background:var(--t3);border-color:var(--dark);color:var(--dark)}
 .du-card .emb{margin:0}
 .du-op{display:inline-flex;align-items:center;gap:2px}
 .du-click{cursor:pointer}
@@ -512,7 +513,7 @@ function duRender() {
   el.querySelectorAll('[data-jogar]').forEach(b => b.onclick = () => duJogar(b.dataset.jogar));
   el.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => duVer(b.dataset.ver, ME, b.dataset.com || null));
   el.querySelectorAll('[data-link]').forEach(b => b.onclick = () => duPartilhar(b.dataset.link));
-  el.querySelectorAll('[data-op]').forEach(b => b.onclick = () => duCriar(b.dataset.op));
+  el.querySelectorAll('[data-op]').forEach(b => b.onclick = () => escolherTipoDuelo(b.dataset.op));
   const bc = $('#duCat'); if (bc) bc.onclick = () => { openCats(); $('#catDlg').addEventListener('close', duRender, {once:true}); };
 }
 // as respostas dos dois, pergunta a pergunta (só se pode ver depois de ter jogado o duelo)
@@ -527,7 +528,8 @@ function duVer(id, eu = ME, outro = null) {
   const pa = duRes(d, eu), pb = duRes(d, quem[1]);
   let h = `<button class="linkbtn" id="duVolta">‹ Duelos</button>
     <div class="du-head">${quem.map((n, k) => `<div class="du-p">${embDe(n, 46)}<b>${esc(nomeDe(n))}</b><span>${acabou(n) ? duRes(d, n) + ' pts' : 'ainda não jogou'}</span></div>${k === 0 ? `<div class="du-x">${acabou(quem[1]) ? (pa > pb ? '🏆' : pa < pb ? '😬' : '🤝') : '⚔️'}</div>` : ''}`).join('')}</div>
-    <p class="cd-p" style="text-align:center">${esc(catNome(d.cat))} · ${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'long'})}</p>`;
+    <p class="cd-p" style="text-align:center">${esc(catNome(d.cat))} · ${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'long'})}</p>
+    ${acabou(quem[1]) ? '<button class="st-btn du-img" id="duImgBtn" style="margin:0 0 12px">📸 Enviar imagem do resultado</button>' : ''}`;
   (qs || []).forEach((q, i) => {
     const linhas = quem.map(n => { const t = tiro(n, i);
       if (!t) return `<div class="amg">${embDe(n, 18)}<b>${esc(nomeDe(n))}</b><span>ainda não jogou</span></div>`;
@@ -541,6 +543,7 @@ function duVer(id, eu = ME, outro = null) {
   if (!qs) h += '<p class="lg-note">Não consegui abrir as perguntas deste duelo.</p>';
   el.innerHTML = h; window.scrollTo(0, 0);
   $('#duVolta').onclick = () => { if (ME) duRender(); else mxSair(); };
+  const bi = $('#duImgBtn'); if (bi) bi.onclick = () => duImagem(id, eu, quem[1]);
 }
 async function openDuelo() { show('s-duelo'); duRender(); await Promise.all([duGet(), cvGet()]); duRender(); duRenderHome(); }
 function duRecDe() { return {nome: S.duelo?.nome || ME, pontos:S.score, golos:S.shots.filter(s => s.tier).length, perguntas:S.shots.length, inicio:S.duelo.inicio, tiros:tirosDe(), resp:S.shots.map(s => s.p ? s.p.nome : null)}; }
@@ -597,10 +600,73 @@ async function dueloFim() {
     if (a > b) confettiEnd();
   } else sub.innerHTML = `${esc(sub.textContent)}<br><b>Agora é a vez do ${esc(op)}</b>: ele vê o desafio no início da app.`;
   const bv = $('#endDuVer'); bv.hidden = false; bv.textContent = r && duAcabou(r) ? `📝 Ver as tuas respostas e as do ${op}` : '📝 Ver as tuas respostas';
+  const bi = $('#endDuImg'); bi.hidden = !(r && duAcabou(r)); bi.onclick = () => duImagem(du.id, du.chave || ME, op);
   bv.onclick = async () => { if (du.chave) { show('s-duelo'); await duGet(); duVer(du.id, du.chave, op); } else { await openDuelo(); duVer(du.id); } };
   if (du.chave) { $('#again').textContent = 'Início'; $('#again').onclick = () => { $('#again').onclick = againOrig; mxSair(); }; }
 }
 const againOrig = $('#again').onclick;
+// antes de cada duelo: escolher o tipo de perguntas (usa a janela dos tipos, com outro título e o botão "Começar duelo")
+function escolherTipoDuelo(op) {
+  const dlg = $('#catDlg'), h2 = dlg.querySelector('h2'), p = dlg.querySelector('.cd-p'), ok = $('#catOk');
+  const antes = {h2: h2.innerHTML, p: p.innerHTML, ok: ok.textContent, fn: ok.onclick};
+  openCats();
+  h2.innerHTML = op === '*' ? '⚔️ Duelo com alguém de fora' : `⚔️ Duelo com o ${esc(op)}`;
+  p.innerHTML = 'Que perguntas queres neste duelo? Escolhe um ou mais tipos (toca para marcar). O adversário joga exatamente as mesmas.';
+  ok.textContent = 'Começar duelo ›';
+  let comecar = false;
+  ok.onclick = () => { const m = catMarcadas(); if (!m.length) { $('#catMsg').hidden = false; return; } ST.cat = catNorm(m.join(',')); saveStats(ST); comecar = true; dlg.close(); };
+  dlg.addEventListener('close', () => { h2.innerHTML = antes.h2; p.innerHTML = antes.p; ok.textContent = antes.ok; ok.onclick = antes.fn; if (comecar) duCriar(op); }, {once:true});
+}
+// ---------- imagem do resultado de um duelo (para mandar por WhatsApp) ----------
+function carregaImg(src) { return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }); }
+async function duImagem(id, eu, outro) {
+  const d = DU.dados?.[id]; if (!d) return;
+  const quem = [eu, outro], nm = k => d.res?.[k]?.nome || k, pts = k => duRes(d, k) || 0, da = pts(eu), db = pts(outro);
+  const qs = desserializar(Array.isArray(d.qs) ? d.qs : Object.values(d.qs || {})) || [];
+  try { await Promise.all([document.fonts.load('400 60px "Alfa Slab One"'), document.fonts.load('600 28px Barlow'), document.fonts.load('400 28px Barlow')]); } catch (e) {}
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const DISP = '"Alfa Slab One", Georgia, serif', SANS = 'Barlow, system-ui, sans-serif';
+  const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+  const txt = (t, x, y, font, cor, al = 'center') => { g.font = font; g.fillStyle = cor; g.textAlign = al; g.textBaseline = 'alphabetic'; g.fillText(t, x, y); };
+  const corta = (t, max) => { if (g.measureText(t).width <= max) return t; while (t.length > 3 && g.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; };
+  g.fillStyle = '#f3ead6'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#1d2b22'; rr(48, 48, W - 88, H - 88, 44); g.fill();
+  g.fillStyle = '#fffaf0'; rr(40, 40, W - 88, H - 88, 44); g.fill(); g.lineWidth = 5; g.strokeStyle = '#1d2b22'; g.stroke();
+  txt('⚔️ DUELO', W / 2, 140, `400 70px ${DISP}`, '#1d2b22');
+  txt('FORA DA CAIXA', W / 2, 186, `700 28px ${SANS}`, '#6c6a58');
+  const xs = [280, 800];
+  for (let k = 0; k < 2; k++) {
+    const n = nm(quem[k]), x = xs[k], liga = typeof emblemaPNG === 'function' && LIGA.jogadores.includes(n);
+    const img = liga ? await carregaImg(emblemaPNG(n, true)) : null;
+    if (img) g.drawImage(img, x - 100, 220, 200, 250);
+    else { g.fillStyle = '#1e5a37'; g.beginPath(); g.arc(x, 345, 100, 0, Math.PI * 2); g.fill(); g.lineWidth = 6; g.strokeStyle = '#1d2b22'; g.stroke(); txt(n.slice(0, 2).toUpperCase(), x, 375, `400 84px ${DISP}`, '#f3ead6'); }
+    g.font = `400 54px ${DISP}`; txt(corta(n, 380), x, 545, `400 54px ${DISP}`, '#1d2b22');
+    const mine = k === 0 ? da : db, other = k === 0 ? db : da;
+    txt(String(mine), x, 660, `400 120px ${DISP}`, mine > other ? '#1e5a37' : mine < other ? '#b8321f' : '#1d2b22');
+  }
+  txt('VS', W / 2, 400, `400 64px ${DISP}`, '#c9bd9c');
+  const venc = da > db ? nm(eu) : da < db ? nm(outro) : null;
+  g.fillStyle = venc ? '#e8b33a' : '#ddd0b3'; rr(150, 700, W - 300, 92, 46); g.fill(); g.lineWidth = 4; g.strokeStyle = '#1d2b22'; g.stroke();
+  g.font = `400 50px ${DISP}`; txt(corta(venc ? `🏆 ${venc} ganhou!` : '🤝 Empate!', W - 360), W / 2, 765, `400 50px ${DISP}`, '#1d2b22');
+  // pergunta a pergunta
+  const y0 = 850, passo = 52;
+  txt(corta(nm(eu), 150), 770, y0 - 14, `700 24px ${SANS}`, '#6c6a58'); txt(corta(nm(outro), 150), 930, y0 - 14, `700 24px ${SANS}`, '#6c6a58');
+  for (let i = 0; i < 7; i++) {
+    const y = y0 + i * passo; g.fillStyle = i % 2 ? '#fffaf0' : '#f6eedc'; g.fillRect(90, y, W - 180, passo - 4); const yy = y - 4;
+    txt(String(i + 1), 120, yy + 38, `400 28px ${DISP}`, '#6c6a58');
+    g.font = `500 25px ${SANS}`; txt(corta(qs[i]?.txt || '', 520), 160, yy + 36, `500 25px ${SANS}`, '#1d2b22', 'left');
+    quem.forEach((k, j) => { const t = (d.res?.[k]?.tiros || [])[i], tier = t ? t[1] : 0, T = TIERS[tier] || TIERS[0], x = j ? 930 : 770;
+      g.fillStyle = T.hex; rr(x - 62, yy + 10, 124, 38, 19); g.fill(); txt(tier ? `${T.m} m` : '✕', x, yy + 38, `700 26px ${SANS}`, tier === 6 || tier === 5 ? '#fffaf0' : '#1d2b22'); });
+  }
+  txt(`${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'long', year:'numeric'})} · ${catNome(d.cat)}`, W / 2, 1250, `500 26px ${SANS}`, '#6c6a58');
+  txt('brunomvcarmo.github.io/foradacaixa', W / 2, 1284, `700 26px ${SANS}`, '#1e5a37');
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  const file = new File([blob], `duelo-${nm(eu)}-${nm(outro)}.png`.replace(/\s+/g, '-'), {type: 'image/png'});
+  const texto = `⚔️ Duelo no Fora da Caixa: ${nm(eu)} ${da} – ${db} ${nm(outro)}`;
+  try { if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], text: texto}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+  toast('Imagem guardada');
+}
 // enviar o link de um duelo por link
 async function duPartilhar(id) {
   const d = DU.dados?.[id], url = location.origin + location.pathname + `?duelo=${id}`;
@@ -763,8 +829,8 @@ $('#euMe').insertAdjacentHTML('afterend', '<button class="st-btn" id="euCod" hid
 $('#euCod').onclick = abrirMudarCodigo;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
-$('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button>');
-endGame = (orig => function () { $('#endDuVer').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
+$('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button><button class="st-btn du-img" id="endDuImg" hidden>📸 Enviar imagem do resultado</button>');
+endGame = (orig => function () { $('#endDuVer').hidden = true; $('#endDuImg').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
 // ---------- desafios por link (também para convidados): o resultado de quem joga fica em ligas/<id>/convites/<chave>/res ----------
 const chaveNome = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20) || 'alguem';   // só letras sem acento, números e traços (chave do Firebase)
 function conviteFim() {
