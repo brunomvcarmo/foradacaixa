@@ -220,7 +220,7 @@ function mxRegistar(rec) {
   const go = (k = 0) => fetch(ligaUrl(`todos/${ME}`), {method:'POST', headers:{'Content-Type':'application/json'}, body}).then(r => { if (!r.ok) throw new Error(r.status); }).catch(() => { if (k < 3) setTimeout(() => go(k + 1), 2000 * (k + 1)); });
   go();
 }
-async function mxJSON(f) { try { const r = await fetch(`${f}?v=${APP_VER}`); return r.ok ? await r.json() : null; } catch (e) { return null; } }
+async function mxJSON(f) { try { const r = await fetch(fvUrl(f)); return r.ok ? await r.json() : null; } catch (e) { return null; } }
 
 // ---------- caixa de resposta com sugestões (igual à do jogo; no iPhone escolhe-se no fim do toque) ----------
 function mSearch(txt, tipo, excl) {
@@ -521,7 +521,7 @@ function duRender() {
   let h = '';
   if (pend.length) h += `<div class="du-sec">Desafiaram-te</div>` + pend.map(d => `<div class="du-card hot">${emb(d.de, 30)}<div class="tx"><b>${esc(d.de)}</b> desafiou-te<small>7 perguntas · ${esc(catNome(d.cat))}${duAcabou(d.res?.[d.de]) ? ` · fez ${duRes(d, d.de)} pontos` : ''}</small></div><button class="du-btn" data-jogar="${d.id}">Jogar</button></div>`).join('');
   h += `<div class="du-sec">Novo duelo</div><div class="du-ops">${LIGA.jogadores.filter(n => n !== ME).map(n => `<button class="du-op" data-op="${esc(n)}">${emb(n, 22)}${esc(n)}</button>`).join('')}<button class="du-op du-link" data-op="*">🔗 Alguém de fora</button></div>
-    <p class="du-cat">Perguntas: <b>${esc(cat === 'tudo' ? 'todas' : catNome(cat))}</b> · <button class="linkbtn" id="duCat">mudar</button></p>`;
+    <p class="du-cat">Toca num amigo e escolhe o tipo de perguntas desse duelo.</p>`;
   if (espera.length) h += `<div class="du-sec">À espera</div>` + espera.map(d => `<div class="du-card">${emb(duOutro(d), 30)}<div class="tx">À espera do <b>${esc(duOutro(d))}</b><small>fizeste ${duRes(d, ME)} pontos · ${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})}</small></div><button class="du-ver" data-ver="${d.id}">As tuas respostas ›</button></div>`).join('');
   // registo contra cada amigo
   const reg = {};

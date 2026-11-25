@@ -44,6 +44,10 @@ GRANDES = ['Benfica', 'FC Porto', 'Sporting', 'Braga', 'Vitória de Guimarães']
 ART = {'Benfica': 'o Benfica', 'FC Porto': 'o FC Porto', 'Sporting': 'o Sporting', 'Braga': 'o Braga', 'Vitória de Guimarães': 'o Vitória de Guimarães'}
 
 
+
+def pl(n, um, varios):   # 1 vez / 3 vezes
+    return f'{n} {um if n == 1 else varios}'
+
 def get(url):
     for k in range(4):
         try:
@@ -144,7 +148,7 @@ def main():
             pos = [(t, f"{st[t]['v']}V, {st[t]['d']}D") for t in st if st[t]['v'] > st[t]['d']]
             add('positivo', f'Um clube que acabou a 1.ª Liga {lbl} com mais vitórias do que derrotas', pos, mn=5, mx=12)
             for lim in (60, 55, 50, 45, 40):   # o limite que der uma lista de tamanho jeitoso
-                gm = [(t, f"{st[t]['gm']} golos") for t in st if st[t]['gm'] >= lim]
+                gm = [(t, pl(st[t]['gm'], 'golo', 'golos')) for t in st if st[t]['gm'] >= lim]
                 if 5 <= len(gm) <= 12: add(f'gm{lim}', f'Um clube que marcou {lim} ou mais golos na 1.ª Liga {lbl}', gm); break
             for lim in (25, 30, 35, 40):
                 gs = [(t, f"{st[t]['gs']} sofridos") for t in st if st[t]['gs'] < lim]
@@ -195,11 +199,11 @@ def main():
                 if gs == 0: st[t]['cs'] += 1
                 if gf > gs and t == a: st[t]['vf'] += 1
         fam = lambda t: PRESTIGIO.get(t, 0) + st[t]['v']
-        for qid, txt, cond, stat in (('emp', 'Um clube que já empatou um jogo esta época', 'e', lambda t: f"{st[t]['e']} empates"),
-                                     ('perd', 'Um clube que já perdeu um jogo esta época', 'd', lambda t: f"{st[t]['d']} derrotas"),
-                                     ('tres', 'Um clube que já marcou 3 ou mais golos num jogo esta época', 'tres', lambda t: f"{st[t]['tres']} vez(es)"),
-                                     ('cs', 'Um clube que já acabou um jogo sem sofrer golos esta época', 'cs', lambda t: f"{st[t]['cs']} jogo(s)"),
-                                     ('vf', 'Um clube que já ganhou fora de casa esta época', 'vf', lambda t: f"{st[t]['vf']} vitória(s) fora")):
+        for qid, txt, cond, stat in (('emp', 'Um clube que já empatou um jogo esta época', 'e', lambda t: pl(st[t]['e'], 'empate', 'empates')),
+                                     ('perd', 'Um clube que já perdeu um jogo esta época', 'd', lambda t: pl(st[t]['d'], 'derrota', 'derrotas')),
+                                     ('tres', 'Um clube que já marcou 3 ou mais golos num jogo esta época', 'tres', lambda t: pl(st[t]['tres'], 'vez', 'vezes')),
+                                     ('cs', 'Um clube que já acabou um jogo sem sofrer golos esta época', 'cs', lambda t: pl(st[t]['cs'], 'jogo', 'jogos')),
+                                     ('vf', 'Um clube que já ganhou fora de casa esta época', 'vf', lambda t: pl(st[t]['vf'], 'vitória fora', 'vitórias fora'))):
             r = [[t, stat(t)] for t in sorted(st, key=lambda t: -fam(t)) if st[t][cond] > 0]
             if 5 <= len(r) <= 18: perguntas.append({'id': f'pt{lbl}-larga-{qid}', 'per': 'atual', 'ep': lbl, 'txt': txt, 'sub': sub, 'r': r})
     perguntas = [q for q in perguntas if len(q['r']) >= 5]   # regra do jogo: pelo menos 5 respostas
