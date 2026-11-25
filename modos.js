@@ -260,7 +260,7 @@ function caixaResposta(box, opts) {
   const render = () => {
     const typed = inp.value.trim().length >= 2;
     if (!lista.length) { ul.innerHTML = typed ? '<li class="empty">Nada com esse nome na lista</li>' : ''; ul.classList.toggle('on', typed); return; }
-    ul.innerHTML = lista.map((p, i) => { const t = TIPO[p.tipo] || ['⚽', '']; return `<li role="option" data-i="${i}" class="${i === sel ? 'sel' : ''}"><span class="kit">${t[0]}</span><span class="nm">${esc(p.nome)}<small>${esc(p.completo || t[1])}</small></span></li>`; }).join('');
+    ul.innerHTML = lista.map((p, i) => { const t = TIPO[p.tipo] || ['⚽', '']; let k = null; try { k = typeof kitDe === 'function' ? kitDe(p) : null; } catch (e) {} return `<li role="option" data-i="${i}" class="${i === sel ? 'sel' : ''}"><span class="kit">${k || t[0]}</span><span class="nm">${esc(p.nome)}<small>${esc(p.completo || t[1])}</small></span></li>`; }).join('');
     ul.classList.add('on');
   };
   const limpa = () => { inp.value = ''; lista = []; sel = 0; ul.classList.remove('on'); ul.innerHTML = ''; };
@@ -1374,9 +1374,10 @@ function temaMeta() { const m = document.querySelector('meta[name="theme-color"]
 function temaPor(v) {
   try { localStorage.setItem('fora-da-caixa-tema', v); } catch (e) {}
   if (v === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
-  temaMeta(); if (typeof drawPitch === 'function' && $('#s-home').classList.contains('on')) renderHome();
+  temaMeta(); heroRedesenha();
 }
-temaMeta(); matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', temaMeta);
+function heroRedesenha() { const H = window.HERO; if (!H) return; drawPitch(H.svg, H.v, {ball:false}); H.svg.appendChild(H.g); }
+temaMeta(); matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { temaMeta(); heroRedesenha(); });
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;
