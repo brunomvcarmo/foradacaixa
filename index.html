@@ -588,7 +588,7 @@ dialog .tiers b{width:52px}
   <!-- ===================== LIGA ===================== -->
   <div id="s-liga" class="screen">
     <div class="lg-head"><button class="iconbtn" id="lgBack" aria-label="Voltar">‹</button><h2>🏆 Classificação</h2><button class="iconbtn" id="lgStats" aria-label="Estatísticas">📊</button><button class="iconbtn" id="lgRefresh" aria-label="Atualizar">↻</button></div>
-    <div class="tabs" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Semana</button><button data-t="total">Total</button><button data-t="trofeus">🏆</button></div>
+    <div class="tabs scroll" id="lgTabs"><button data-t="hoje">Hoje</button><button data-t="semana">Semana</button><button data-t="total">Total</button><button data-t="taca">🏆 Taça</button><button data-t="mural">📰 Mural</button><button data-t="trofeus">🎖️ Honra</button></div>
     <div id="lgBody"></div>
     <p class="foot">3 jogos por dia contam (o dia muda à meia-noite de Lisboa). Os jogos 1, 2 e 3 de cada dia têm as mesmas perguntas para todos.</p>
   </div>
@@ -743,10 +743,10 @@ dialog .tiers b{width:52px}
   </defs>
 </svg>
 
-<script src="perguntas.js?v=20261125153807"></script>
-<script src="perguntas2.js?v=20261125153807"></script>
-<script src="perguntas3.js?v=20261125153807"></script>
-<script src="emblemas.js?v=20261125153807"></script>
+<script src="perguntas.js?v=20261125160502"></script>
+<script src="perguntas2.js?v=20261125160502"></script>
+<script src="perguntas3.js?v=20261125160502"></script>
+<script src="emblemas.js?v=20261125160502"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -756,7 +756,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261125153807';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261125160502';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 let novaVersao = false;
 async function verVersao() {
   try {
@@ -1168,6 +1168,7 @@ async function answer(p, timeout = false) {
   S.score += pts;
   if (S.liga) ligaSync(false);
   if (S.duelo && typeof dueloSync === 'function') dueloSync(false);   // duelos (modos.js)
+  if (S.taca && typeof tacaSync === 'function') tacaSync(false);   // Taça dos Amigos (modos.js)
   S.shots.push({q, p, tier, pts, timeout, tries:S.tries.slice()});
   if (tier >= 5) { ST.golacos++; saveStats(ST); }
   $('#pitchBox').scrollIntoView({behavior:'smooth', block:'center'});
@@ -1530,10 +1531,12 @@ function renderTrofeus() {
   h += `<h3 class="lg-h">Campeões de cada semana</h3>`;
   h += sem.length ? sem.slice().reverse().map(s => `<div class="tr-w"><span>${lab(s.ws)}</span><b>🏆 ${s.vencedores.map(esc).join(' e ')}</b>${s.pts} pts</div>`).join('')
                   : '<p class="lg-note">Ainda nenhuma semana acabou. O primeiro campeão fica decidido no domingo à meia-noite (hora de Lisboa).</p>';
+  if (typeof tacaHonraHTML === 'function') h += tacaHonraHTML();   // campeões da Taça (modos.js)
   $('#lgBody').innerHTML = h;
 }
 function renderLiga() {
   if (LTAB === 'trofeus') return renderTrofeus();
+  if ((LTAB === 'taca' || LTAB === 'mural') && typeof renderLigaExtra === 'function') { document.querySelectorAll('#lgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === LTAB)); return renderLigaExtra(LTAB); }   // Taça e Mural (modos.js)
   const hoje = lisDate(), wk = weekStart(hoje);
   const filtros = {hoje: d => d === hoje, semana: d => weekStart(d) === wk, total: () => true};
   document.querySelectorAll('#lgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === LTAB));
@@ -1572,7 +1575,7 @@ async function statsGet() {
 // guarda no Firebase um jogo que não é da liga (para as estatísticas de "Tudo")
 function registarJogo() {
   if (!LIGA.db || !ME || !S || S.liga || !S.shots.length) return;
-  const rec = {modo:S.mode, cat:S.cat, dia:lisDate(), fim:Date.now(), pontos:S.score, golos:S.shots.filter(s => s.tier).length,
+  const rec = {modo:S.taca ? 'taca' : S.mode, cat:S.cat, dia:lisDate(), fim:Date.now(), pontos:S.score, golos:S.shots.filter(s => s.tier).length,
                golacos:S.shots.filter(s => s.tier >= 5).length, perguntas:S.shots.length, serie:S.bestStreak, tiros:tirosDe()};
   const go = (k = 0) => fetch(ligaUrl(`todos/${ME}`), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(rec)})
     .then(r => { if (!r.ok) throw new Error(r.status); }).catch(() => { if (k < 3) setTimeout(() => go(k + 1), 2000 * (k + 1)); });
@@ -1891,6 +1894,6 @@ sugEl.addEventListener('click', e => { const li = e.target.closest('li[data-i]')
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#s-game').classList.contains('on') && S?.answered && !busy && document.activeElement !== inp) { const b = document.getElementById('nextBtn'); if (b && document.activeElement !== b) { b.click(); e.preventDefault(); } } });
 boot();
 </script>
-<script src="modos.js?v=20261125153807"></script>
+<script src="modos.js?v=20261125160502"></script>
 </body>
 </html>

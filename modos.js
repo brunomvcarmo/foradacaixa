@@ -80,6 +80,31 @@ const MX_CSS = `
 .cv-r span{flex:1}.cv-r small{color:var(--mute)}.cv-r b{font-family:var(--display);font-weight:400;font-size:16px}
 .cv-g{flex:none!important;width:18px;text-align:center}
 .du-link{border-style:dashed;color:var(--acc)}
+.tc-mini,.mu-mini{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:0 0 12px}
+.tc-mini{display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid var(--t3)}
+.tc-mini .ic{font-size:26px}.tc-mini .tx{flex:1;min-width:0}.tc-mini .tx b{font-family:var(--display);font-weight:400;font-size:17px;display:block}
+.tc-mini small{color:var(--mute);font-size:13.5px}.tc-mini .go{font-size:22px;opacity:.6}
+.mu-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.mu-top b{font-family:var(--display);font-weight:400;font-size:17px}
+.mu-it{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-top:1px dashed var(--line);font-size:14px;line-height:1.35}
+.mu-it:first-of-type{border-top:0}
+.mu-it .emb{margin:1px 0 0}.mu-ic{width:22px;text-align:center;flex:none}
+.mu-tx{flex:1;min-width:0}.mu-it small{flex:none;color:var(--mute);font-size:12px;white-space:nowrap;margin-top:2px}
+.mu-falta{background:#fff3d6;border:1px solid #ecd28a;border-radius:12px;padding:9px 12px;font-size:14px;margin:0 0 8px}
+.mu-falta.ok{background:#e7f2e6;border-color:#b7d6b2}.mu-falta .emb{margin:0 3px 0 4px}
+.tc-head{display:flex;justify-content:space-between;align-items:baseline;margin:4px 2px 10px}.tc-head b{font-family:var(--display);font-weight:400;font-size:22px}.tc-head span{color:var(--mute);font-size:14px}
+.tc-camp{display:flex;align-items:center;gap:12px;background:var(--t3);border:2px solid var(--dark);box-shadow:var(--shadow);border-radius:16px;padding:12px 16px;margin-bottom:12px}
+.tc-camp small{display:block;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.tc-camp b{font-family:var(--display);font-weight:400;font-size:22px}
+.tc-ronda{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin:12px 0}
+.tc-ronda.hoje{border:2px solid var(--acc)}
+.tc-rt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.tc-rt b{font-family:var(--display);font-weight:400;font-size:17px}.tc-rt span{color:var(--mute);font-size:13px}
+.tc-jogo{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:6px 0}
+.tc-p{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);font-weight:600}
+.tc-p+.tc-p{border-top:1px solid var(--line)}
+.tc-p span{flex:1}.tc-p em{font-style:normal;font-family:var(--display);font-size:17px}
+.tc-p.venc{background:#e3f0e1}.tc-p.venc span::after{content:' ✓';color:var(--acc)}.tc-p.perd{opacity:.55}
+.tc-p.eu span{text-decoration:underline;text-underline-offset:3px}
+.tc-p.tbd{color:var(--mute);font-weight:500}.emb-v{width:24px;text-align:center}
+.tc-bye{font-size:13.5px;color:var(--mute);margin:6px 2px 2px}.tc-bye .emb{margin:0 2px 0 4px}
 .st-btn.du-img{background:var(--t3);border-color:var(--dark);color:var(--dark)}
 .du-card .emb{margin:0}
 .du-op{display:inline-flex;align-items:center;gap:2px}
@@ -476,7 +501,7 @@ function duRenderHome() {
   ban.hidden = !p.length;
   if (p.length) { $('#duBanTx').innerHTML = p.length === 1 ? `${emb(p[0].de, 26)}O <b>${esc(p[0].de)}</b> desafiou-te para um duelo!` : `Tens <b>${p.length} duelos</b> à tua espera!`; ban.onclick = () => p.length === 1 ? duJogar(p[0].id) : openDuelo(); }
 }
-async function duRefresh() { if ($('#s-eu').classList.contains('on')) renderEu(); if (!ME || !LIGA.db) return; await duGet(); duRenderHome(); if ($('#s-duelo').classList.contains('on')) duRender(); if ($('#s-eu').classList.contains('on')) renderEu(); }
+async function duRefresh() { setTimeout(() => { try { inicioExtra(); } catch (e) {} }, 0); if ($('#s-eu').classList.contains('on')) renderEu(); if (!ME || !LIGA.db) return; await duGet(); duRenderHome(); if ($('#s-duelo').classList.contains('on')) duRender(); if ($('#s-eu').classList.contains('on')) renderEu(); }
 function duRes(d, n) { const r = d.res?.[n]; return r ? r.pontos || 0 : null; }
 function duRender() {
   const el = $('#duBody');
@@ -830,7 +855,7 @@ $('#euCod').onclick = abrirMudarCodigo;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button><button class="st-btn du-img" id="endDuImg" hidden>📸 Enviar imagem do resultado</button>');
-endGame = (orig => function () { $('#endDuVer').hidden = true; $('#endDuImg').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
+endGame = (orig => function () { $('#endDuVer').hidden = true; $('#endDuImg').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); if (S?.taca) tacaFim(); return r; })(endGame);
 // ---------- desafios por link (também para convidados): o resultado de quem joga fica em ligas/<id>/convites/<chave>/res ----------
 const chaveNome = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20) || 'alguem';   // só letras sem acento, números e traços (chave do Firebase)
 function conviteFim() {
@@ -846,6 +871,227 @@ function conviteFim() {
 }
 let CV = null;
 async function cvGet() { if (!LIGA.db) return; try { const r = await fetch(ligaUrl('convites'), {cache:'no-store'}); if (r.ok) CV = (await r.json()) || {}; } catch (e) {} }
+
+// ======================================================================
+// 🏆 TAÇA DOS AMIGOS — duas por semana: "Taça de segunda" (seg-qua) e "Taça de quinta" (qui-sáb). Sorteio igual para todos
+// (semente taca:<liga>:<início>); uma eliminatória por dia; 7 perguntas iguais para todos nessa ronda (taca/<id>/sets/r<k>);
+// resultados em taca/<id>/jogos/r<k>/<nome>; campeões em tacas_campeoes/<id>. Passa quem fizer mais pontos
+// (desempate: golos, golos de longe, lugar no sorteio). Quem não jogar até à meia-noite fica com 0.
+// ======================================================================
+let TC = {id:null, jogos:null, campeoes:null, ant:null, antJogos:null};
+const TACA_INICIO = '2026-11-26';   // a 1.ª taça (Taça de quinta, 26 nov 2026); as anteriores não existiram
+const diaMais = (ds, n) => new Date(new Date(ds + 'T12:00:00Z').getTime() + n * 864e5).toISOString().slice(0, 10);
+const dowDe = ds => new Date(ds + 'T12:00:00Z').getUTCDay();
+function tacaDe(ds) { const w = dowDe(ds); if (w >= 1 && w <= 3) return diaMais(ds, 1 - w); if (w >= 4 && w <= 6) return diaMais(ds, 4 - w); return null; }
+function tacaAnterior(ds) { const t = tacaDe(ds); if (!t) return diaMais(ds, -3); return diaMais(t, dowDe(t) === 1 ? -4 : -3); }   // domingo: a de quinta
+const tacaNome = id => dowDe(id) === 1 ? 'Taça de segunda' : 'Taça de quinta';
+const diaCurto = ds => new Date(ds + 'T12:00:00Z').toLocaleDateString('pt-PT', {weekday:'short', day:'numeric', timeZone:'UTC'});
+function tacaSorteio(id) {
+  const J = [...LIGA.jogadores], r = rng(hashStr(`taca:${LIGA.id}:${id}`));
+  for (let i = J.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [J[i], J[j]] = [J[j], J[i]]; }
+  let P = 1; while (P < J.length) P *= 2;
+  const n1 = J.length - P / 2, byes = J.slice(0, J.length - 2 * n1), r1 = J.slice(J.length - 2 * n1);
+  const pares = []; for (let i = 0; i < n1; i++) pares.push([r1[i], r1[r1.length - 1 - i]]);
+  return {J, rondas: Math.log2(P), byes, pares};
+}
+function nomeRonda(k, R, nJogos) { if (k === R) return 'Final'; if (k === R - 1) return 'Meias-finais'; if (k === R - 2 && nJogos === 4) return 'Quartos de final'; return 'Pré-eliminatória'; }
+// estado de uma taça a partir dos jogos guardados
+function tacaEstado(id, jogos) {
+  const sor = tacaSorteio(id), seed = n => sor.J.indexOf(n), hoje = lisDate(), rondas = [];
+  let pares = sor.pares, entram = sor.byes;
+  for (let k = 1; k <= sor.rondas; k++) {
+    const dia = diaMais(id, k - 1), passou = hoje > dia, js = jogos?.['r' + k] || {};
+    const fechado = rec => !!rec && (rec.estado === 'acabado' || Date.now() - (rec.inicio || 0) > 30 * 60e3);
+    const lista = pares.map(([a, b]) => {
+      const ra = a ? js[a] : null, rb = b ? js[b] : null;
+      let venc = null;
+      if (a && b && (passou || (fechado(ra) && fechado(rb)))) {
+        const v = x => [x?.pontos || 0, x?.golos || 0, x?.golacos || 0];
+        const [pa, pb] = [v(ra), v(rb)]; let c = 0; for (let i = 0; i < 3 && !c; i++) c = pa[i] - pb[i];
+        venc = c > 0 ? a : c < 0 ? b : (seed(a) < seed(b) ? a : b);
+      }
+      return {a, b, ra, rb, venc, jogado: !!(ra || rb)};
+    });
+    rondas.push({k, dia, nome: nomeRonda(k, sor.rondas, lista.length), jogos: lista, byes: k === 1 ? sor.byes : []});
+    const slots = [...entram, ...lista.map(m => m.venc)];
+    pares = []; for (let i = 0; i < slots.length / 2; i++) pares.push([slots[i], slots[slots.length - 1 - i]]);
+    entram = [];
+  }
+  const fin = rondas[rondas.length - 1].jogos[0];
+  return {id, nome: tacaNome(id), rondas, campeao: fin?.jogado ? fin.venc : null, finalVazia: !!(fin?.venc && !fin.jogado), sor};
+}
+async function tacaGet() {
+  if (!LIGA.db) return;
+  const hoje = lisDate(); let id = tacaDe(hoje), ant = tacaAnterior(hoje);
+  if (id && id < TACA_INICIO) id = null; if (ant < TACA_INICIO) ant = null;
+  const get = async p => { try { const r = await fetch(ligaUrl(p), {cache:'no-store'}); return r.ok ? (await r.json()) || {} : null; } catch (e) { return null; } };
+  const [j, ja, c] = await Promise.all([id ? get(`taca/${id}/jogos`) : null, ant ? get(`taca/${ant}/jogos`) : null, get('tacas_campeoes')]);
+  TC = {id, jogos: j || {}, ant, antJogos: ja || {}, campeoes: c || {}};
+  for (const [tid, js] of [[id, TC.jogos], [ant, TC.antJogos]]) if (tid) {   // guardar o campeão quando a final fica decidida (uma vez)
+    const e = tacaEstado(tid, js); if (e.campeao && TC.campeoes[tid] !== e.campeao && Object.keys(js).length) { TC.campeoes[tid] = e.campeao; ligaPut(`tacas_campeoes/${tid}`, e.campeao).catch(() => {}); }
+  }
+}
+function tacaMeuJogo() {
+  if (!ME || !TC.id) return null;
+  const e = tacaEstado(TC.id, TC.jogos), hoje = lisDate(), r = e.rondas.find(x => x.dia === hoje); if (!r) return null;
+  const m = r.jogos.find(x => x.a === ME || x.b === ME);
+  if (!m) { const fora = !e.rondas.slice(0, r.k - 1).some(x => x.jogos.some(y => y.venc === ME)) && !e.rondas[0].byes.includes(ME); return {r, m:null, fora, e}; }
+  const op = m.a === ME ? m.b : m.a, meu = m.a === ME ? m.ra : m.rb;
+  return {r, m, op, meu, e};
+}
+async function startTaca() {
+  if (!ME) return askWho();
+  await tacaGet(); const t = tacaMeuJogo();
+  if (!t || !t.m) { toast('Hoje não tens jogo da taça'); return; }
+  if (t.meu) { toast('Já jogaste a tua eliminatória de hoje'); openTaca(); return; }
+  if (!t.op) { toast('O teu adversário ainda não está decidido'); return; }
+  const id = TC.id, k = t.r.k, seed = hashStr(`taca:${LIGA.id}:${id}:r${k}`);
+  let qs = null;
+  try { const r = await fetch(ligaUrl(`taca/${id}/sets/r${k}`), {cache:'no-store'}); if (r.ok) { const arr = await r.json(); if (Array.isArray(arr)) qs = desserializar(arr); } } catch (e) {}
+  if (!qs) { LIGA_PL_MAX = LIGA.maxPL; qs = genSet(seed, 'liga'); LIGA_PL_MAX = null; ligaPut(`taca/${id}/sets/r${k}`, qs.map(serializar)).catch(() => {}); }
+  const inicio = Date.now();
+  try { await ligaPut(`taca/${id}/jogos/r${k}/${ME}`, {pontos:0, golos:0, golacos:0, estado:'a jogar', inicio}); } catch (e) { toast('Sem ligação: tenta outra vez'); return; }
+  startGame('7', seed, 'liga', qs); S.taca = {id, k, op: t.op, ronda: t.r.nome, inicio};
+  toast(`${t.r.nome} da taça contra o ${t.op}: boa sorte!`);
+}
+let tcSyncT = null;
+function tacaSync(final) {
+  if (!S?.taca) return Promise.resolve();
+  const body = {pontos:S.score, golos:S.shots.filter(x => x.tier).length, golacos:S.shots.filter(x => x.tier >= 5).length, perguntas:S.shots.length,
+    tiros:tirosDe(), resp:S.shots.map(x => x.p ? x.p.nome : null), estado: final ? 'acabado' : 'a jogar', inicio:S.taca.inicio, fim: final ? Date.now() : null};
+  const path = `taca/${S.taca.id}/jogos/r${S.taca.k}/${ME}`;
+  const go = (k = 0) => ligaPut(path, JSON.parse(JSON.stringify(body))).catch(() => { if (k < 4) return sleep(2000 * (k + 1)).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
+  clearTimeout(tcSyncT); if (final) return go(); tcSyncT = setTimeout(go, 300); return Promise.resolve();
+}
+async function tacaFim() {
+  const t = S.taca; $('#endLbl').textContent = `🏆 ${tacaNome(t.id)} · ${t.ronda}`;
+  $('#again').textContent = 'Ver a taça'; $('#again').onclick = () => { $('#again').onclick = againOrig; openTaca(); };
+  await tacaSync(true); await tacaGet();
+  const r = TC.jogos?.['r' + t.k]?.[t.op], sub = $('#endSub');
+  if (r && (r.estado === 'acabado')) { const a = S.score, b = r.pontos || 0;
+    sub.innerHTML = `<div class="du-vs ${a > b ? 'du-win' : a < b ? 'du-lose' : ''}">${a > b ? `🏆 Passaste! ${a} – ${b}` : a < b ? `Eliminado… ${a} – ${b}` : `Empate ${a} – ${b} (desempate: golos)`}</div>${esc(sub.textContent)}`;
+    if (a > b) confettiEnd(); }
+  else sub.innerHTML = `${esc(sub.textContent)}<br><b>Agora falta o ${esc(t.op)}</b> jogar a eliminatória dele (até à meia-noite).`;
+}
+function openTaca() { LTAB = 'taca'; openLiga(); }
+function tacaHTML() {
+  if (!TC.campeoes) return '<p class="lg-note">A carregar…</p>';
+  const hoje = lisDate(), mostrar = TC.id || TC.ant;
+  if (!mostrar) return `<div class="tc-camp" style="background:var(--panel2)"><span style="font-size:34px">🏆</span><span><small>Taça dos Amigos</small><b>Começa ${hoje < TACA_INICIO ? diaCurto(TACA_INICIO).replace('.', '') : 'em breve'}</b></span></div>
+    <p class="lg-note" style="text-align:left">Duas taças por semana: a <b>Taça de segunda</b> (segunda, terça e quarta) e a <b>Taça de quinta</b> (quinta, sexta e sábado). Sorteio automático; uma eliminatória por dia, 7 perguntas iguais para os dois; passa quem fizer mais pontos. Com 5 jogadores: pré-eliminatória (2 jogam, 3 passam diretamente), meias-finais e final. O campeão vai para o quadro de honra.</p>`;
+  const e = tacaEstado(mostrar, TC.id ? TC.jogos : TC.antJogos);
+  let h = '';
+  if (!TC.id) h += `<p class="lg-note">Hoje ${dowDe(hoje) === 0 ? '(domingo) ' : ''}não há taça. A próxima começa ${dowDe(hoje) === 0 ? 'amanhã' : 'em breve'}. Aqui fica a última:</p>`;
+  h += `<div class="tc-head"><b>${esc(e.nome)}</b><span>${diaCurto(e.rondas[0].dia)} – ${diaCurto(e.rondas[e.rondas.length - 1].dia)}</span></div>`;
+  if (e.campeao) h += `<div class="tc-camp">${emb(e.campeao, 44)}<span><small>Campeão</small><b>🏆 ${esc(e.campeao)}</b></span></div>`;
+  else if (e.finalVazia) h += `<p class="lg-note">Ninguém jogou a final: esta taça ficou sem campeão.</p>`;
+  const t = tacaMeuJogo();
+  if (t && t.m && !t.meu && t.op) h += `<button class="btn" id="tcPlay">Jogar: ${esc(t.r.nome)} contra o ${esc(t.op)} ›</button>`;
+  for (const r of e.rondas) {
+    const hojeR = r.dia === hoje, fut = r.dia > hoje;
+    h += `<div class="tc-ronda ${hojeR ? 'hoje' : ''}"><div class="tc-rt"><b>${esc(r.nome)}</b><span>${diaCurto(r.dia)}${hojeR ? ' · hoje' : ''}</span></div>`;
+    h += r.jogos.map(m => { const lado = (n, rec) => { if (!n) return `<div class="tc-p tbd"><span class="emb-v">?</span><span>a decidir</span><em></em></div>`;
+        const st = rec ? (rec.estado === 'acabado' || Date.now() - (rec.inicio || 0) > 30 * 60e3 ? String(rec.pontos || 0) : '⏳') : (fut ? '' : r.dia < hoje ? '0' : '·');
+        return `<div class="tc-p ${m.venc === n ? 'venc' : m.venc ? 'perd' : ''} ${n === ME ? 'eu' : ''}">${emb(n, 24)}<span>${esc(n)}</span><em>${st}</em></div>`; };
+      return `<div class="tc-jogo">${lado(m.a, m.ra)}${lado(m.b, m.rb)}</div>`; }).join('');
+    if (r.byes.length) h += `<p class="tc-bye">Passam diretamente: ${r.byes.map(n => `${emb(n, 16)}${esc(n)}`).join(', ')}</p>`;
+    h += '</div>';
+  }
+  h += `<p class="foot">Uma eliminatória por dia, 7 perguntas iguais para os dois. Passa quem fizer mais pontos (desempate: golos, golos de longe, sorteio). Quem não jogar até à meia-noite fica com 0.</p>`;
+  return h;
+}
+function tacaHonraHTML() {
+  const c = TC.campeoes || {}, ids = Object.keys(c).sort().reverse(); if (!ids.length) return `<h3 class="lg-h">Campeões da Taça</h3><p class="lg-note">Ainda não houve nenhuma final.</p>`;
+  const cont = {}; ids.forEach(i => cont[c[i]] = (cont[c[i]] || 0) + 1);
+  return `<h3 class="lg-h">Campeões da Taça</h3><div class="trofeus">${Object.entries(cont).sort((a, b) => b[1] - a[1]).map(([n, k]) => `<div class="tr-q">${emb(n, 26)}<b>${esc(n)}</b><span class="cups">${'🏆'.repeat(Math.min(k, 8))}</span><em>${k}</em></div>`).join('')}</div>`
+    + ids.slice(0, 12).map(i => `<div class="tr-w"><span>${tacaNome(i)} · ${diaCurto(i)}</span><b>🏆 ${esc(c[i])}</b></div>`).join('');
+}
+
+// ======================================================================
+// 📰 MURAL DA LIGA — o que vai acontecendo (calculado dos jogos da liga, duelos e taças; nada novo guardado)
+// ======================================================================
+function quando(t) {
+  const m = Math.round((Date.now() - t) / 60000); if (m < 1) return 'agora'; if (m < 60) return `há ${m} min`;
+  const h = Math.round(m / 60); if (h < 12) return `há ${h} h`;
+  const d = new Date(t); return d.toLocaleDateString('pt-PT', {weekday:'short'}) + ' ' + d.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+}
+const vs = (n, txtEu, txtOutro) => n === ME ? txtEu : txtOutro;
+function muralEventos() {
+  const ev = [], desde = Date.now() - 8 * 864e5, add = (t, ic, html, quem) => { if (t && t > desde) ev.push({t, ic, html, quem}); };
+  const nb = n => `<b>${esc(n)}</b>`;
+  // jogos da liga
+  const recordeAntes = {}, jogosOrd = [];
+  for (const n of LIGA.jogadores) for (const dia in (LG.dados?.[n] || {})) for (const [jk, g] of Object.entries(LG.dados[n][dia] || {})) if (g) jogosOrd.push({n, dia, j: jk.slice(1), g, t: g.fim || g.inicio || 0});
+  jogosOrd.sort((a, b) => a.t - b.t);
+  const sem = weekStart(lisDate()), acum = {}; let lider = null;
+  for (const x of jogosOrd) {
+    const {n, g} = x, acabado = g.estado === 'acabado';
+    if (acabado) {
+      const b100 = (g.tiros || []).filter(t => t[1] === 6).length;
+      if (b100) add(x.t, '🚀', `${vs(n, 'Marcaste', nb(n) + ' marcou')} ${b100 > 1 ? b100 + ' golos' : 'um golo'} de baliza a baliza (100 m) no jogo ${x.j} da liga`, n);
+      if ((g.perguntas || 0) >= 7 && g.golos === g.perguntas) add(x.t, '🎯', `${vs(n, 'Acertaste', nb(n) + ' acertou')} as 7 perguntas do jogo ${x.j} (${g.pontos} pontos)`, n);
+      if (recordeAntes[n] != null && (g.pontos || 0) > recordeAntes[n] && recordeAntes[n] > 0) add(x.t, '⭐', `${vs(n, 'Bateste o teu recorde', nb(n) + ' bateu o recorde dele')} na liga: ${g.pontos} pontos`, n);
+      recordeAntes[n] = Math.max(recordeAntes[n] || 0, g.pontos || 0);
+    }
+    if (weekStart(x.dia) === sem) {
+      acum[n] = (acum[n] || 0) + (g.pontos || 0);
+      const top = Object.entries(acum).sort((a, b) => b[1] - a[1])[0][0];
+      if (top !== lider) { if (lider) add(x.t, '👑', `${vs(top, 'Passaste para a frente da liga', 'Novo líder da semana: ' + nb(top))} (${acum[top]} pontos)`, top); lider = top; }
+    }
+  }
+  // campeão da semana passada
+  const ult = semanasFechadas().at(-1); if (ult) add(new Date(diaMais(ult.ws, 7) + 'T00:00:00Z').getTime(), '🏆', `${ult.vencedores.map(nb).join(' e ')} ${ult.vencedores.length > 1 ? 'foram campeões' : 'foi campeão'} da semana com ${ult.pts} pontos`, ult.vencedores[0]);
+  // duelos
+  for (const d of Object.values(DU.dados || {})) {
+    if (!d || d.para === '*') continue; const ra = d.res?.[d.de], rb = d.res?.[d.para];
+    if (duAcabou(ra) && duAcabou(rb)) { const a = ra.pontos || 0, b = rb.pontos || 0, t = Math.max(ra.fim || 0, rb.fim || 0) || d.criado;
+      if (a === b) add(t, '⚔️', `${nb(d.de)} e ${nb(d.para)} empataram um duelo (${a}–${b})`, d.de);
+      else { const [w, l, pw, pl] = a > b ? [d.de, d.para, a, b] : [d.para, d.de, b, a];
+        add(t, '⚔️', l === ME ? `${nb(w)} ganhou-te um duelo por ${pw - pl} pontos (${pw}–${pl})` : w === ME ? `Ganhaste um duelo ao ${nb(l)} por ${pw - pl} pontos (${pw}–${pl})` : `${nb(w)} ganhou um duelo ao ${nb(l)} (${pw}–${pl})`, w); } }
+    else add(d.criado, '⚔️', d.para === ME ? `${nb(d.de)} desafiou-te para um duelo` : `${nb(d.de)} desafiou o ${nb(d.para)} para um duelo`, d.de);
+  }
+  // taças
+  for (const [tid, js] of [[TC.ant, TC.antJogos], [TC.id, TC.jogos]]) { if (!tid || !js) continue;
+    const e = tacaEstado(tid, js);
+    for (const r of e.rondas) for (const m of r.jogos) if (m.venc && m.jogado) { const p = m.venc === m.a ? m.b : m.a, rv = m.venc === m.a ? m.ra : m.rb, rp = m.venc === m.a ? m.rb : m.ra;
+      const t = Math.max(rv?.fim || 0, rp?.fim || 0) || new Date(diaMais(r.dia, 1) + 'T00:00:00Z').getTime();
+      if (r.nome === 'Final') add(t + 1, '🏆', `${vs(m.venc, 'Ganhaste a ' + e.nome + '!', nb(m.venc) + ' ganhou a ' + e.nome + '!')} Na final, ${rv?.pontos || 0}–${rp?.pontos || 0} ao ${nb(p)}`, m.venc);
+      else add(t, '🏆', `${vs(m.venc, 'Passaste', nb(m.venc) + ' passou')} ${r.nome === 'Meias-finais' ? 'à final' : 'às ' + (r.k + 1 === e.rondas.length ? 'final' : 'meias-finais')} da ${e.nome} (${rv?.pontos || 0}–${rp?.pontos || 0} ao ${nb(p)})`, m.venc); }
+  }
+  return ev.sort((a, b) => b.t - a.t);
+}
+function muralFaltam() { const hoje = lisDate(); return LIGA.jogadores.filter(n => feitosDia(n, hoje) === 0); }
+function muralItem(e) { return `<div class="mu-it">${e.quem && LIGA.jogadores.includes(e.quem) ? emb(e.quem, 22) : `<span class="mu-ic">${e.ic}</span>`}<span class="mu-tx">${e.ic} ${e.html}</span><small>${quando(e.t)}</small></div>`; }
+function muralHTML(max) {
+  if (!LG.dados) return '<p class="lg-note">A carregar…</p>';
+  const ev = muralEventos(), falta = muralFaltam();
+  let h = falta.length ? `<div class="mu-falta">👀 Ainda não ${falta.length === 1 ? 'jogou' : 'jogaram'} hoje: ${falta.map(n => `${emb(n, 16)}<b>${esc(n)}</b>`).join(', ')}</div>` : '<div class="mu-falta ok">✅ Hoje já jogaram todos!</div>';
+  h += ev.length ? ev.slice(0, max || 60).map(muralItem).join('') : '<p class="lg-note">Ainda não aconteceu nada esta semana.</p>';
+  return h;
+}
+function renderLigaExtra(tab) { $('#lgBody').innerHTML = tab === 'taca' ? tacaHTML() : muralHTML(); const b = $('#tcPlay'); if (b) b.onclick = startTaca; }
+// ---------- no início: um cartão pequeno da taça e as 3 últimas do mural ----------
+$('#ligaCard').insertAdjacentHTML('afterend', '<div class="tc-mini" id="tcMini" hidden></div><div class="mu-mini" id="muMini" hidden></div>');
+function inicioExtra() {
+  const tm = $('#tcMini'), mm = $('#muMini'); if (!tm) return;
+  if (LIGA.db && TC.campeoes) {
+    const t = tacaMeuJogo(); let linha = '', botao = '';
+    if (!TC.id && !TC.ant) linha = lisDate() < TACA_INICIO ? `A 1.ª taça começa ${diaCurto(TACA_INICIO).replace('.', '')}` : 'Em breve';
+    else if (!TC.id) linha = dowDe(lisDate()) === 0 ? 'Domingo não há taça · amanhã começa a Taça de segunda' : 'Ver a última taça';
+    else if (!t) { const e = tacaEstado(TC.id, TC.jogos); linha = e.campeao ? `Campeão: <b>${esc(e.campeao)}</b>` : 'Ver o quadro'; }
+    else if (t.m && t.op && !t.meu) { linha = `Hoje: <b>${esc(t.r.nome)}</b> contra o <b>${esc(t.op)}</b>`; botao = '<button class="du-btn" id="tcMiniPlay">Jogar</button>'; }
+    else if (t.m && t.meu) linha = `${esc(t.r.nome)} contra o ${esc(t.op)}: já jogaste${t.m.venc ? (t.m.venc === ME ? ' · <b>passaste!</b>' : ' · eliminado') : ''}`;
+    else linha = t.fora ? `Já foste eliminado · hoje: ${esc(t.r.nome)}` : `Hoje não jogas (${esc(t.r.nome)})`;
+    tm.hidden = false; tm.innerHTML = `<span class="ic">🏆</span><span class="tx"><b>${esc(TC.id || TC.ant ? tacaNome(TC.id || TC.ant) : 'Taça dos Amigos')}</b><small>${linha}</small></span>${botao || '<span class="go">›</span>'}`;
+    tm.onclick = e => { if (e.target.closest('#tcMiniPlay')) { e.stopPropagation(); startTaca(); } else openTaca(); };
+  }
+  if (LG.dados && LIGA.db) { const ev = muralEventos().slice(0, 3); mm.hidden = false;
+    mm.innerHTML = `<div class="mu-top"><b>📰 Mural</b><button class="linkbtn" id="muVer">ver tudo ›</button></div>${ev.length ? ev.map(muralItem).join('') : '<p class="lg-note" style="margin:4px 0">Ainda não aconteceu nada esta semana.</p>'}`;
+    $('#muVer').onclick = () => { LTAB = 'mural'; openLiga(); }; }
+}
+renderLigaCard = (orig => function () { const r = orig.apply(this, arguments); try { inicioExtra(); } catch (e) {} return r; })(renderLigaCard);
+async function tacaRefresh() { await tacaGet(); inicioExtra(); if ($('#s-liga').classList.contains('on') && (LTAB === 'taca' || LTAB === 'mural' || LTAB === 'trofeus')) renderLiga(); }
+tacaRefresh(); setInterval(() => { if (LIGA.db && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-liga').classList.contains('on'))) tacaRefresh(); }, 30000);
 
 // ---------- ligar tudo ----------
 $('#m-raj').onclick = startRajada;
