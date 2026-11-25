@@ -79,6 +79,7 @@ const MX_CSS = `
 .cv-r{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}
 .cv-r span{flex:1}.cv-r small{color:var(--mute)}.cv-r b{font-family:var(--display);font-weight:400;font-size:16px}
 .cv-g{flex:none!important;width:18px;text-align:center}
+.du-link{border-style:dashed;color:var(--acc)}
 .du-card .emb{margin:0}
 .du-op{display:inline-flex;align-items:center;gap:2px}
 .du-click{cursor:pointer}
@@ -480,12 +481,13 @@ function duRender() {
   const el = $('#duBody');
   if (!ME) { el.innerHTML = `<p class="cd-p">Primeiro escolhe quem és.</p><button class="btn" id="duWho">Escolher</button>`; $('#duWho').onclick = askWho; return; }
   if (!DU.dados) { el.innerHTML = `<p class="cd-p">${DU.erro ? 'Sem ligação: tenta daqui a pouco.' : 'A carregar…'}</p>`; return; }
-  const ls = duLista(), pend = ls.filter(d => d.para === ME && !d.res?.[ME]), espera = ls.filter(d => d.res?.[ME] && !duAcabou(d.res?.[duOutro(d)]));
+  const todos = duLista(), ls = todos.filter(d => d.para !== '*'), links = todos.filter(d => d.para === '*' && d.de === ME);
+  const pend = ls.filter(d => d.para === ME && !d.res?.[ME]), espera = ls.filter(d => d.res?.[ME] && !duAcabou(d.res?.[duOutro(d)]));
   const feitos = ls.filter(d => duAcabou(d.res?.[d.de]) && duAcabou(d.res?.[d.para]));
   const cat = catNorm(ST.cat);
   let h = '';
   if (pend.length) h += `<div class="du-sec">Desafiaram-te</div>` + pend.map(d => `<div class="du-card hot">${emb(d.de, 30)}<div class="tx"><b>${esc(d.de)}</b> desafiou-te<small>7 perguntas · ${esc(catNome(d.cat))}${duAcabou(d.res?.[d.de]) ? ` · fez ${duRes(d, d.de)} pontos` : ''}</small></div><button class="du-btn" data-jogar="${d.id}">Jogar</button></div>`).join('');
-  h += `<div class="du-sec">Novo duelo</div><div class="du-ops">${LIGA.jogadores.filter(n => n !== ME).map(n => `<button class="du-op" data-op="${esc(n)}">${emb(n, 22)}${esc(n)}</button>`).join('')}</div>
+  h += `<div class="du-sec">Novo duelo</div><div class="du-ops">${LIGA.jogadores.filter(n => n !== ME).map(n => `<button class="du-op" data-op="${esc(n)}">${emb(n, 22)}${esc(n)}</button>`).join('')}<button class="du-op du-link" data-op="*">🔗 Alguém de fora</button></div>
     <p class="du-cat">Perguntas: <b>${esc(cat === 'tudo' ? 'todas' : catNome(cat))}</b> · <button class="linkbtn" id="duCat">mudar</button></p>`;
   if (espera.length) h += `<div class="du-sec">À espera</div>` + espera.map(d => `<div class="du-card">${emb(duOutro(d), 30)}<div class="tx">À espera do <b>${esc(duOutro(d))}</b><small>fizeste ${duRes(d, ME)} pontos · ${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})}</small></div><button class="du-ver" data-ver="${d.id}">As tuas respostas ›</button></div>`).join('');
   // registo contra cada amigo
@@ -494,55 +496,64 @@ function duRender() {
   if (Object.keys(reg).length) h += `<div class="du-sec">Contra cada amigo</div><div class="du-rec">${Object.entries(reg).map(([o, [v, e, d]]) => `<span>${emb(ME, 16)}${esc(ME)} <b>${v}</b> – <b>${d}</b> ${esc(o)}${emb(o, 16)}${e ? ` · ${e} empate${e === 1 ? '' : 's'}` : ''}</span>`).join('')}</div>`;
   if (feitos.length) h += `<div class="du-sec">Últimos duelos</div>` + feitos.slice(0, 15).map(d => { const o = duOutro(d), a = duRes(d, ME), b = duRes(d, o), cl = a > b ? 'du-win' : a < b ? 'du-lose' : '';
     return `<div class="du-card du-click" data-ver="${d.id}">${emb(o, 30)}<div class="tx"><b class="${cl}">${a > b ? 'Ganhaste' : a < b ? 'Perdeste' : 'Empate'}</b> contra ${esc(o)}<small>${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})} · ${esc(catNome(d.cat))} · <u>ver respostas</u></small></div><div class="res">${a} – ${b}</div></div>`; }).join('');
+  if (links.length) h += `<div class="du-sec">Duelos com convidados</div>` + links.slice(0, 12).map(d => {
+    const eu = duRes(d, ME), rs = Object.entries(d.res || {}).filter(([k, r]) => k !== ME && r && duAcabou(r)).sort((a, b) => (b[1].fim || 0) - (a[1].fim || 0));
+    return `<div class="du-card" style="flex-wrap:wrap"><div class="tx" style="flex-basis:60%"><b>Duelo por link</b> · ${duAcabou(d.res?.[ME]) ? `fizeste ${eu}` : 'ainda a jogar'}<small>${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'})} · ${esc(catNome(d.cat))}</small></div>
+      <button class="du-ver" data-link="${d.id}">📤 Enviar link</button>
+      ${rs.length ? rs.map(([k, r]) => `<div class="cv-r du-click" data-ver="${d.id}" data-com="${esc(k)}"><span class="cv-g">👤</span><span>${esc(r.nome || k)} <small>· ver respostas</small></span><b class="${r.pontos > eu ? 'du-lose' : r.pontos < eu ? 'du-win' : ''}">${r.pontos || 0} – ${eu}</b></div>`).join('')
+        : '<div class="cv-r"><span style="color:var(--mute)">Ainda ninguém jogou. Envia o link a alguém de fora.</span></div>'}</div>`; }).join('');
   const meus = Object.values(CV || {}).filter(c => c && c.de === ME && c.res).sort((a, b) => (b.info?.criado || 0) - (a.info?.criado || 0));
   if (meus.length) h += `<div class="du-sec">Desafios por link</div><p class="cd-p" style="margin:-4px 2px 8px">Quem jogou os desafios que partilhaste (no fim de um jogo: "Desafiar amigo").</p>` + meus.slice(0, 10).map(c => {
     const eu = c.info?.pontos ?? 0, rs = Object.values(c.res).sort((a, b) => (b.fim || 0) - (a.fim || 0));
     return `<div class="du-card" style="flex-wrap:wrap"><div class="tx" style="flex-basis:100%"><b>${c.info?.cat === 'dia' ? 'Desafio do dia' : 'Jogo rápido'}</b> · fizeste ${eu}<small>${c.info?.criado ? new Date(c.info.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'short'}) : ''}</small></div>
       ${rs.map(r => `<div class="cv-r">${r.perfil ? emb(r.nome, 18) : '<span class="cv-g">👤</span>'}<span>${esc(r.nome)}${r.perfil ? '' : ' <small>(convidado)</small>'}</span><b class="${r.pontos > eu ? 'du-lose' : r.pontos < eu ? 'du-win' : ''}">${r.pontos} – ${eu}</b></div>`).join('')}</div>`; }).join('');
-  if (!ls.length) h += `<p class="cd-p" style="margin-top:14px">Ainda não há duelos. Escolhe um amigo: jogas as 7 perguntas e ele recebe o desafio no início da app.</p>`;
+  if (!todos.length) h += `<p class="cd-p" style="margin-top:14px">Ainda não há duelos. Escolhe um amigo (ele recebe o desafio no início da app) ou "Alguém de fora" (envias-lhe um link). Jogas as 7 perguntas e depois joga ele.</p>`;
   el.innerHTML = h;
   el.querySelectorAll('[data-jogar]').forEach(b => b.onclick = () => duJogar(b.dataset.jogar));
-  el.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => duVer(b.dataset.ver));
+  el.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => duVer(b.dataset.ver, ME, b.dataset.com || null));
+  el.querySelectorAll('[data-link]').forEach(b => b.onclick = () => duPartilhar(b.dataset.link));
   el.querySelectorAll('[data-op]').forEach(b => b.onclick = () => duCriar(b.dataset.op));
   const bc = $('#duCat'); if (bc) bc.onclick = () => { openCats(); $('#catDlg').addEventListener('close', duRender, {once:true}); };
 }
 // as respostas dos dois, pergunta a pergunta (só se pode ver depois de ter jogado o duelo)
-function duVer(id) {
+function duVer(id, eu = ME, outro = null) {
   const d = DU.dados?.[id], el = $('#duBody'); if (!d) return;
-  if (!duAcabou(d.res?.[ME])) { toast('Primeiro joga o duelo'); return; }
+  if (!eu || !duAcabou(d.res?.[eu])) { toast('Primeiro joga o duelo'); return; }
   const qs = desserializar(Array.isArray(d.qs) ? d.qs : Object.values(d.qs || {}));
-  const quem = [ME, duOutro(d)], acabou = n => duAcabou(d.res?.[n]);
+  if (!outro) outro = eu === d.de ? (d.para === '*' ? (Object.keys(d.res || {}).find(k => k !== eu) || '?') : d.para) : d.de;
+  const quem = [eu, outro], acabou = n => duAcabou(d.res?.[n]);
+  const nomeDe = k => k === eu ? 'Tu' : d.res?.[k]?.nome || k, embDe = (k, px) => emb(d.res?.[k]?.nome || k, px);
   const tiro = (n, i) => { const r = d.res?.[n]; if (!r || !acabou(n)) return null; const t = (r.tiros || [])[i]; return {tier: t ? t[1] : 0, erros: t ? t[2] || 0 : 0, resp: (r.resp || [])[i] || null, jogou: i < (r.perguntas || 0)}; };
-  const pa = duRes(d, ME), pb = duRes(d, quem[1]);
+  const pa = duRes(d, eu), pb = duRes(d, quem[1]);
   let h = `<button class="linkbtn" id="duVolta">‹ Duelos</button>
-    <div class="du-head">${quem.map((n, k) => `<div class="du-p">${emb(n, 46)}<b>${esc(n === ME ? 'Tu' : n)}</b><span>${acabou(n) ? duRes(d, n) + ' pts' : 'ainda não jogou'}</span></div>${k === 0 ? `<div class="du-x">${acabou(quem[1]) ? (pa > pb ? '🏆' : pa < pb ? '😬' : '🤝') : '⚔️'}</div>` : ''}`).join('')}</div>
+    <div class="du-head">${quem.map((n, k) => `<div class="du-p">${embDe(n, 46)}<b>${esc(nomeDe(n))}</b><span>${acabou(n) ? duRes(d, n) + ' pts' : 'ainda não jogou'}</span></div>${k === 0 ? `<div class="du-x">${acabou(quem[1]) ? (pa > pb ? '🏆' : pa < pb ? '😬' : '🤝') : '⚔️'}</div>` : ''}`).join('')}</div>
     <p class="cd-p" style="text-align:center">${esc(catNome(d.cat))} · ${new Date(d.criado).toLocaleDateString('pt-PT', {day:'numeric', month:'long'})}</p>`;
   (qs || []).forEach((q, i) => {
     const linhas = quem.map(n => { const t = tiro(n, i);
-      if (!t) return `<div class="amg">${emb(n, 18)}<b>${esc(n === ME ? 'Tu' : n)}</b><span>ainda não jogou</span></div>`;
+      if (!t) return `<div class="amg">${embDe(n, 18)}<b>${esc(nomeDe(n))}</b><span>ainda não jogou</span></div>`;
       const T = TIERS[t.tier] || TIERS[0];
-      return `<div class="amg">${emb(n, 18)}<b>${esc(n === ME ? 'Tu' : n)}</b><span>${t.resp ? esc(t.resp) : t.jogou ? 'passou / sem tempo' : 'saiu antes'}${t.erros ? ` <small>· ${t.erros} erro${t.erros === 1 ? '' : 's'}</small>` : ''}</span><em style="background:${T.hex}${t.tier === 6 ? ';color:#fffaf0' : ''}">${t.tier ? T.m + ' m' : '✕'}</em></div>`; }).join('');
-    const ta = tiro(ME, i), tb = tiro(quem[1], i), ganha = ta && tb ? (TIERS[ta.tier].pts > TIERS[tb.tier].pts ? ME : TIERS[ta.tier].pts < TIERS[tb.tier].pts ? quem[1] : null) : null;
-    h += `<div class="sc du-q"><div class="sc-h"><span>Pergunta ${i + 1}${ganha ? ` · ${ganha === ME ? 'ganhaste esta' : esc(ganha) + ' ganhou esta'}` : ''}</span><b style="font-size:16px">${esc(q.txt)}</b><span>${esc(q.sub || '')}</span></div>
+      return `<div class="amg">${embDe(n, 18)}<b>${esc(nomeDe(n))}</b><span>${t.resp ? esc(t.resp) : t.jogou ? 'passou / sem tempo' : 'saiu antes'}${t.erros ? ` <small>· ${t.erros} erro${t.erros === 1 ? '' : 's'}</small>` : ''}</span><em style="background:${T.hex}${t.tier === 6 ? ';color:#fffaf0' : ''}">${t.tier ? T.m + ' m' : '✕'}</em></div>`; }).join('');
+    const ta = tiro(eu, i), tb = tiro(quem[1], i), ganha = ta && tb ? (TIERS[ta.tier].pts > TIERS[tb.tier].pts ? eu : TIERS[ta.tier].pts < TIERS[tb.tier].pts ? quem[1] : null) : null;
+    h += `<div class="sc du-q"><div class="sc-h"><span>Pergunta ${i + 1}${ganha ? ` · ${ganha === eu ? 'ganhaste esta' : esc(nomeDe(ganha)) + ' ganhou esta'}` : ''}</span><b style="font-size:16px">${esc(q.txt)}</b><span>${esc(q.sub || '')}</span></div>
       <div class="amigos" style="margin-top:4px">${linhas}</div>
       <details class="all"><summary>Ver as ${q.valid.length} respostas certas</summary><div class="chips">${q.valid.map(x => chip(x, q)).join('')}</div></details></div>`;
   });
   if (!qs) h += '<p class="lg-note">Não consegui abrir as perguntas deste duelo.</p>';
   el.innerHTML = h; window.scrollTo(0, 0);
-  $('#duVolta').onclick = duRender;
+  $('#duVolta').onclick = () => { if (ME) duRender(); else mxSair(); };
 }
 async function openDuelo() { show('s-duelo'); duRender(); await Promise.all([duGet(), cvGet()]); duRender(); duRenderHome(); }
-function duRecDe() { return {pontos:S.score, golos:S.shots.filter(s => s.tier).length, perguntas:S.shots.length, inicio:S.duelo.inicio, tiros:tirosDe(), resp:S.shots.map(s => s.p ? s.p.nome : null)}; }
+function duRecDe() { return {nome: S.duelo?.nome || ME, pontos:S.score, golos:S.shots.filter(s => s.tier).length, perguntas:S.shots.length, inicio:S.duelo.inicio, tiros:tirosDe(), resp:S.shots.map(s => s.p ? s.p.nome : null)}; }
 async function duCriar(op) {
   if (!LIGA.db || !ME) return;
   const cat = catNorm(ST.cat), f = freshSeed(cat), qs = f[2];
   if (qs.length < NQ) { toast('Não há perguntas suficientes desse tipo'); return; }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6), inicio = Date.now();
-  const d = {de:ME, para:op, cat, criado:inicio, qs:qs.map(serializar), res:{[ME]:{pontos:0, estado:'a jogar', inicio}}};
+  const d = {de:ME, para:op, cat, criado:inicio, qs:qs.map(serializar), res:{[ME]:{pontos:0, estado:'a jogar', inicio}}};   // op '*' = duelo por link (alguém de fora)
   try { await ligaPut(`duelos/${id}`, d); } catch (e) { toast('Sem ligação: o duelo não foi criado'); return; }
   (DU.dados = DU.dados || {})[id] = d;
-  startGame('7', f[0], cat, qs); S.duelo = {id, op, inicio};
-  toast(`Duelo com o ${op}: boa sorte!`);
+  startGame('7', f[0], cat, qs); S.duelo = {id, op, inicio, link: op === '*'};
+  toast(op === '*' ? 'Joga as 7 perguntas e no fim envia o link' : `Duelo com o ${op}: boa sorte!`);
 }
 async function duJogar(id) {
   await duGet(); const d = DU.dados?.[id];
@@ -557,7 +568,7 @@ async function duJogar(id) {
 let duSyncT = null;
 function dueloSync(final) {
   if (!S?.duelo) return Promise.resolve();
-  const body = {...duRecDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : null}, path = `duelos/${S.duelo.id}/res/${ME}`;
+  const body = {...duRecDe(), estado: final ? 'acabado' : 'a jogar', fim: final ? Date.now() : null}, path = `duelos/${S.duelo.id}/res/${S.duelo.chave || ME}`;
   const go = (k = 0) => ligaPut(path, JSON.parse(JSON.stringify(body))).catch(() => { if (k < 4) return sleep(2000 * (k + 1)).then(() => go(k + 1)); toast('Sem ligação: o resultado pode não ter ficado guardado'); });
   clearTimeout(duSyncT);
   if (final) return go();
@@ -565,6 +576,15 @@ function dueloSync(final) {
 }
 async function dueloFim() {
   const du = S.duelo, op = du.op;
+  if (du.link) {   // quem criou um duelo por link: agora é enviar o link
+    await dueloSync(true);
+    $('#endLbl').textContent = '⚔️ Duelo por link'; $('#again').textContent = 'Ver duelos';
+    $('#endSub').innerHTML = `${esc($('#endSub').textContent)}<br><b>Agora envia o link</b> a alguém de fora: joga as mesmas 7 perguntas e o resultado aparece nos teus Duelos.`;
+    $('#share').textContent = '📤 Enviar o link do duelo'; $('#share').onclick = () => duPartilhar(du.id);
+    const bv = $('#endDuVer'); bv.hidden = false; bv.textContent = '📝 Ver as tuas respostas'; bv.onclick = async () => { await openDuelo(); duVer(du.id); };
+    duPartilhar(du.id);
+    return;
+  }
   $('#endLbl').textContent = `⚔️ Duelo com o ${op}`;
   $('#again').textContent = 'Ver duelos'; $('#share').textContent = 'Partilhar';
   await dueloSync(true);
@@ -577,8 +597,40 @@ async function dueloFim() {
     if (a > b) confettiEnd();
   } else sub.innerHTML = `${esc(sub.textContent)}<br><b>Agora é a vez do ${esc(op)}</b>: ele vê o desafio no início da app.`;
   const bv = $('#endDuVer'); bv.hidden = false; bv.textContent = r && duAcabou(r) ? `📝 Ver as tuas respostas e as do ${op}` : '📝 Ver as tuas respostas';
-  bv.onclick = async () => { await openDuelo(); duVer(du.id); };
+  bv.onclick = async () => { if (du.chave) { show('s-duelo'); await duGet(); duVer(du.id, du.chave, op); } else { await openDuelo(); duVer(du.id); } };
+  if (du.chave) { $('#again').textContent = 'Início'; $('#again').onclick = () => { $('#again').onclick = againOrig; mxSair(); }; }
 }
+const againOrig = $('#again').onclick;
+// enviar o link de um duelo por link
+async function duPartilhar(id) {
+  const d = DU.dados?.[id], url = location.origin + location.pathname + `?duelo=${id}`;
+  const txt = `⚔️ ${ME} desafiou-te para um duelo no Fora da Caixa: 7 perguntas de futebol${d && duAcabou(d.res?.[ME]) ? `, fez ${duRes(d, ME)} pontos` : ''}. Consegues ganhar?`;
+  try { if (navigator.share) { await navigator.share({text: txt, url}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(txt + '\n' + url); toast('Link copiado! Cola numa conversa'); } catch (e) { prompt('Copia isto:', txt + '\n' + url); }
+}
+// abrir a app pelo link de um duelo (?duelo=<id>): convidados (ou alguém da liga) jogam as mesmas 7 perguntas
+async function duPeloLink(id) {
+  await duGet(); const d = DU.dados?.[id];
+  if (!d) { toast('Esse duelo já não existe'); return; }
+  if (ME && ME === d.de) { await openDuelo(); return; }
+  const jogar = async (nome, chave) => {
+    const r = d.res?.[chave];
+    if (r) { show('s-duelo'); if (duAcabou(r)) duVer(id, chave, d.de); else toast('Já começaste este duelo'); return; }
+    const qs = desserializar(Array.isArray(d.qs) ? d.qs : Object.values(d.qs || {}));
+    if (!qs || !qs.length) { toast('Não consegui abrir as perguntas deste duelo'); return; }
+    const inicio = Date.now();
+    try { await ligaPut(`duelos/${id}/res/${chave}`, {nome, convidado: !ME, pontos:0, estado:'a jogar', inicio}); } catch (e) { toast('Sem ligação: tenta outra vez'); return; }
+    startGame('7', hashStr(id), d.cat, qs); S.duelo = {id, op:d.de, inicio, chave, nome};
+  };
+  if (ME) { jogar(ME, ME); return; }
+  const dl = $('#conv');
+  $('#convDe').innerHTML = `${emb(d.de, 40)}<span><b>${esc(d.de)} desafiou-te para um duelo!</b><span>7 perguntas${duAcabou(d.res?.[d.de]) ? ` · fez ${duRes(d, d.de)} pontos` : ''}. Consegues ganhar?</span></span>`;
+  $('#convNome').value = CONVIDADO || '';
+  $('#convOk').onclick = () => { const nome = $('#convNome').value.trim().slice(0, 16); if (!nome) { $('#convNome').focus(); return; } setConvidado(nome); dl.close(); jogar(nome, 'conv-' + chaveNome(nome)); };
+  $('#convLiga').onclick = () => { dl.close(); askWho(); };
+  dl.showModal();
+}
+function aoArrancar() { const id = new URLSearchParams(location.search).get('duelo'); if (id && /^[a-z0-9]{4,20}$/.test(id)) duPeloLink(id); }
 // ======================================================================
 // ESTATÍSTICAS dos outros modos (separadores no ecrã de estatísticas; os jogos vêm de ligas/<id>/todos/<nome>, os duelos de duelos/)
 // ======================================================================
@@ -712,9 +764,9 @@ $('#euCod').onclick = abrirMudarCodigo;
 navUpdate((document.querySelector('.screen.on') || {}).id);
 
 $('#s-end .row2').insertAdjacentHTML('beforebegin', '<button class="st-btn" id="endDuVer" hidden></button>');
-endGame = (orig => function () { $('#endDuVer').hidden = true; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
+endGame = (orig => function () { $('#endDuVer').hidden = true; $('#share').onclick = share; $('#again').onclick = againOrig; const r = orig.apply(this, arguments); if (S?.convite) conviteFim(); return r; })(endGame);
 // ---------- desafios por link (também para convidados): o resultado de quem joga fica em ligas/<id>/convites/<chave>/res ----------
-const chaveNome = n => String(n).replace(/[.#$\[\]\/]/g, '').slice(0, 20) || 'alguem';
+const chaveNome = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20) || 'alguem';   // só letras sem acento, números e traços (chave do Firebase)
 function conviteFim() {
   const cv = S.convite, quem = ME || CONVIDADO, sub = $('#endSub');
   if (cv.de && S.friendScore != null) {
