@@ -80,10 +80,17 @@ def enviar(sub, dados, chave):
 
 
 def main():
-    priv = os.environ.get('VAPID_PRIVATE', '').strip()
+    priv = re.sub(r'[\s"\'`]', '', os.environ.get('VAPID_PRIVATE', ''))   # sem espaços, quebras de linha nem aspas coladas por engano
+    priv = priv.split('=', 1)[1] if priv.upper().startswith('VAPID_PRIVATE=') else priv
     if not priv:
         print('Falta o segredo VAPID_PRIVATE: as notificações não são enviadas (ver o início deste ficheiro).'); return
-    chave = ec.derive_private_key(int.from_bytes(b64d(priv), 'big'), ec.SECP256R1())
+    try: bruto = b64d(priv)
+    except Exception: bruto = b''
+    if len(bruto) != 32:   # não falha a Action (senão o GitHub manda um e-mail a cada 10 min): só avisa no registo
+        print(f'O segredo VAPID_PRIVATE não é uma chave privada válida: tem {len(priv)} caracteres (devia ter 43)'
+              + (' — parece a chave PÚBLICA (87 caracteres, começa por B)' if len(bruto) == 65 else '') + '. As notificações não são enviadas.')
+        return
+    chave = ec.derive_private_key(int.from_bytes(bruto, 'big'), ec.SECP256R1())
     fila = pedir('GET', 'pushfila') or {}
     if not fila: print('fila vazia'); return
     subs = pedir('GET', 'push') or {}
