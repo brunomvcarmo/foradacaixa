@@ -807,6 +807,14 @@ dialog .tiers b{width:52px}
     <radialGradient id="spot" cx="50%" cy="0%" r="90%">
       <stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </radialGradient>
+    <!-- guarda-redes: camisola, pele e luvas com volume -->
+    <linearGradient id="gk-cam" x1="0" x2="1"><stop offset="0" stop-color="#c96f05"/><stop offset=".3" stop-color="#ffab1f"/><stop offset=".48" stop-color="#ffc84a"/><stop offset=".7" stop-color="#ffa514"/><stop offset="1" stop-color="#b86204"/></linearGradient>
+    <linearGradient id="gk-sombra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
+    <radialGradient id="gk-pele" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="#f7d5b5"/><stop offset=".7" stop-color="#e2b089"/><stop offset="1" stop-color="#c58e66"/></radialGradient>
+    <linearGradient id="gk-coxa" x1="0" x2="1"><stop offset="0" stop-color="#c58e66"/><stop offset=".45" stop-color="#eec29e"/><stop offset="1" stop-color="#b98059"/></linearGradient>
+    <linearGradient id="gk-luva" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#eef2f4"/><stop offset="1" stop-color="#b9c3c8"/></linearGradient>
+    <linearGradient id="gk-calc" x1="0" x2="1"><stop offset="0" stop-color="#0b0e08"/><stop offset=".45" stop-color="#262c1f"/><stop offset="1" stop-color="#080a06"/></linearGradient>
+    <linearGradient id="gk-meia" x1="0" x2="1"><stop offset="0" stop-color="#c06a05"/><stop offset=".45" stop-color="#ffb02a"/><stop offset="1" stop-color="#b35f04"/></linearGradient>
   </defs>
 </svg>
 
@@ -823,7 +831,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261126140228';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261126145751';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"c3d610ef68","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"90882c054b"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
@@ -1058,6 +1066,52 @@ function proj(x, d, v = PV) { const f = Math.max(0, d) / v.D; const k = v.K0 + (
 function poly(pts, v) { return pts.map(([x, d]) => proj(x, d, v).slice(0,2).map(n => n.toFixed(1)).join(',')).join(' '); }
 // modo escuro (escolhido no ecrã Eu ou automático pelo telemóvel): o relvado passa a jogo noturno
 function temaEscuro() { const t = document.documentElement.dataset.theme; return t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches); }
+// guarda-redes "a sério": desenhado com 100 unidades de altura (pés em 0) e encolhido para a escala da baliza (~1,9 m);
+// os braços (#kArmE/#kArmD) rodam no ombro: prontos (±24°, cotovelos dobrados), esticados no mergulho (±190°), em V na festa (±150°);
+// as pernas (#kPernaE/#kPernaD) abrem-se em tesoura no mergulho
+function keeperSVG(cx, gy, k0) {
+  const sc = (k0 * .0212).toFixed(4);
+  const perna = (id, l) => `<g id="${id}"><g transform="scale(${l},1)">
+      <path d="M-11.4,-42 C-11.8,-34 -11,-27.5 -10.4,-22.6 L-4.4,-22.8 C-4.2,-28 -2.6,-35 -.6,-42Z" fill="url(#gk-coxa)"/>
+      <path d="M-7.6,-25.4 C-8.4,-24 -8.2,-22.4 -7.2,-21.6" stroke="#b98059" stroke-width=".6" fill="none"/>
+      <path d="M-10.6,-24.6 C-12.6,-19 -14.4,-13 -15,-5.4 L-10,-5.2 C-9.6,-11 -7.4,-17.4 -4.3,-23.4Z" fill="url(#gk-meia)"/>
+      <path d="M-10.8,-24.8 L-4.2,-23.6 L-4.8,-21.3 L-11.4,-22.4Z" fill="#1d2b22" opacity=".75"/>
+      <path d="M-15.6,-5.8 C-19,-5.8 -21.6,-3.6 -21.3,-1.4 C-21,.5 -16,.6 -10.4,.2 C-8.8,-.2 -8.8,-3.6 -9.6,-5.8Z" fill="#14170f"/>
+      <path d="M-20.9,-.9 C-17,.3 -13,.3 -9,-.2" stroke="#e8edf0" stroke-width="1.1" fill="none"/>
+      <path d="M-18.8,-4.2 L-13.4,-3.6" stroke="#ffb020" stroke-width=".9"/></g></g>`;
+  const braco = (id, l, a) => `<g transform="translate(${-12.6 * l},-75.5)"><g id="${id}" transform="rotate(${a})"><g transform="scale(${l},1)">
+      <path d="M-3.5,-.5 C-4.1,4 -3.8,9 -3.2,13.4 L3,13.4 C3.4,9 3.6,4 3,-1.5Z" fill="url(#gk-cam)"/>
+      <path d="M-3.7,3 C-4,7 -3.8,10 -3.4,13" stroke="#1d2b22" stroke-width="1" fill="none" opacity=".55"/>
+      <g class="kcot" transform="rotate(22 0 12.4)">
+        <path d="M-3.2,11 C-3.4,15 -3.2,19 -2.8,22.4 L2.6,22.4 C3,19 3.2,15 3,11Z" fill="url(#gk-cam)"/>
+        <path d="M-3.4,15 C-3.4,18 -3.2,20 -3,22" stroke="#1d2b22" stroke-width="1" fill="none" opacity=".55"/>
+        <path d="M-3.2,21.6 L3,21.6 L3.3,24.6 L-3.5,24.6Z" fill="#1d2b22"/>
+        <path d="M-3.9,24 C-6,26.4 -6.1,30.4 -4.8,33.4 C-2.6,35.4 2.6,35.4 4.8,33.4 C6,30.4 5.8,26.4 3.7,24Z" fill="url(#gk-luva)"/>
+        <path d="M-2.3,29.4 L-2.6,34.2 M0,29.6 L0,34.8 M2.3,29.4 L2.6,34.2" stroke="#9aa6ac" stroke-width=".55"/>
+        <path d="M-5.2,26.4 C-7.4,27.2 -7.8,29.8 -6.2,31" stroke="#9aa6ac" stroke-width=".6" fill="#f4f6f7"/></g></g></g></g>`;
+  return `<g id="keeper" transform="translate(${cx},${gy})">
+    <ellipse id="kshadow" cx="0" cy=".6" rx="${(k0 * .5).toFixed(1)}" ry="${(k0 * .13).toFixed(2)}" fill="rgba(0,0,0,.32)"/>
+    <g id="kbody"><g transform="scale(${sc})">
+    ${perna('kPernaE', 1)}${perna('kPernaD', -1)}
+    <path d="M-11.6,-52 L11.6,-52 L13.2,-38.4 L1.9,-37.2 L0,-42 L-1.9,-37.2 L-13.2,-38.4Z" fill="url(#gk-calc)"/>
+    <path d="M-12.2,-50 L-13.1,-39 M12.2,-50 L13.1,-39" stroke="#ffb020" stroke-width=".9"/>
+    <path d="M-3.4,-84.5 L3.4,-84.5 L3.6,-78 L-3.6,-78Z" fill="#c58e66"/>
+    <path d="M-13.8,-78.4 C-9,-80.8 -6,-81 -3.6,-80.8 L0,-77.2 L3.6,-80.8 C6,-81 9,-80.8 13.8,-78.4 C15.2,-70 14.2,-60 11.8,-50.6 L-11.8,-50.6 C-14.2,-60 -15.2,-70 -13.8,-78.4Z" fill="url(#gk-cam)"/>
+    <path d="M-13.8,-78.4 C-9,-80.8 -6,-81 -3.6,-80.8 L0,-77.2 L3.6,-80.8 C6,-81 9,-80.8 13.8,-78.4 C15.2,-70 14.2,-60 11.8,-50.6 L-11.8,-50.6 C-14.2,-60 -15.2,-70 -13.8,-78.4Z" fill="url(#gk-sombra)"/>
+    <path d="M-12.4,-66 C-6,-64.2 6,-64.2 12.4,-66 L12.6,-63.4 C6,-61.6 -6,-61.6 -12.6,-63.4Z" fill="#1d2b22" opacity=".8"/>
+    <path d="M-3.7,-80.8 L0,-76.4 L3.7,-80.8" stroke="#1d2b22" stroke-width="1.3" fill="none" stroke-linejoin="round"/>
+    <path d="M-1.4,-74.4 L.9,-75.6 L.9,-68.6" stroke="#1d2b22" stroke-width="1.4" fill="none"/>
+    <path d="M5.2,-74.6 l2.6,0 l0,2.4 c0,1.3 -1.3,1.9 -1.3,1.9 c0,0 -1.3,-.6 -1.3,-1.9z" fill="#fff6e0" stroke="#1d2b22" stroke-width=".4"/>
+    ${braco('kArmE', 1, 24)}${braco('kArmD', -1, -24)}
+    <ellipse cx="-6.3" cy="-89.6" rx="1.3" ry="2.3" fill="#d9a27c"/><ellipse cx="6.3" cy="-89.6" rx="1.3" ry="2.3" fill="#d9a27c"/>
+    <ellipse cx="0" cy="-90" rx="6.3" ry="7.7" fill="url(#gk-pele)"/>
+    <path d="M-6.6,-90.6 C-7.6,-98 -3.4,-100.4 .6,-100 C5.4,-99.8 7.8,-96.4 6.6,-90.6 C6,-93.8 4.4,-95.2 1.6,-95.4 C-1.6,-95.6 -4,-95.2 -5.2,-93.4 C-5.8,-92.4 -6.2,-91.4 -6.6,-90.6Z" fill="#3a2414"/>
+    <path d="M-3.6,-91.6 l1.9,-.3 M1.7,-91.9 l1.9,.3" stroke="#3a2414" stroke-width=".75"/>
+    <circle cx="-2.4" cy="-89.8" r=".75" fill="#24170d"/><circle cx="2.4" cy="-89.8" r=".75" fill="#24170d"/>
+    <path d="M-.2,-89 L-.8,-86.6 L.4,-86.4" stroke="#b7805c" stroke-width=".55" fill="none"/>
+    <path d="M-1.8,-84.8 C-.6,-84.2 .6,-84.2 1.8,-84.8" stroke="#8a4a36" stroke-width=".65" fill="none"/>
+    </g></g></g>`;
+}
 function drawPitch(svg, v, opts = {}) {
   let h = '';
   const noite = temaEscuro();
@@ -1092,10 +1146,7 @@ function drawPitch(svg, v, opts = {}) {
   h += `<g id="net"><polygon points="${cx-gx},${gy} ${cx-gx+6},${gy-gh-5} ${cx+gx-6},${gy-gh-5} ${cx+gx},${gy}" fill="url(#netp)" stroke="rgba(255,255,255,.4)" stroke-width=".6"/>`;
   h += `<rect x="${cx-gx}" y="${gy-gh}" width="${gx*2}" height="${gh}" fill="url(#netp)"/></g>`;
   h += `<path d="M${cx-gx} ${gy}V${gy-gh}H${cx+gx}V${gy}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>`;
-  h += `<g id="keeper" transform="translate(${cx},${gy})"><g id="kbody">
-    <rect x="-4" y="-17" width="8" height="10" rx="3" fill="#ffb020"/><circle cx="0" cy="-20.5" r="3.4" fill="#f1c7a0"/>
-    <rect x="-3.6" y="-8" width="3" height="8" rx="1.2" fill="#11160a"/><rect x="0.6" y="-8" width="3" height="8" rx="1.2" fill="#11160a"/>
-    <rect x="-9" y="-16" width="5" height="2.6" rx="1.3" fill="#ffb020" transform="rotate(-25 -4 -15)"/><rect x="4" y="-16" width="5" height="2.6" rx="1.3" fill="#ffb020" transform="rotate(25 4 -15)"/></g></g>`;
+  h += keeperSVG(cx, gy, k0);
   if (opts.ball !== false) h += `<ellipse id="shadow" cx="${sx}" cy="${sy}" rx="6" ry="2" fill="rgba(0,0,0,.35)"/><g id="ball" transform="translate(${sx},${sy-6})"><use href="#ballsym" x="-6" y="-6" width="12" height="12"/></g>`;
   svg.innerHTML = h;
 }
@@ -1113,12 +1164,27 @@ function setBall(x, y, size, rot = 0, groundY = null) {
   const u = b.firstElementChild; u.setAttribute('x', -size/2); u.setAttribute('y', -size/2); u.setAttribute('width', size); u.setAttribute('height', size);
   if (s) { s.setAttribute('cx', x.toFixed(1)); s.setAttribute('cy', (groundY ?? y + size/2).toFixed(1)); s.setAttribute('rx', (size*.5).toFixed(1)); s.setAttribute('ry', (size*.16).toFixed(1)); }
 }
-function keeper(dx, rot, ms, dy = 4) { const k = document.getElementById('kbody'); if (!k) return; tween(ms, t => k.setAttribute('transform', `translate(${(dx * t).toFixed(1)},${(dy * t).toFixed(1)}) rotate(${(rot * t).toFixed(0)} 0 -8)`), easeOut); }
-// o guarda-redes levanta-se e festeja (salta duas vezes) depois de uma defesa
-function keeperFesta(atraso = 0) { setTimeout(() => { const k = document.getElementById('kbody'); if (!k) return;
-  const m = /translate\(([-\d.]+),([-\d.]+)\)(?: rotate\(([-\d.]+))?/.exec(k.getAttribute('transform') || '') || [0, 0, 0, 0], x0 = +m[1], y0 = +m[2], r0 = +(m[3] || 0);
-  tween(300, t => k.setAttribute('transform', `translate(${(x0 * (1 - t)).toFixed(1)},${(y0 * (1 - t)).toFixed(1)}) rotate(${(r0 * (1 - t)).toFixed(0)} 0 -8)`), easeOut)
-    .then(() => tween(760, t => k.setAttribute('transform', `translate(0,${(-7 * Math.abs(Math.sin(t * Math.PI * 2))).toFixed(1)})`), t => t)); }, atraso); }
+// pose do guarda-redes: deslocação (x, y), rotação do corpo (r, à volta da anca) e ângulo de cada braço (e = esquerdo, d = direito)
+// (o relvado do início também tem guarda-redes: procurar primeiro o do jogo)
+const kEl = id => document.querySelector('#pitch #' + id) || document.getElementById(id);
+function kPose(x, y, r, e = 24, d = -24) {
+  const k = kEl('kbody'); if (!k) return;
+  k.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${r.toFixed(0)} 0 -8)`); k._p = [x, y, r, e, d];
+  const g = id => k.querySelector('#' + id), sh = kEl('kshadow');
+  for (const [id, v] of [['kArmE', e], ['kArmD', d]]) { const a = g(id); if (!a) continue; a.setAttribute('transform', `rotate(${v.toFixed(0)})`);
+    const c = a.querySelector('.kcot'); if (c) c.setAttribute('transform', `rotate(${(22 * Math.max(0, 1 - (Math.abs(v) - 24) / 70)).toFixed(0)} 0 12.4)`); }
+  const t = r / 80, pe = g('kPernaE'), pd = g('kPernaD');
+  if (pe) pe.setAttribute('transform', `rotate(${(-14 * t).toFixed(0)} -5 -42)`); if (pd) pd.setAttribute('transform', `rotate(${(8 * t).toFixed(0)} 5 -42)`);
+  if (sh) { sh.setAttribute('transform', `translate(${(x + 7 * Math.sin(r * Math.PI / 180)).toFixed(1)},0) scale(${(1 + Math.abs(r) / 90 * 1.1).toFixed(2)},1)`); sh.setAttribute('opacity', Math.max(.25, 1 - Math.max(0, -y) * .08).toFixed(2)); }
+}
+// mergulho: o corpo atira-se para o lado e os braços esticam-se por cima da cabeça para a bola
+function keeper(dx, rot, ms, dy = 4) { if (!kEl('kbody')) return; tween(ms, t => { const a = Math.min(1, t * 1.5); kPose(dx * t, dy * t, rot * t, 24 + 166 * a, -24 - 166 * a); }, easeOut); }
+// o guarda-redes levanta-se e festeja (salta duas vezes de braços no ar) depois de uma defesa
+function keeperFesta(atraso = 0) { setTimeout(() => { const k = kEl('kbody'); if (!k) return;
+  const [x0, y0, r0, e0, d0] = k._p || [0, 0, 0, 24, -24];
+  tween(300, t => kPose(x0 * (1 - t), y0 * (1 - t), r0 * (1 - t), e0 + (150 - e0) * t, d0 + (-150 - d0) * t), easeOut)
+    .then(() => tween(760, t => { const j = Math.abs(Math.sin(t * Math.PI * 2)); kPose(0, -7 * j, 0, 150 + 22 * j, -150 - 22 * j); }, t => t))
+    .then(() => tween(260, t => kPose(0, 0, 0, 150 - 126 * t, -150 + 126 * t), easeOut)); }, atraso); }
 function highlightMarker(tier) { document.querySelectorAll('#pitch .mk').forEach((m, i) => m.setAttribute('opacity', tier ? (i + 1 === tier ? '1' : '.25') : '.85')); }
 
 async function shoot(tier, kind, rnd) {
