@@ -823,8 +823,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261126122929';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"38e5569fd3","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"90882c054b"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261126140228';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"c3d610ef68","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"90882c054b"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
@@ -1113,7 +1113,12 @@ function setBall(x, y, size, rot = 0, groundY = null) {
   const u = b.firstElementChild; u.setAttribute('x', -size/2); u.setAttribute('y', -size/2); u.setAttribute('width', size); u.setAttribute('height', size);
   if (s) { s.setAttribute('cx', x.toFixed(1)); s.setAttribute('cy', (groundY ?? y + size/2).toFixed(1)); s.setAttribute('rx', (size*.5).toFixed(1)); s.setAttribute('ry', (size*.16).toFixed(1)); }
 }
-function keeper(dx, rot, ms) { const k = document.getElementById('kbody'); if (!k) return; tween(ms, t => k.setAttribute('transform', `translate(${(dx * t).toFixed(1)},${(4 * t).toFixed(1)}) rotate(${(rot * t).toFixed(0)} 0 -8)`), easeOut); }
+function keeper(dx, rot, ms, dy = 4) { const k = document.getElementById('kbody'); if (!k) return; tween(ms, t => k.setAttribute('transform', `translate(${(dx * t).toFixed(1)},${(dy * t).toFixed(1)}) rotate(${(rot * t).toFixed(0)} 0 -8)`), easeOut); }
+// o guarda-redes levanta-se e festeja (salta duas vezes) depois de uma defesa
+function keeperFesta(atraso = 0) { setTimeout(() => { const k = document.getElementById('kbody'); if (!k) return;
+  const m = /translate\(([-\d.]+),([-\d.]+)\)(?: rotate\(([-\d.]+))?/.exec(k.getAttribute('transform') || '') || [0, 0, 0, 0], x0 = +m[1], y0 = +m[2], r0 = +(m[3] || 0);
+  tween(300, t => k.setAttribute('transform', `translate(${(x0 * (1 - t)).toFixed(1)},${(y0 * (1 - t)).toFixed(1)}) rotate(${(r0 * (1 - t)).toFixed(0)} 0 -8)`), easeOut)
+    .then(() => tween(760, t => k.setAttribute('transform', `translate(0,${(-7 * Math.abs(Math.sin(t * Math.PI * 2))).toFixed(1)})`), t => t)); }, atraso); }
 function highlightMarker(tier) { document.querySelectorAll('#pitch .mk').forEach((m, i) => m.setAttribute('opacity', tier ? (i + 1 === tier ? '1' : '.25') : '.85')); }
 
 async function shoot(tier, kind, rnd) {
@@ -1132,7 +1137,8 @@ async function shoot(tier, kind, rnd) {
   else { tx = cx + side * (1.2 + r() * 1.6) * k0; ty = gy - (.5 + r() * 1.2) * k0; }
   const peak = Math.max(6, Math.min(ey, ty) - 20 - Math.min(d, 57) * 1.4), s0 = ballSize(d), s1 = 6, dur = 520 + Math.min(d, 70) * 13;
   const kDive = tier ? -side : side;   // no golo, o guarda-redes atira-se para o lado errado
-  setTimeout(() => keeper(kDive * (tier ? 16 : Math.abs(tx - cx) * .9), kDive * 70, 380), dur * .35 * TEMPO);
+  const alto = ty < gy - 1.3 * k0;   // bola alta: mergulho a voar; rasteira: atira-se ao chão
+  setTimeout(() => keeper(kDive * (tier ? 16 : Math.abs(tx - cx) * .9), kDive * (alto ? 55 : 80), 380, alto ? -6 : 5), dur * .35 * TEMPO);
   await tween(dur, (t, raw) => {
     const x = (1-t)*(1-t)*ex + 2*(1-t)*t*((ex+tx)/2) + t*t*tx;
     const y = (1-t)*(1-t)*(ey - s0/2) + 2*(1-t)*t*peak + t*t*ty;
@@ -1212,7 +1218,7 @@ function penalize() {
   $('#tnum').textContent = Math.ceil(ms / 1000); tm.classList.toggle('low', ms <= 5000);
   tm.classList.remove('pen'); void tm.offsetWidth; tm.classList.add('pen');
 }
-function keeperSave() { const side = Math.random() < .5 ? -1 : 1; keeper(side * 14, side * 65, 200); setTimeout(() => { const k = document.getElementById('kbody'); if (k) tween(300, t => k.setAttribute('transform', `translate(${(side * 14 * (1 - t)).toFixed(1)},${(4 * (1 - t)).toFixed(1)}) rotate(${(side * 65 * (1 - t)).toFixed(0)} 0 -8)`), easeOut); }, 380); }
+function keeperSave() { const side = Math.random() < .5 ? -1 : 1; keeper(side * 14, side * 65, 200); keeperFesta(380); }
 function wrongTry(p) {
   S.ultimoErro = Date.now();
   S.tries.push(p); if (PENALTY) penalize(); keeperSave(); if (typeof fxDefesa === 'function') fxDefesa();
@@ -1276,6 +1282,7 @@ async function answer(p, timeout = false) {
   if (typeof fxRemate === 'function') fxRemate();   // sons (visual.js)
   const sorte = (Math.random() * 2**31) >>> 0;
   await shoot(tier, kind, rng(sorte));
+  if (!tier && kind === 'defesa') keeperFesta(250);
   if (tier) {
     const t = TIERS[tier];
     flash(tier === 6 ? 'BALIZA A BALIZA!' : tier >= 4 ? 'GOLAÇO!' : 'GOLO!', `de ${t.m} m · +${pts}`, t.hex);
@@ -2007,6 +2014,6 @@ boot();
 if ('serviceWorker' in navigator && !/[?&]nosw/.test(location.search)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 <script src="modos.js?v=216539b6ae"></script>
-<script src="visual.js?v=38e5569fd3"></script>
+<script src="visual.js?v=c3d610ef68"></script>
 </body>
 </html>

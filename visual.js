@@ -479,3 +479,165 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ta-c.camp{display:flex;align-items:center;gap:6px;padding:0 8px;height:50px;border:2px solid var(--t3);background:color-mix(in oklab,var(--t3) 18%,var(--panel))}
 .ta-c.camp b{font-family:var(--display);font-weight:400;font-size:15px}.ta-taca{font-size:22px}.ta-c.camp .emb{margin:0}
 </style>`);
+
+// ---------- comentário no golo (por cima do resultado de cada pergunta) ----------
+const COMENT = {
+  0: ['O guarda-redes adivinhou...', 'Ao lado! Fica para a próxima.', 'Uhhh! Quase!', 'O guarda-redes nem precisou de se esticar.'],
+  1: ['De penálti, sem espinhas.', 'Golo fácil, mas conta!', 'Aquela que toda a gente sabia.', 'Simples e eficaz.'],
+  2: ['Bem colocada, à entrada da área.', 'Golo de quem sabe.', 'Sem pressa, para o fundo da baliza.'],
+  3: ['Fora da caixa! Já poucos se lembravam d{e} {n}.', 'Remate seco, de fora da área!', 'Bonito golo! {n}, quem diria.'],
+  4: ['Que bomba! {N} — esta ninguém esperava!', 'Do meio da rua, e entrou!', 'Disparo de longe… e lá dentro!'],
+  5: ['DO MEIO-CAMPO! {N}?! Onde é que foste buscar isso?', 'Golaço! A bancada levantou-se toda!', 'Inacreditável! {N} do meio-campo!'],
+  6: ['DE BALIZA A BALIZA! {N}! Isto vai passar no resumo durante anos!', 'Inacreditável! O guarda-redes nem viu a bola!', 'GOLO DO ANO! {N}! Ninguém no mundo se lembrava!'],
+};
+function comentario(tier, p, timeout) {
+  if (timeout) return ['Acabou o tempo! O árbitro já tinha o apito na boca.', 'Tempo! A bola não chegou a sair.'][Math.floor(Math.random() * 2)];
+  const l = COMENT[tier] || COMENT[0], f = l[Math.floor(Math.random() * l.length)], n = p?.nome || '';
+  return f.replace('{N}', n.toUpperCase()).replace(/\{n\}/g, n).replace('d{e} ', 'de ');
+}
+renderReveal = (orig => function (q, p, tier, pts, timeout) {
+  const r = orig.apply(this, arguments);
+  try { const rv = $('#reveal'); if (rv && !rv.querySelector('.coment')) rv.insertAdjacentHTML('afterbegin', `<div class="coment"><span>🎙️</span><q>${esc(comentario(tier, p, timeout))}</q></div>`); } catch (e) {}
+  return r;
+})(renderReveal);
+
+// ---------- câmara que segue a bola nos remates de longe (afasta no remate, aproxima à baliza) ----------
+shoot = (orig => function (tier, kind, rnd) {
+  const d = tier ? TIERS[tier].m : 11, svg = $('#pitch');
+  if (svg && tier >= 4 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const tot = (380 + d * 6 + 220 + 520 + Math.min(d, 70) * 13 + 260) * (TEMPO || 1);
+    svg.style.transformOrigin = '50% 22%';
+    svg.animate([{transform: 'scale(1)'}, {transform: 'scale(.93)', offset: .25}, {transform: 'scale(1.22)', offset: .82}, {transform: 'scale(1.22)', offset: .92}, {transform: 'scale(1)'}],
+      {duration: tot + 500, easing: 'ease-in-out'});
+  }
+  return orig.apply(this, arguments);
+})(shoot);
+
+// ---------- dia de jogo: cartaz "HOJE HÁ JOGO" no início quando tens jogo da taça ----------
+inicioExtra = (orig => function () {
+  const r = orig.apply(this, arguments);
+  try {
+    const tm = $('#tcMini'), t = typeof tacaMeuJogo === 'function' ? tacaMeuJogo() : null;
+    if (tm && t?.m && t.op && t.falta?.length) {
+      const temBotao = !!tm.querySelector('#tcMiniPlay'), estado = tm.querySelector('small')?.innerHTML.split('·').slice(1).join('·') || '';
+      tm.classList.add('cartaz');
+      tm.innerHTML = `<div class="cz-topo"><span>🏆 ${esc(tacaNome(TC.id))}</span><span>${esc(t.r.nome)}</span></div>
+        <div class="cz-titulo">HOJE HÁ JOGO</div>
+        <div class="cz-vs"><div>${emb(ME, 52)}<b>${esc(ME)}</b></div><span class="cz-x">VS</span><div>${emb(t.op, 52)}<b>${esc(t.op)}</b></div></div>
+        <div class="cz-pe"><small>${estado || '🏠 casa e ✈️ fora'}</small>${temBotao ? '<button class="du-btn" id="tcMiniPlay">Jogar ›</button>' : ''}</div>`;
+    } else tm?.classList.remove('cartaz');
+  } catch (e) {}
+  try { domingoMini(); } catch (e) {}
+  try { festaSeCampeao(); } catch (e) {}
+  return r;
+})(inicioExtra);
+
+// ---------- campeão da taça: ecrã de festa (uma vez por taça) ----------
+function festaCampeao(nomeTaca) {
+  if ($('#campFx')) return;
+  document.body.insertAdjacentHTML('beforeend', `<div class="campeao-fx" id="campFx"><div class="cf-luz"></div>
+    <div class="cf-in"><small>${esc(nomeTaca)}</small><h2>CAMPEÃO!</h2>
+    <svg class="cf-taca" viewBox="0 0 120 150" aria-hidden="true"><defs><linearGradient id="cfOuro" x1="0" x2="1"><stop offset="0" stop-color="#a8781c"/><stop offset=".45" stop-color="#ffe08a"/><stop offset="1" stop-color="#b8860b"/></linearGradient></defs>
+      <path d="M30 14h60v34a30 30 0 0 1-60 0z" fill="url(#cfOuro)" stroke="#5a3d0a" stroke-width="2.5"/><path d="M30 24H14a16 16 0 0 0 18 28M90 24h16a16 16 0 0 1-18 28" fill="none" stroke="url(#cfOuro)" stroke-width="7"/>
+      <rect x="52" y="78" width="16" height="22" fill="url(#cfOuro)" stroke="#5a3d0a" stroke-width="2"/><rect x="34" y="100" width="52" height="14" rx="3" fill="url(#cfOuro)" stroke="#5a3d0a" stroke-width="2"/>
+      <rect x="28" y="114" width="64" height="20" rx="3" fill="#3b2a12"/><text x="60" y="128" text-anchor="middle" font-size="9" font-family="Barlow,sans-serif" font-weight="800" fill="#ffe08a">TAÇA DOS AMIGOS</text></svg>
+    <div class="cf-emb">${emb(ME, 64)}<b>${esc(ME)}</b></div><button class="btn" id="cfOk" type="button">Levantar a taça 🏆</button></div></div>`);
+  $('#cfOk').onclick = () => $('#campFx').remove();
+  try { SOM.golo(6); } catch (e) {}
+  try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.([80, 60, 80, 60, 200]); } catch (e) {}
+  if (typeof confettiEnd === 'function') confettiEnd();
+}
+function festaSeCampeao() {
+  if (!ME || !TC?.campeoes) return;
+  const vistas = ST.festas = ST.festas || {};
+  for (const id of [TC.id, TC.ant]) if (id && TC.campeoes[id] === ME && !vistas[id]) { vistas[id] = 1; saveStats(ST); festaCampeao(tacaNome(id)); return; }
+}
+tacaFim = (orig => async function () { const r = await orig.apply(this, arguments); try { festaSeCampeao(); } catch (e) {} return r; })(tacaFim);
+
+// ---------- Domingo Desportivo: o resumo da semana (domingo: a semana até agora; segunda: a semana que acabou) ----------
+function resumoSemana(ws) {
+  const F = d => weekStart(d) === ws, tab = totals(F), jogos = [];
+  for (const n of LIGA.jogadores) for (const dia in (LG.dados?.[n] || {})) if (F(dia)) for (const g of Object.values(LG.dados[n][dia] || {})) if (g) jogos.push({n, dia, g});
+  let golo = null, jogo = null; const golacos = {}, plenos = {};
+  for (const {n, dia, g} of jogos) {
+    (g.tiros || []).forEach((t, i) => { const tier = t[1]; if (tier >= 5) golacos[n] = (golacos[n] || 0) + 1;
+      if (tier >= 5 && (!golo || tier > golo.tier || (tier === golo.tier && (g.fim || 0) < golo.fim))) golo = {n, dia, tier, resp: g.resp?.[i], fim: g.fim || 0}; });
+    if (!jogo || (g.pontos || 0) > jogo.pts) jogo = {n, dia, pts: g.pontos || 0, golos: g.golos || 0};
+    if ((g.perguntas || 0) >= 7 && (g.golos || 0) >= 7) plenos[n] = (plenos[n] || 0) + 1;
+  }
+  const antes = totals(d => weekStart(d) === weekStart(diaMais(ws, -7))).map(o => o.nome);
+  const subida = tab.map((o, i) => ({n: o.nome, d: antes.indexOf(o.nome) - i})).filter(x => x.d > 0).sort((a, b) => b.d - a.d)[0];
+  const tacas = Object.entries(TC?.campeoes || {}).filter(([id]) => id >= ws && id <= diaMais(ws, 6));
+  return {tab, golo, jogo, golacos, plenos, subida, tacas, nJogos: jogos.length};
+}
+function domingoSemana() { const hoje = lisDate(), w = dowDe(hoje); return w === 0 ? {ws: weekStart(hoje), acabou: false} : w === 1 ? {ws: weekStart(diaMais(hoje, -1)), acabou: true} : null; }
+function domingoMini() {
+  let el = $('#ddMini'); const s = domingoSemana();
+  if (!s || !LG.dados) { if (el) el.hidden = true; return; }
+  if (!el) { ($('#muMini') || $('#tcMini')).insertAdjacentHTML('afterend', '<button class="dd-mini" id="ddMini" type="button"></button>'); el = $('#ddMini'); el.onclick = abrirDomingo; }
+  const R = resumoSemana(s.ws), lider = R.tab[0];
+  el.hidden = !R.nJogos;
+  el.innerHTML = `<span class="dd-tv">📺</span><span class="dd-tx"><b>Domingo Desportivo</b><small>${s.acabou ? 'O resumo da semana que acabou' : 'A semana até agora'} · ${lider && lider.pts ? `${esc(lider.nome)} ${s.acabou ? 'campeão' : 'na frente'}` : ''}</small></span><span class="go">›</span>`;
+}
+function abrirDomingo() {
+  const s = domingoSemana() || {ws: weekStart(lisDate()), acabou: false}, R = resumoSemana(s.ws);
+  const fim = diaMais(s.ws, 6), lab = d => new Date(d + 'T12:00:00Z').toLocaleDateString('pt-PT', {day: 'numeric', month: 'short', timeZone: 'UTC'});
+  const top = R.tab[0], vencs = R.tab.filter(o => o.pts && o.pts === top.pts).map(o => o.nome);
+  const mx = obj => { const e = Object.entries(obj).sort((a, b) => b[1] - a[1])[0]; return e ? e : null; };
+  const gol = mx(R.golacos), ple = mx(R.plenos);
+  const bloco = (ic, tit, html) => `<div class="dd-bl"><div class="dd-bt">${ic} ${tit}</div>${html}</div>`;
+  let h = `<div class="dd-cab"><div class="dd-logo"><span>DOMINGO</span><b>DESPORTIVO</b></div><small>Semana de ${lab(s.ws)} a ${lab(fim)}${s.acabou ? '' : ' · ainda falta hoje'}</small></div>`;
+  h += bloco('🏆', s.acabou ? (vencs.length > 1 ? 'Campeões da semana' : 'Campeão da semana') : 'Na frente', top?.pts ? `<div class="dd-camp">${vencs.map(n => `<span>${emb(n, 46)}<b>${esc(n)}</b></span>`).join('')}<em>${top.pts} pontos</em></div>` : '<p class="lg-note">Ninguém jogou esta semana.</p>');
+  h += bloco('📊', 'Classificação', `<ol class="dd-tab">${R.tab.map((o, i) => `<li>${i + 1}.º ${emb(o.nome, 20)}<span>${esc(o.nome)}</span><b>${o.pts}</b></li>`).join('')}</ol>`);
+  if (R.golo) h += bloco('🚀', 'Golo da semana', `<p>${emb(R.golo.n, 22)}<b>${esc(R.golo.n)}</b> marcou de <b>${TIERS[R.golo.tier].m} m</b>${R.golo.resp ? ` com <q>${esc(R.golo.resp)}</q>` : ''} · ${lab(R.golo.dia)}</p>`);
+  if (R.jogo) h += bloco('⭐', 'Jogo da semana', `<p>${emb(R.jogo.n, 22)}<b>${esc(R.jogo.n)}</b>: ${R.jogo.pts} pontos e ${R.jogo.golos} golos (${lab(R.jogo.dia)})</p>`);
+  if (R.subida) h += bloco('📈', 'Quem mais subiu', `<p>${emb(R.subida.n, 22)}<b>${esc(R.subida.n)}</b> subiu ${R.subida.d} lugar${R.subida.d > 1 ? 'es' : ''} em relação à semana anterior</p>`);
+  if (gol) h += bloco('🎯', 'Rei dos golaços', `<p>${emb(gol[0], 22)}<b>${esc(gol[0])}</b> com ${gol[1]} golo${gol[1] > 1 ? 's' : ''} de 50 m ou mais</p>`);
+  if (ple) h += bloco('✨', 'Plenos (7 em 7)', `<p>${Object.entries(R.plenos).map(([n, v]) => `${emb(n, 18)}<b>${esc(n)}</b> ×${v}`).join(' · ')}</p>`);
+  if (R.tacas.length) h += bloco('🏆', 'Taças da semana', `<p>${R.tacas.map(([id, n]) => `${esc(tacaNome(id))}: ${emb(n, 18)}<b>${esc(n)}</b>`).join(' · ')}</p>`);
+  let el = $('#domingoFx');
+  if (!el) { document.body.insertAdjacentHTML('beforeend', '<div class="domingo-fx" id="domingoFx"><div class="dd-in"></div></div>'); el = $('#domingoFx'); el.addEventListener('click', e => { if (e.target === el) el.remove(); }); }
+  el.querySelector('.dd-in').innerHTML = `<button class="dlg-x" type="button" aria-label="Fechar" id="ddX">✕</button>${h}<button class="btn" type="button" id="ddOk">Fechar</button>`;
+  $('#ddX').onclick = $('#ddOk').onclick = () => el.remove();
+}
+
+document.head.insertAdjacentHTML('beforeend', `<style>
+/* comentário */
+.coment{display:flex;gap:8px;align-items:flex-start;background:var(--dark);color:#fffaf0;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:15px;line-height:1.35;box-shadow:var(--shadow);animation:qIn .35s both}
+:root[data-theme="dark"] .coment{background:#0c120e;border:1px solid var(--line)}
+.coment q{font-style:italic;quotes:'«' '»'}.coment span{font-size:18px;line-height:1.2}
+/* cartaz do dia de jogo */
+.tc-mini.cartaz{display:block;padding:0;overflow:hidden;border:2px solid var(--dark);box-shadow:var(--shadow);background:linear-gradient(180deg,#1e5a37,#174a2c);color:#fffaf0}
+.cartaz .cz-topo{display:flex;justify-content:space-between;padding:7px 12px;background:rgba(0,0,0,.22);font:800 11.5px var(--sans);text-transform:uppercase;letter-spacing:.08em}
+.cartaz .cz-titulo{font-family:var(--display);font-size:30px;text-align:center;margin:8px 0 2px;letter-spacing:.02em;color:#ffe08a;text-shadow:0 3px 0 rgba(0,0,0,.3)}
+.cartaz .cz-vs{display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 12px 8px}
+.cartaz .cz-vs>div{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px}.cartaz .cz-vs .emb{margin:0;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}
+.cartaz .cz-vs b{font-family:var(--display);font-weight:400;font-size:18px}
+.cartaz .cz-x{font-family:var(--display);font-size:26px;color:#ffe08a}
+.cartaz .cz-pe{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px 10px;background:rgba(0,0,0,.18)}
+.cartaz .cz-pe small{color:rgba(255,250,240,.85);font-size:13px}.cartaz .du-btn{background:#ffe08a;color:#1d2b22}
+/* festa do campeão */
+.campeao-fx{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#3a2a0e,#0d0b08 70%);color:#fffaf0;text-align:center;animation:cfIn .5s ease-out;overflow:hidden}
+.cf-luz{position:absolute;inset:-20%;background:repeating-conic-gradient(from 0deg at 50% 40%,rgba(255,224,138,.12) 0 8deg,transparent 8deg 20deg);animation:cfGira 18s linear infinite}
+.cf-in{position:relative;padding:20px;width:min(340px,90vw)}.cf-in small{font:800 13px var(--sans);letter-spacing:.14em;color:#ffe08a;text-transform:uppercase}
+.cf-in h2{font-family:var(--display);font-weight:400;font-size:52px;margin:2px 0 8px;color:#ffe08a;text-shadow:0 4px 0 #5a3d0a}
+.cf-taca{width:150px;animation:cfTaca 1.2s .2s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 10px 18px rgba(255,200,80,.35))}
+.cf-emb{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 14px}.cf-emb .emb{margin:0}.cf-emb b{font-family:var(--display);font-weight:400;font-size:28px}
+@keyframes cfIn{from{opacity:0}}@keyframes cfGira{to{transform:rotate(360deg)}}@keyframes cfTaca{from{transform:translateY(80px) scale(.6);opacity:0}}
+/* Domingo Desportivo */
+.dd-mini{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:linear-gradient(90deg,#16306b,#1f4796);color:#fffaf0;border:2px solid var(--dark);border-radius:var(--r);padding:12px 14px;margin:0 0 12px;box-shadow:var(--shadow);cursor:pointer}
+.dd-mini .dd-tv{font-size:26px}.dd-mini .dd-tx{flex:1;min-width:0}.dd-mini b{display:block;font-family:var(--display);font-weight:400;font-size:17px}.dd-mini small{color:rgba(255,250,240,.85);font-size:13px}.dd-mini .go{font-size:22px;opacity:.7}
+.domingo-fx{position:fixed;inset:0;z-index:70;background:rgba(5,8,18,.72);overflow-y:auto;padding:18px 12px;animation:cfIn .3s ease-out}
+.dd-in{position:relative;max-width:460px;margin:0 auto;background:var(--panel);border:2px solid var(--dark);border-radius:var(--r);box-shadow:var(--shadow);padding:0 14px 14px;overflow:hidden}
+.dd-in .dlg-x{position:absolute;top:10px;right:10px;z-index:2}
+.dd-cab{margin:0 -14px 12px;padding:18px 14px 12px;background:repeating-linear-gradient(135deg,#16306b 0 18px,#1b3a80 18px 36px);color:#fffaf0;text-align:center}
+.dd-logo{display:inline-flex;flex-direction:column;align-items:center;line-height:.95}
+.dd-logo span{font:800 13px var(--sans);letter-spacing:.42em;color:#ffe08a;margin-left:.42em}.dd-logo b{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:.02em}
+.dd-cab small{display:block;margin-top:6px;color:rgba(255,250,240,.85);font-size:13px}
+.dd-bl{border-top:1px dashed var(--line);padding:10px 0}.dd-bl:first-of-type{border-top:0}
+.dd-bt{font:800 12px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-bottom:6px}
+.dd-bl p{margin:0;font-size:15px;line-height:1.45}.dd-bl p .emb{margin:0 4px 0 0}.dd-bl q{font-style:italic}
+.dd-camp{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.dd-camp span{display:flex;align-items:center;gap:8px}.dd-camp b{font-family:var(--display);font-weight:400;font-size:24px}.dd-camp em{font-style:normal;color:var(--mute);margin-left:auto}
+.dd-tab{list-style:none;margin:0;padding:0;display:grid;gap:4px}.dd-tab li{display:flex;align-items:center;gap:8px;font-size:15px}.dd-tab li span{flex:1}.dd-tab li b{font-family:var(--display);font-weight:400}.dd-tab .emb{margin:0}
+@media (prefers-reduced-motion: reduce){.cf-luz,.cf-taca,.coment{animation:none}}
+</style>`);
