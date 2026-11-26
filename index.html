@@ -823,8 +823,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261126004720';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"38e5569fd3","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261126121136';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"38e5569fd3","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"6ebfbc2ad8","estatisticas.json":"78a8012988"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
@@ -908,7 +908,10 @@ function matchScore(p, q, qw) {
   if (qw.length > 1 && qw.every(t => ws.some(w => w.startsWith(t)))) return 3;
   return -1;
 }
+// o mesmo jogador escrito de maneiras diferentes nas várias fontes (ordem asiática do nome): passa a ser uma só resposta
+const MESMO_NOME = {'Heung-min Son':'Son Heung-min', 'Min-jae Kim':'Kim Min-jae', 'Hee-chan Hwang':'Hwang Hee-chan', 'Kang-in Lee':'Lee Kang-in', 'Takefusa Kubo':'Takefusa Kubo'};
 function getEnt(tipo, nome, extra) {
+  if (tipo !== 'plh' && MESMO_NOME[nome]) nome = MESMO_NOME[nome];
   ENT[tipo] = ENT[tipo] || {};
   const k = tipo === 'plh' ? nome : norm(nome);   // o mesmo nome com ou sem acentos é a mesma resposta (Eder = Éder)
   if (!ENT[tipo][k]) { const al = (window.ALIASES || {})[nome] || []; ENT[tipo][k] = Object.assign({nome, tipo, nWeb:norm(nome), nAll:norm([nome, ...al].join(' ')), fama:0}, extra || {}); }
@@ -1837,7 +1840,7 @@ function heroAnim() {
 async function boot() {
   buildBank();
   const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
-  const hist = getJ(fvUrl('historia.json')), selP = getJ(fvUrl('selecoes.json')), nacP = getJ(fvUrl('nacionalidades.json')), merP = getJ(fvUrl('transferencias.json')), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ(fvUrl('historia.json')), selP = getJ(fvUrl('selecoes.json')), nacP = getJ(fvUrl('nacionalidades.json')), boP = getJ(fvUrl('bolaouro.json')), estP = getJ(fvUrl('estatisticas.json')), merP = getJ(fvUrl('transferencias.json')), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1846,6 +1849,8 @@ async function boot() {
   } catch (e) { console.warn('Sem dados da Premier League:', e); }
   try { const H = await hist; if (H) buildHistory(H); } catch (e) { console.warn('Sem épocas passadas:', e); }
   try { const S2 = await selP; if (S2) BQ = BQ.concat(buildGen(S2)); } catch (e) { console.warn('Sem perguntas de seleções:', e); }
+  try { const B2 = await boP; if (B2) BQ = BQ.concat(buildGen(B2)); } catch (e) { console.warn('Sem perguntas da Bola de Ouro:', e); }   // bolaouro.json (scripts/bola_ouro.py)
+  try { const E2 = await estP; if (E2) OQ = OQ.concat(buildGen(E2)); } catch (e) { console.warn('Sem perguntas de estatísticas:', e); }   // estatisticas.json (scripts/estatisticas.py)
   try { const N = await nacP; if (N) OQ = OQ.concat(buildGen(N)); } catch (e) { console.warn('Sem perguntas de nacionalidades:', e); }
   try { const M = await merP; if (M) MQ = buildGen(M); } catch (e) { console.warn('Sem perguntas de transferências:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
