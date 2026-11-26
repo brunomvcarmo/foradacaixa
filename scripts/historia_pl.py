@@ -138,13 +138,13 @@ def main():
         gk = [(el, pl(d['clean_sheets'], 'jogo') + ' sem sofrer') for el, d in tot.items() if pos.get(el) == 1 and d['clean_sheets'] >= 10]
         if len(gk) >= 5: q('gk10', f'Um guarda-redes com 10 ou mais jogos sem sofrer golos na Premier League {label}', sub, gk)
         df = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if pos.get(el) == 2 and d['golos'] >= 3]
-        if len(df) >= 5: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição do jogador no Fantasy oficial da Premier League)', df)
+        if len(df) >= 5: q('def3', f'Um defesa que marcou 3 ou mais golos na Premier League {label}', sub + ' (posição oficial do jogador na Premier League)', df)
         # (amarelos não: a FPL não conta os dois amarelos de quem é expulso, a lista podia ficar incompleta)
         psv = [(el, f"{pl(d['penalties_saved'], 'penálti')} defendido{'s' if d['penalties_saved'] > 1 else ''}") for el, d in tot.items() if d['penalties_saved'] > 0]
         if 5 <= len(psv) <= 30: q('pdef', f'Um guarda-redes que defendeu um penálti na Premier League {label}', sub, psv)
         for lim in (10, 8, 7, 6):
             md = [(el, pl(d['golos'], 'golo')) for el, d in tot.items() if pos.get(el) == 3 and d['golos'] >= lim]
-            if 5 <= len(md) <= 20: q(f'med{lim}', f'Um médio que marcou {lim} ou mais golos na Premier League {label}', sub + ' (posição do jogador no Fantasy oficial da Premier League)', md); break
+            if 5 <= len(md) <= 20: q(f'med{lim}', f'Um médio que marcou {lim} ou mais golos na Premier League {label}', sub + ' (posição oficial do jogador na Premier League)', md); break
         dois = [(el, ' e '.join(teams[t] for t in d if d[t]['jogos'])) for el, d in st.items() if sum(1 for t in d if d[t]['jogos']) >= 2]
         if 5 <= len(dois) <= 30: q('dois', f'Um jogador que jogou por dois clubes diferentes na mesma época da Premier League {label}', sub + ' (mudou de clube a meio da época)', dois)
         # clubes da época (os mais óbvios são os que somaram mais pontos FPL, ou seja, as equipas mais fortes)
