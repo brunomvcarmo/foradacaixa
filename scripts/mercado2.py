@@ -13,6 +13,7 @@ from collections import defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nacionalidades as N
 import transferencias as TR   # (junta os ficheiros das transferências e dos colegas a N.FICH)
+from carreiras10 import PROPRIA
 
 SAIDA = os.path.join(N.AQUI, '..', 'mercado2.json')
 INI5, FIM = '2020-07-01', TR.FIM
@@ -69,7 +70,7 @@ def main():
     nclube = lambda tid, nm: N.CLUBE.get(nome_tm.get(tid, ''), nm)
     def do_clube(c, nm):   # equipas B/juniores do próprio clube (o nome do Transfermarkt contém o do clube)
         chaves = {w for t in ids[c] for w in N.norm(nome_tm[t]).split() if len(w) > 3 and w not in ('club', 'futbol', 'football', 'sport', 'clube')}
-        return bool(chaves & set(N.norm(nm).split()))
+        return bool(chaves & set(N.norm(nm).split())) or any(N.norm(nm).startswith(a) for a in PROPRIA.get(c, []))
 
     for c in CLUBES:
         if not ids[c]: print('  sem id:', c); continue

@@ -831,8 +831,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261126145751';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"c3d610ef68","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"90882c054b"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261126153857';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"c3d610ef68","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"26632cc7f1","carreiras10.json":"746643692e","listas.json":"a33a6a83fd","finais.json":"2ff09fba79","custozero.json":"4214080220"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
@@ -917,7 +917,7 @@ function matchScore(p, q, qw) {
   return -1;
 }
 // o mesmo jogador escrito de maneiras diferentes nas várias fontes (ordem asiática do nome): passa a ser uma só resposta
-const MESMO_NOME = {'Heung-min Son':'Son Heung-min', 'Min-jae Kim':'Kim Min-jae', 'Hee-chan Hwang':'Hwang Hee-chan', 'Kang-in Lee':'Lee Kang-in', 'Takefusa Kubo':'Takefusa Kubo'};
+const MESMO_NOME = {'Heung-min Son':'Son Heung-min', 'Min-jae Kim':'Kim Min-jae', 'Hee-chan Hwang':'Hwang Hee-chan', 'Kang-in Lee':'Lee Kang-in', 'Takefusa Kubo':'Takefusa Kubo', 'Cláudio Taffarel':'Taffarel', 'Mário Jardel':'Jardel', 'Diamantino':'Diamantino Miranda', 'Rui Pedro da Rocha Fonte':'Rui Fonte'};
 function getEnt(tipo, nome, extra) {
   if (tipo !== 'plh' && MESMO_NOME[nome]) nome = MESMO_NOME[nome];
   ENT[tipo] = ENT[tipo] || {};
@@ -1913,7 +1913,7 @@ function heroAnim() {
 async function boot() {
   buildBank();
   const getJ = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
-  const hist = getJ(fvUrl('historia.json')), selP = getJ(fvUrl('selecoes.json')), nacP = getJ(fvUrl('nacionalidades.json')), boP = getJ(fvUrl('bolaouro.json')), estP = getJ(fvUrl('estatisticas.json')), m2P = getJ(fvUrl('mercado2.json')), merP = getJ(fvUrl('transferencias.json')), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+  const hist = getJ(fvUrl('historia.json')), selP = getJ(fvUrl('selecoes.json')), nacP = getJ(fvUrl('nacionalidades.json')), boP = getJ(fvUrl('bolaouro.json')), estP = getJ(fvUrl('estatisticas.json')), m2P = getJ(fvUrl('mercado2.json')), maisP = ['carreiras10.json', 'listas.json', 'finais.json', 'custozero.json'].map(f => getJ(fvUrl(f))), merP = getJ(fvUrl('transferencias.json')), ligaP = fetch('liga_pt.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
   try {   // perguntas da Premier League (opcional: sem os dados, o jogo usa só o banco)
     const res = await fetch('dados.json', {cache:'no-cache'}); if (!res.ok) throw new Error(res.status); D = await res.json();
     G = D.jornada; TEAMS = D.equipas; EPOCA = D.epoca || '';
@@ -1927,6 +1927,9 @@ async function boot() {
   try { const E2 = await estP; if (E2) OQ = OQ.concat(buildGen(E2)); } catch (e) { console.warn('Sem perguntas de estatísticas:', e); }   // estatisticas.json (scripts/estatisticas.py)
   try { const N = await nacP; if (N) OQ = OQ.concat(buildGen(N)); } catch (e) { console.warn('Sem perguntas de nacionalidades:', e); }
   try { const M = await merP; if (M) MQ = buildGen(M).concat(MQ); } catch (e) { console.warn('Sem perguntas de transferências:', e); }
+  for (const p of maisP) try {   // carreiras10.json, listas.json, finais.json, custozero.json: cada pergunta vai para o seu tipo
+    const J = await p; if (J) for (const q of buildGen(J)) (q.cat === 'ligas' ? OQ : q.cat === 'mercado' ? MQ : q.cat === 'historia' ? HQ : BQ).push(q);
+  } catch (e) { console.warn('Sem perguntas extra:', e); }
   try { const L = await ligaP; if (L) LQ = buildGen(L, 'ligapt'); } catch (e) { console.warn('Sem Liga Portuguesa:', e); }
   $('#verFoot').textContent = `versão ${APP_VER}`;
   $('#dataFoot').textContent = `${BQ.length + HQ.length + LQ.length + OQ.length + MQ.length} perguntas: Liga Portuguesa desde 1994/95, seleções, jogadores pelo mundo, transferências, futebol mundial e Premier League` + (TPL.length ? ` + perguntas da época ${EPOCA} da Premier League sempre novas` : '');
