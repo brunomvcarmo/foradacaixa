@@ -22,6 +22,22 @@ PODIOS_ANTIGOS = {   # 1.º, 2.º, 3.º
     2003: ['Pavel Nedvěd', 'Thierry Henry', 'Paolo Maldini'], 2004: ['Andriy Shevchenko', 'Deco', 'Ronaldinho'],
     2005: ['Ronaldinho', 'Frank Lampard', 'Steven Gerrard'], 2006: ['Fabio Cannavaro', 'Gianluigi Buffon', 'Thierry Henry'],
 }
+MARCADORES = [   # (id, "da liga", categoria, [(época, [jogadores], golos)])
+    ('es', 'da Liga espanhola', 'ligas', [('2015/16', ['Luis Suárez'], 40), ('2016/17', ['Lionel Messi'], 37), ('2017/18', ['Lionel Messi'], 34), ('2018/19', ['Lionel Messi'], 36),
+        ('2019/20', ['Lionel Messi'], 25), ('2020/21', ['Lionel Messi'], 30), ('2021/22', ['Karim Benzema'], 27), ('2022/23', ['Robert Lewandowski'], 23), ('2023/24', ['Artem Dovbyk'], 24), ('2024/25', ['Kylian Mbappé'], 31)]),
+    ('pl', 'da Premier League', 'ligas', [('2015/16', ['Harry Kane'], 25), ('2016/17', ['Harry Kane'], 29), ('2017/18', ['Mohamed Salah'], 32), ('2018/19', ['Mohamed Salah', 'Sadio Mané', 'Pierre-Emerick Aubameyang'], 22),
+        ('2019/20', ['Jamie Vardy'], 23), ('2020/21', ['Harry Kane'], 23), ('2021/22', ['Mohamed Salah', 'Son Heung-min'], 23), ('2022/23', ['Erling Haaland'], 36), ('2023/24', ['Erling Haaland'], 27), ('2024/25', ['Mohamed Salah'], 29)]),
+    ('it', 'da Serie A italiana', 'ligas', [('2015/16', ['Gonzalo Higuaín'], 36), ('2016/17', ['Edin Džeko'], 29), ('2017/18', ['Mauro Icardi', 'Ciro Immobile'], 29), ('2018/19', ['Fabio Quagliarella'], 26),
+        ('2019/20', ['Ciro Immobile'], 36), ('2020/21', ['Cristiano Ronaldo'], 29), ('2021/22', ['Ciro Immobile'], 27), ('2022/23', ['Victor Osimhen'], 26), ('2023/24', ['Lautaro Martínez'], 24), ('2024/25', ['Mateo Retegui'], 25)]),
+    ('de', 'da Bundesliga', 'ligas', [('2015/16', ['Robert Lewandowski'], 30), ('2016/17', ['Pierre-Emerick Aubameyang'], 31), ('2017/18', ['Robert Lewandowski'], 29), ('2018/19', ['Robert Lewandowski'], 22),
+        ('2019/20', ['Robert Lewandowski'], 34), ('2020/21', ['Robert Lewandowski'], 41), ('2021/22', ['Robert Lewandowski'], 35), ('2022/23', ['Christopher Nkunku', 'Niclas Füllkrug'], 16), ('2023/24', ['Harry Kane'], 36), ('2024/25', ['Harry Kane'], 26)]),
+    ('fr', 'da Ligue 1 francesa', 'ligas', [('2015/16', ['Zlatan Ibrahimović'], 38), ('2016/17', ['Edinson Cavani'], 35), ('2017/18', ['Edinson Cavani'], 28), ('2018/19', ['Kylian Mbappé'], 33),
+        ('2019/20', ['Kylian Mbappé', 'Wissam Ben Yedder'], 18), ('2020/21', ['Kylian Mbappé'], 27), ('2021/22', ['Kylian Mbappé'], 28), ('2022/23', ['Kylian Mbappé'], 29), ('2023/24', ['Kylian Mbappé'], 27), ('2024/25', ['Ousmane Dembélé', 'Mason Greenwood'], 21)]),
+    ('pt', 'da Liga Portuguesa', 'portugal', [('2015/16', ['Jonas'], 32), ('2016/17', ['Bas Dost'], 34), ('2017/18', ['Jonas'], 34), ('2018/19', ['Haris Seferović'], 23),
+        ('2019/20', ['Pizzi', 'Carlos Vinícius', 'Mehdi Taremi'], 18), ('2020/21', ['Pedro Gonçalves'], 23), ('2021/22', ['Darwin Núñez'], 26), ('2022/23', ['Mehdi Taremi'], 22), ('2023/24', ['Viktor Gyökeres'], 29), ('2024/25', ['Viktor Gyökeres'], 39)]),
+    ('cl', 'da Liga dos Campeões', 'mundo', [('2015/16', ['Cristiano Ronaldo'], 16), ('2016/17', ['Cristiano Ronaldo'], 12), ('2017/18', ['Cristiano Ronaldo'], 15), ('2018/19', ['Lionel Messi'], 12),
+        ('2019/20', ['Robert Lewandowski'], 15), ('2020/21', ['Erling Haaland'], 10), ('2021/22', ['Karim Benzema'], 15), ('2022/23', ['Erling Haaland'], 12), ('2023/24', ['Harry Kane', 'Kylian Mbappé'], 8), ('2024/25', ['Serhou Guirassy', 'Raphinha'], 13)]),
+]
 NAC = {'Portugal': 'português', 'POR': 'português', 'Brazil': 'brasileiro', 'BRA': 'brasileiro', 'Spain': 'espanhol', 'ESP': 'espanhol',
        'France': 'francês', 'FRA': 'francês', 'Argentina': 'argentino', 'ARG': 'argentino', 'England': 'inglês', 'ENG': 'inglês',
        'Germany': 'alemão', 'GER': 'alemão', 'Netherlands': 'neerlandês', 'NED': 'neerlandês', 'Italy': 'italiano', 'ITA': 'italiano',
@@ -83,8 +99,27 @@ def main():
         for r, n, c in RANK[a]:
             if 4 <= r <= 5: d[n].append((a, r))
     junta(P, 'bo-4e5', 'Um jogador que ficou em 4.º ou 5.º lugar na Bola de Ouro entre 2007 e 2025', SUB, d)
+    junta(P, 'bo-top5-2007-2025', 'Um jogador que já ficou no top 5 da Bola de Ouro (entre 2007 e 2025)', SUB, top(2007, 2025, 5))
+    for a0, a1 in [(2007, 2015), (2016, 2025)]:
+        junta(P, f'bo-top5-{a0}-{a1}', f'Um jogador que ficou no top 5 da Bola de Ouro entre {a0} e {a1}', SUB, top(a0, a1, 5))
+    # ---------- melhores marcadores das ligas (épocas 2015/16 a 2024/25; empatados contam) ----------
+    # 2019/20 a 2024/25 conferidos com os dados do Transfermarkt (scripts/estatisticas.py); antes disso, factos conhecidos
+    for qid, liga, cat, lista in MARCADORES:
+        d = defaultdict(list)
+        for ep, nomes, golos in lista:
+            for n in nomes: d[n].append((ep, golos))
+        r = sorted(d.items(), key=lambda kv: (-len(kv[1]), -max(g for e, g in kv[1])))
+        P.append({'id': f'mm-{qid}', 'cat': cat, 'tipo': 'jogador', 'txt': f'Um jogador que foi o melhor marcador {liga} numa época entre 2015/16 e 2024/25',
+                  'sub': 'Melhor marcador da época (os empatados no 1.º lugar também contam)', 'r': [[n, ', '.join(f'{e} ({g} golos)' for e, g in v)] for n, v in r]})
+    d = defaultdict(list)
+    for qid, liga, cat, lista in MARCADORES:
+        if qid in ('es', 'pl', 'it', 'de', 'fr'):
+            for ep, nomes, golos in lista:
+                for n in nomes: d[n].append(f'{ep} {liga[3:] if liga.startswith("da ") else liga}')
+    P.append({'id': 'mm-cinco', 'cat': 'ligas', 'tipo': 'jogador', 'txt': 'Um jogador que foi o melhor marcador de uma das 5 grandes ligas entre 2015/16 e 2024/25',
+              'sub': 'Inglaterra, Espanha, Itália, Alemanha ou França; os empatados no 1.º lugar também contam', 'r': [[n, ' · '.join(v)] for n, v in sorted(d.items(), key=lambda kv: -len(kv[1]))]})
     with open(os.path.join(AQUI, '..', 'bolaouro.json'), 'w', encoding='utf8', newline='\n') as f:
-        json.dump({'fonte': 'Wikipédia (classificações da Bola de Ouro 2007-2025) + pódios 1995-2006', 'perguntas': P}, f, ensure_ascii=False, separators=(',', ':'))
+        json.dump({'fonte': 'Wikipédia (classificações da Bola de Ouro 2007-2025) + pódios 1995-2006 + melhores marcadores', 'perguntas': P}, f, ensure_ascii=False, separators=(',', ':'))
     print(len(P), 'perguntas;', ', '.join(f"{q['id']}:{len(q['r'])}" for q in P))
 
 
