@@ -469,6 +469,13 @@ dialog .tiers i{width:12px;height:12px;border-radius:50%}
 dialog .tiers b{width:52px}
 .loading{text-align:center;color:var(--mute);padding:80px 0}
 .loading .ballspin{width:40px;height:40px;margin:0 auto 14px;animation:spin 1s linear infinite}
+.carrega{padding:22vh 0 0}.cr-titulo{font-family:var(--display);font-size:34px;color:var(--ink);margin-bottom:26px}.cr-titulo span{color:var(--red)}
+.cr-relva{position:relative;width:min(300px,80vw);height:64px;margin:0 auto 16px;border-radius:14px;overflow:hidden;background:repeating-linear-gradient(90deg,#2f7a4a 0 30px,#2a6f43 30px 60px);border:2px solid var(--dark);box-shadow:var(--shadow)}
+.cr-bola{position:absolute;bottom:8px;left:-40px;width:34px;height:34px;animation:crRola 2.2s cubic-bezier(.45,.05,.55,.95) infinite}.cr-bola svg{width:100%;height:100%;animation:spin .7s linear infinite}
+.cr-sombra{position:absolute;bottom:5px;left:-40px;width:30px;height:6px;border-radius:50%;background:rgba(0,0,0,.3);animation:crRola 2.2s cubic-bezier(.45,.05,.55,.95) infinite}
+.cr-baliza{position:absolute;right:10px;top:12px;width:22px;height:40px;border:3px solid #fff;border-left:0;border-radius:0 3px 3px 0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.35) 0 2px,transparent 2px 6px)}
+@keyframes crRola{0%{transform:translateX(0)}85%{transform:translateX(min(270px,74vw))}100%{transform:translateX(min(270px,74vw))}}
+.cr-txt{font-weight:600;color:var(--mute);min-height:1.4em;transition:opacity .25s}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (min-width:600px){.qtxt{font-size:26px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
@@ -478,9 +485,10 @@ dialog .tiers b{width:52px}
 <div class="wrap">
 
   <div id="s-load" class="screen on">
-    <div class="loading">
-      <svg class="ballspin" viewBox="0 0 40 40"><use href="#ballsym"/></svg>
-      A aquecer no relvado…
+    <div class="loading carrega">
+      <div class="cr-titulo">Fora da <span>Caixa</span></div>
+      <div class="cr-relva"><div class="cr-bola"><svg viewBox="0 0 40 40"><use href="#ballsym"/></svg></div><div class="cr-sombra"></div><div class="cr-baliza"></div></div>
+      <div class="cr-txt" id="crTxt">A aquecer no relvado…</div>
     </div>
   </div>
 
@@ -786,8 +794,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261125234319';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"b6edca916c","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261126002625';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"38e5569fd3","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
@@ -1061,7 +1069,10 @@ function drawPitch(svg, v, opts = {}) {
 }
 const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
 const easeOut = t => 1 - Math.pow(1 - t, 3);
-function tween(ms, fn, e = ease) { return new Promise(res => { const t0 = performance.now(); const step = now => { const t = Math.min(1, (now - t0) / ms); fn(e(t), t); if (t < 1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
+(() => { const F = ['A aquecer no relvado…', 'A encher a bola…', 'A chamar os amigos…', 'A pintar as linhas…', 'A afinar o apito…']; let i = 0;
+  const t = setInterval(() => { const e = document.getElementById('crTxt'); if (!e || !document.getElementById('s-load')?.classList.contains('on')) return clearInterval(t); e.style.opacity = 0; setTimeout(() => { e.textContent = F[++i % F.length]; e.style.opacity = 1; }, 250); }, 1300); })();
+var TEMPO = 1;   // >1 = câmara lenta (repetição dos golaços, visual.js)
+function tween(ms, fn, e = ease) { ms *= TEMPO; return new Promise(res => { const t0 = performance.now(); const step = now => { const t = Math.min(1, (now - t0) / ms); fn(e(t), t); if (t < 1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function ballSize(d) { return 7 + 9 * Math.min(1, d / PV.D); }
 function setBall(x, y, size, rot = 0, groundY = null) {
@@ -1073,14 +1084,14 @@ function setBall(x, y, size, rot = 0, groundY = null) {
 function keeper(dx, rot, ms) { const k = document.getElementById('kbody'); if (!k) return; tween(ms, t => k.setAttribute('transform', `translate(${(dx * t).toFixed(1)},${(4 * t).toFixed(1)}) rotate(${(rot * t).toFixed(0)} 0 -8)`), easeOut); }
 function highlightMarker(tier) { document.querySelectorAll('#pitch .mk').forEach((m, i) => m.setAttribute('opacity', tier ? (i + 1 === tier ? '1' : '.25') : '.85')); }
 
-async function shoot(tier, kind) {
-  // tier 1-5: golo dessa distância; tier 0: falhado (kind: 'defesa' | 'poste' | 'fora')
-  const d = tier ? TIERS[tier].m : 11, r = Math.random;
+async function shoot(tier, kind, rnd) {
+  // tier 1-5: golo dessa distância; tier 0: falhado (kind: 'defesa' | 'poste' | 'fora'); rnd: sorte fixa (a repetição faz o mesmo remate)
+  const d = tier ? TIERS[tier].m : 11, r = rnd || Math.random;
   const x0 = tier <= 1 ? 0 : (r() - .5) * (tier >= 4 ? 22 : 14);
   const [sx0, sy0] = proj(0, 11), [ex, ey] = proj(x0, d);
   await tween(380 + d * 6, t => { const x = sx0 + (ex - sx0) * t, gy = sy0 + (ey - sy0) * t, sz = ballSize(11 + (d - 11) * t); setBall(x, gy - sz/2, sz, t * -360, gy); }, easeOut);
   highlightMarker(tier);
-  await sleep(220);
+  await sleep(220 * TEMPO);
   const cx = PV.W/2, k0 = PV.K0, gy = PV.Y0, side = r() < .5 ? -1 : 1;
   let tx, ty;
   if (tier) { tx = cx + side * (1 + r() * 2.3) * k0; ty = gy - (.4 + r() * 1.7) * k0; }
@@ -1089,7 +1100,7 @@ async function shoot(tier, kind) {
   else { tx = cx + side * (1.2 + r() * 1.6) * k0; ty = gy - (.5 + r() * 1.2) * k0; }
   const peak = Math.max(6, Math.min(ey, ty) - 20 - Math.min(d, 57) * 1.4), s0 = ballSize(d), s1 = 6, dur = 520 + Math.min(d, 70) * 13;
   const kDive = tier ? -side : side;   // no golo, o guarda-redes atira-se para o lado errado
-  setTimeout(() => keeper(kDive * (tier ? 16 : Math.abs(tx - cx) * .9), kDive * 70, 380), dur * .35);
+  setTimeout(() => keeper(kDive * (tier ? 16 : Math.abs(tx - cx) * .9), kDive * 70, 380), dur * .35 * TEMPO);
   await tween(dur, (t, raw) => {
     const x = (1-t)*(1-t)*ex + 2*(1-t)*t*((ex+tx)/2) + t*t*tx;
     const y = (1-t)*(1-t)*(ey - s0/2) + 2*(1-t)*t*peak + t*t*ty;
@@ -1097,7 +1108,7 @@ async function shoot(tier, kind) {
   }, t => t);
   if (tier) {
     const net = document.getElementById('net'); net.style.transformOrigin = `${cx}px ${gy-10}px`;
-    net.animate([{transform:'scale(1,1)'},{transform:'scale(1.08,1.12)'},{transform:'scale(.98,.97)'},{transform:'scale(1,1)'}], {duration:520, easing:'ease-out'});
+    net.animate([{transform:'scale(1,1)'},{transform:'scale(1.08,1.12)'},{transform:'scale(.98,.97)'},{transform:'scale(1,1)'}], {duration:520 * TEMPO, easing:'ease-out'});
     await tween(260, t => setBall(tx + (cx - tx) * .2 * t, ty - 4 * t + 10 * t * t, s1, 0, gy), easeOut);
   } else {
     const bx = tx + side * (kind === 'fora' ? 40 : 30), by = kind === 'fora' ? ty - 30 : gy + 40;
@@ -1231,7 +1242,8 @@ async function answer(p, timeout = false) {
   await sleep(150);
   const kind = timeout ? 'defesa' : pick(Math.random, ['defesa','poste','fora']);
   if (typeof fxRemate === 'function') fxRemate();   // sons (visual.js)
-  await shoot(tier, kind);
+  const sorte = (Math.random() * 2**31) >>> 0;
+  await shoot(tier, kind, rng(sorte));
   if (tier) {
     const t = TIERS[tier];
     flash(tier === 6 ? 'BALIZA A BALIZA!' : tier >= 4 ? 'GOLAÇO!' : 'GOLO!', `de ${t.m} m · +${pts}`, t.hex);
@@ -1242,6 +1254,7 @@ async function answer(p, timeout = false) {
   } else { if (typeof fxFalha === 'function') fxFalha(); } if (!tier) flash(timeout ? 'TEMPO!' : kind === 'defesa' ? 'DEFENDIDO' : kind === 'poste' ? 'AO POSTE!' : 'PARA FORA', timeout ? 'acabou o tempo' : 'passaste a vez', '#f05a3c');
   countUp($('#score'), S.score - pts, S.score);
   if (S.mode === 'fim') { const st = $('#streak'); if (S.streak >= 2) { st.textContent = `🔥 ${S.streak} seguidos` + (mult() > 1 ? ` · ×${String(mult()).replace('.', ',')}` : ''); st.classList.remove('on'); void st.offsetWidth; st.classList.add('on'); } else st.classList.remove('on'); if (lifeBack) renderLives(S.lives - 1); }
+  if (tier >= 5 && typeof repeticao === 'function') await repeticao(tier, kind, sorte);   // golaços: repetição em câmara lenta (visual.js)
   await sleep(450);
   renderReveal(q, p, tier, pts, timeout, lifeBack);
   busy = false;
@@ -1959,6 +1972,6 @@ boot();
 if ('serviceWorker' in navigator && !/[?&]nosw/.test(location.search)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 <script src="modos.js?v=216539b6ae"></script>
-<script src="visual.js?v=b6edca916c"></script>
+<script src="visual.js?v=38e5569fd3"></script>
 </body>
 </html>

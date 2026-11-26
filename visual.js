@@ -311,3 +311,171 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 </style>`);
 
 icones();
+
+// ---------- repetição dos golaços (50 m e 100 m): o mesmo remate em câmara lenta ----------
+async function repeticao(tier, kind, sorte) {
+  await sleep(700);
+  const box = $('#pitchBox'); if (!box || !$('#s-game').classList.contains('on') || typeof PV === 'undefined') return;
+  drawPitch($('#pitch'), PV);
+  box.classList.add('replay');
+  box.insertAdjacentHTML('beforeend', '<div class="rp-tag"><i></i>REPETIÇÃO<button type="button">saltar ›</button></div>');
+  const tag = box.querySelector('.rp-tag'); let saltar = false;
+  const salta = e => { e?.stopPropagation(); saltar = true; TEMPO = .05; };
+  tag.querySelector('button').onclick = salta; box.addEventListener('click', salta, {once: true});   // tocar no relvado também salta
+  TEMPO = 1.8;
+  try { await shoot(tier, kind, rng(sorte)); } catch (e) {}
+  TEMPO = 1;
+  box.removeEventListener('click', salta);
+  if (!saltar) await sleep(350);
+  box.classList.remove('replay'); tag.remove();
+}
+
+// ---------- capa do jornal no fim de cada jogo ----------
+function jornalDados() {
+  const sh = S.shots, golos = sh.filter(x => x.tier).length, melhor = sh.reduce((b, x) => x.tier > (b?.tier || 0) ? x : b, null);
+  const quem = ME || (typeof CONVIDADO !== 'undefined' && CONVIDADO) || 'O jogador', Q = quem.toUpperCase();
+  const rec = /recorde/i.test($('#endRec')?.textContent || ''), cem = sh.filter(x => x.tier >= 6).length, n = sh.length, sete = n === 7 && golos === 7;
+  const m = melhor ? TIERS[melhor.tier].m : 0;
+  let tit, ante;
+  if (sete && cem) { tit = `${Q} FAZ O PLENO E MARCA DE BALIZA A BALIZA!`; ante = 'Noite histórica'; }
+  else if (cem >= 2) { tit = `${cem} GOLOS DE 100 METROS: ${Q} NÃO É DESTE PLANETA`; ante = 'Inacreditável'; }
+  else if (cem) { tit = `GOLAÇO DE 100 METROS DE ${Q}!`; ante = 'De baliza a baliza'; }
+  else if (sete) { tit = `SETE EM SETE: ${Q} IMPARÁVEL`; ante = 'Pleno'; }
+  else if (rec) { tit = `${Q} BATE O RECORDE: ${S.score} PONTOS`; ante = 'Recorde pessoal'; }
+  else if (n && golos <= Math.floor(n / 3)) { tit = `NOITE PARA ESQUECER: ${Q} SÓ MARCA ${golos}`; ante = 'Crise no ataque'; }
+  else if (m >= 50) { tit = `${Q} MARCA DO MEIO-CAMPO E SOMA ${S.score} PONTOS`; ante = 'Golaço'; }
+  else { tit = `${Q} SOMA ${S.score} PONTOS`; ante = golos >= n - 1 ? 'Exibição sólida' : 'Jogo dividido'; }
+  const lead = melhor ? `Ao responder «${melhor.p.nome}» à pergunta “${melhor.q.txt}”, ${quem} mandou a bola de ${m} metros${melhor.tier >= 6 ? ', de baliza a baliza' : ''}.` : `${quem} não conseguiu marcar: o guarda-redes defendeu tudo.`;
+  const falhas = sh.filter(x => !x.tier), falha = falhas[0];
+  const outra = falha ? `Em “${falha.q.txt}”, ${falhas.length === 1 ? 'a única que escapou' : `uma das ${falhas.length} que escaparam`}${falha.q.valid[0] ? `: bastava dizer ${falha.q.valid[0].nome}` : ''}.` : 'Nenhuma pergunta ficou por responder.';
+  return {tit, ante, lead, outra, golos, n, m, quem, data: new Date().toLocaleDateString('pt-PT', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}), num: (ST.jogos || 0) + 1000, modo: $('#endLbl').textContent};
+}
+function jornalRender() {
+  let el = $('#endJornal');
+  if (!el) { $('#recap').insertAdjacentHTML('beforebegin', '<div class="jornal" id="endJornal"></div>'); el = $('#endJornal'); }
+  if (!S?.shots?.length) { el.hidden = true; return; }
+  const J = jornalDados(); el.hidden = false;
+  el.innerHTML = `<div class="jn-top"><span>N.º ${J.num}</span><b>Diário Fora da Caixa</b><span>0,90 €</span></div>
+    <div class="jn-data">${esc(J.data)} · ${esc(J.modo)}</div>
+    <div class="jn-ante">${esc(J.ante)}</div><h3 class="jn-tit">${esc(J.tit)}</h3>
+    <div class="jn-cols"><p class="jn-lead">${esc(J.lead)}</p><div class="jn-ficha"><b>FICHA</b><span>${J.golos}/${J.n} golos</span><span>${J.m ? J.m + ' m' : '—'} remate mais longo</span><span>${S.score} pontos</span></div></div>
+    <p class="jn-outra">${esc(J.outra)}</p>
+    <button class="st-btn" id="jnPart" type="button">📰 Partilhar a capa</button>`;
+  $('#jnPart').onclick = jornalImagem;
+}
+async function partilharCanvas(c, ficheiro, texto) {
+  const blob = await new Promise(res => c.toBlob(res, 'image/png')), f = new File([blob], ficheiro, {type: 'image/png'});
+  try { if (navigator.canShare && navigator.canShare({files: [f]})) { await navigator.share({files: [f], title: 'Fora da Caixa', text: texto}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = ficheiro; document.body.appendChild(a); a.click(); a.remove(); toast('Imagem guardada');
+}
+async function jornalImagem() {
+  const J = jornalDados();
+  try { await Promise.all([document.fonts.load('400 60px "Alfa Slab One"'), document.fonts.load('600 28px Barlow')]); } catch (e) {}
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const DISP = '"Alfa Slab One", Georgia, serif', SERIF = 'Georgia, "Times New Roman", serif', SANS = 'Barlow, system-ui, sans-serif';
+  const txt = (t, x, y, font, cor, al = 'left') => { g.font = font; g.fillStyle = cor; g.textAlign = al; g.fillText(t, x, y); };
+  const quebra = (t, font, max) => { g.font = font; const ws = t.split(' '), ls = []; let l = ''; for (const w of ws) { const n = l ? l + ' ' + w : w; if (g.measureText(n).width > max && l) { ls.push(l); l = w; } else l = n; } if (l) ls.push(l); return ls; };
+  g.fillStyle = '#efe6d2'; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(80,60,30,${Math.random() * .05})`; g.fillRect(Math.random() * W, Math.random() * H, 2, 2); }   // grão do papel
+  const M = 70; g.fillStyle = '#1d2b22';
+  txt(`N.º ${J.num}`, M, 92, `700 26px ${SANS}`, '#1d2b22'); txt('0,90 €', W - M, 92, `700 26px ${SANS}`, '#1d2b22', 'right');
+  txt('DIÁRIO', W / 2, 108, `400 40px ${DISP}`, '#d6452f', 'center');
+  txt('FORA DA CAIXA', W / 2, 196, `400 92px ${DISP}`, '#1d2b22', 'center');
+  g.fillRect(M, 222, W - 2 * M, 6); g.fillRect(M, 234, W - 2 * M, 2);
+  txt(`${J.data} · ${J.modo}`.toUpperCase(), W / 2, 272, `700 24px ${SANS}`, '#6c6a58', 'center');
+  g.fillRect(M, 292, W - 2 * M, 2);
+  g.font = `800 30px ${SANS}`; const aw = g.measureText(J.ante.toUpperCase()).width + 36; g.fillStyle = '#d6452f'; g.fillRect(M, 322, aw, 48); txt(J.ante.toUpperCase(), M + 18, 356, `800 30px ${SANS}`, '#fffaf0');
+  let y = 452; const tam = quebra(J.tit, `400 84px ${DISP}`, W - 2 * M).length > 3 ? 66 : 84; for (const l of quebra(J.tit, `400 ${tam}px ${DISP}`, W - 2 * M)) { txt(l, M, y, `400 ${tam}px ${DISP}`, '#1d2b22'); y += tam * 1.08; }
+  y += 20; g.fillStyle = '#1d2b22'; g.fillRect(M, y, W - 2 * M, 2); y += 56;
+  // coluna da notícia e ficha
+  const colW = 600; let yl = y; for (const l of quebra(J.lead, `400 34px ${SERIF}`, colW)) { txt(l, M, yl, `400 34px ${SERIF}`, '#1d2b22'); yl += 46; }
+  yl += 14; for (const l of quebra(J.outra, `italic 28px ${SERIF}`, colW)) { txt(l, M, yl, `italic 28px ${SERIF}`, '#6c6a58'); yl += 38; }
+  const fx = M + colW + 40, fw = W - M - fx; g.strokeStyle = '#1d2b22'; g.lineWidth = 3; g.strokeRect(fx, y - 40, fw, 356);
+  txt('FICHA DO JOGO', fx + fw / 2, y + 4, `800 24px ${SANS}`, '#d6452f', 'center');
+  [[`${J.golos}/${J.n}`, 'golos'], [J.m ? `${J.m} m` : '—', 'remate mais longo'], [String(S.score), 'pontos']].forEach(([v, l], i) => { txt(v, fx + fw / 2, y + 74 + i * 92, `400 50px ${DISP}`, '#1d2b22', 'center'); txt(l, fx + fw / 2, y + 102 + i * 92, `600 22px ${SANS}`, '#6c6a58', 'center'); });
+  // os remates, como fotografias pequenas
+  const yb = H - 210, sh = S.shots.slice(0, 7), lado = 100, esp = 20, xs = W / 2 - (sh.length * lado + (sh.length - 1) * esp) / 2;
+  sh.forEach((s, i) => { const t = TIERS[s.tier], x = xs + i * (lado + esp); g.fillStyle = s.tier ? t.hex : '#d9cdb1'; g.fillRect(x, yb, lado, lado); g.strokeStyle = '#1d2b22'; g.lineWidth = 3; g.strokeRect(x, yb, lado, lado);
+    txt(s.tier ? `${t.m}` : '✕', x + lado / 2, yb + 62, `400 38px ${DISP}`, s.tier === 6 ? '#fffaf0' : '#1d2b22', 'center'); });
+  g.fillStyle = '#1d2b22'; g.fillRect(M, H - 82, W - 2 * M, 2);
+  txt('brunomvcarmo.github.io/foradacaixa', W / 2, H - 44, `700 24px ${SANS}`, '#6c6a58', 'center');
+  partilharCanvas(c, 'fora-da-caixa-jornal.png', J.tit);
+}
+endGame = (orig => function () { const r = orig.apply(this, arguments); setTimeout(() => { try { jornalRender(); } catch (e) {} }, 80); return r; })(endGame);
+
+// ---------- quadro da taça em árvore ----------
+function tacaArvore(e) {
+  const R = e.rondas; if (!R?.length) return '';
+  const filhos = {};   // 'k:j' → fontes ({bye} ou {k, j})
+  let entram = e.sor.byes.map(n => ({bye: n}));
+  for (let k = 0; k < R.length - 1; k++) {
+    const slots = [...entram, ...R[k].jogos.map((m, j) => ({k, j}))];
+    R[k + 1].jogos.forEach((m, i) => { filhos[`${k + 1}:${i}`] = [slots[i], slots[slots.length - 1 - i]]; });
+    entram = [];
+  }
+  const LIN = 62, BW = 118, GAP = 24, pos = {}, caixas = [];
+  let folha = 0;
+  const coloca = (no) => {
+    const id = no.bye ? 'b:' + no.bye : `${no.k}:${no.j}`, fs = no.bye ? null : filhos[id];
+    let y; if (!fs) y = folha++ * LIN; else { const ys = fs.map(coloca); y = (ys[0] + ys[1]) / 2; }
+    pos[id] = {x: (no.bye ? 0 : no.k) * (BW + GAP), y}; return y;
+  };
+  const final = {k: R.length - 1, j: 0}; coloca(final);
+  const linhas = [], hoje = lisDate();
+  for (const [id, fs] of Object.entries(filhos)) { const p = pos[id]; for (const f of fs) { const c = pos[f.bye ? 'b:' + f.bye : `${f.k}:${f.j}`]; if (!c) continue;
+    const x1 = c.x + BW, y1 = c.y + 24, x2 = p.x, y2 = p.y + 24, xm = (x1 + x2) / 2; linhas.push(`M${x1} ${y1}H${xm}V${y2}H${x2}`); } }
+  const lado = (n, tot, venc) => n ? `<div class="ta-l ${venc === n ? 'v' : venc ? 'p' : ''} ${n === ME ? 'eu' : ''}">${emb(n, 16)}<span>${esc(n)}</span><em>${tot ?? ''}</em></div>` : '<div class="ta-l tbd"><span>a decidir</span></div>';
+  for (const [id, p] of Object.entries(pos)) {
+    if (id.startsWith('b:')) { const n = id.slice(2); caixas.push(`<div class="ta-c bye" style="left:${p.x}px;top:${p.y}px">${lado(n)}<small>passa diretamente</small></div>`); continue; }
+    const [k, j] = id.split(':').map(Number), m = R[k].jogos[j], jog = m.jogado || R[k].dia < hoje;
+    caixas.push(`<div class="ta-c ${R[k].dia === hoje ? 'hoje' : ''}" style="left:${p.x}px;top:${p.y}px">${lado(m.a, jog ? m.ta : null, m.venc)}${lado(m.b, jog ? m.tb : null, m.venc)}</div>`);
+  }
+  const fp = pos[`${R.length - 1}:0`], cx = fp.x + BW + GAP; linhas.push(`M${fp.x + BW} ${fp.y + 24}H${cx}`);
+  caixas.push(`<div class="ta-c camp ${e.campeao ? 'tem' : ''}" style="left:${cx}px;top:${fp.y}px"><div class="ta-taca">🏆</div>${e.campeao ? `${emb(e.campeao, 18)}<b>${esc(e.campeao)}</b>` : '<b>?</b>'}</div>`);
+  const cab = R.map((r, k) => `<span style="left:${k * (BW + GAP)}px">${esc(r.nome)}<small>${diaCurto(r.dia)}</small></span>`).join('') + `<span style="left:${cx}px">Campeão</span>`;
+  const larg = cx + BW, alt = Math.max(...Object.values(pos).map(p => p.y)) + 56;
+  return `<div class="ta-wrap"><div class="ta" style="width:${larg}px"><div class="ta-cab">${cab}</div><div class="ta-in" style="height:${alt}px"><svg width="${larg}" height="${alt}" aria-hidden="true"><path d="${linhas.join('')}" fill="none" stroke="var(--line)" stroke-width="2.5"/></svg>${caixas.join('')}</div></div></div>`;
+}
+tacaHTML = (orig => function () {
+  const h = orig.apply(this, arguments);
+  try { if (!TC.id && !TC.ant) return h; const i = h.indexOf('<div class="tc-ronda'); if (i < 0) return h;
+    return h.slice(0, i) + tacaArvore(tacaEst(TC.id ? 'id' : 'ant')) + '<h3 class="lg-h" style="margin-top:14px">Jogo a jogo</h3>' + h.slice(i); } catch (e) { return h; }
+})(tacaHTML);
+
+document.head.insertAdjacentHTML('beforeend', `<style>
+/* repetição */
+#pitchBox.replay svg{filter:saturate(.75) contrast(1.05)}
+.rp-tag{position:absolute;top:8px;left:8px;z-index:5;display:flex;align-items:center;gap:7px;background:rgba(20,20,20,.78);color:#fff;font:800 12px var(--sans);letter-spacing:.12em;padding:5px 6px 5px 10px;border-radius:8px}
+.rp-tag i{width:8px;height:8px;border-radius:50%;background:#e33;animation:rpPisca 1s infinite}
+.rp-tag button{border:0;background:rgba(255,255,255,.16);color:#fff;font:700 11px var(--sans);letter-spacing:0;padding:3px 7px;border-radius:6px;cursor:pointer}
+@keyframes rpPisca{50%{opacity:.2}}
+/* capa do jornal */
+.jornal{margin:16px 0 6px;padding:14px 16px 12px;background:#efe6d2;color:#1d2b22;border:2px solid var(--dark);box-shadow:var(--shadow);border-radius:6px;font-family:Georgia,'Times New Roman',serif;transform:rotate(-.6deg)}
+.jn-top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px double #1d2b22;padding-bottom:6px;font:700 11px var(--sans)}
+.jn-top b{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.01em}
+.jn-data{font:700 10.5px var(--sans);color:#6c6a58;text-transform:uppercase;letter-spacing:.06em;text-align:center;padding:4px 0;border-bottom:1px solid #1d2b22}
+.jn-ante{display:inline-block;margin-top:10px;background:#d6452f;color:#fffaf0;font:800 11px var(--sans);text-transform:uppercase;letter-spacing:.06em;padding:2px 8px}
+.jn-tit{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.08;margin:6px 0 8px;color:#1d2b22}
+.jn-cols{display:grid;grid-template-columns:1fr 96px;gap:12px;border-top:1px solid #1d2b22;padding-top:8px}
+.jn-lead{margin:0;font-size:14.5px;line-height:1.4}
+.jn-lead::first-letter{font-family:var(--display);font-size:30px;float:left;line-height:.9;margin:3px 5px 0 0}
+.jn-ficha{border:2px solid #1d2b22;padding:6px;display:flex;flex-direction:column;gap:4px;text-align:center;font:600 11px var(--sans);color:#6c6a58}
+.jn-ficha b{color:#d6452f;font-weight:800;font-size:10.5px;letter-spacing:.06em}
+.jn-outra{margin:8px 0 10px;font-style:italic;font-size:13px;color:#6c6a58;line-height:1.35}
+.jornal .st-btn{margin:0;background:#1d2b22;color:#efe6d2;border-color:#1d2b22}
+/* quadro da taça */
+.ta-wrap{overflow-x:auto;margin:4px -4px 6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch}
+.ta{position:relative}
+.ta-cab{position:relative;height:34px}.ta-cab span{position:absolute;top:0;width:118px;font:800 12px var(--sans);text-transform:uppercase;letter-spacing:.04em;color:var(--ink)}
+.ta-cab small{display:block;font-weight:600;text-transform:none;letter-spacing:0;color:var(--mute)}
+.ta-in{position:relative}.ta-in svg{position:absolute;inset:0}
+.ta-c{position:absolute;width:118px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.06)}
+.ta-c.hoje{border:2px solid var(--acc)}
+.ta-c.bye{background:var(--bg2);border-style:dashed}.ta-c.bye small{display:block;font:600 10px var(--sans);color:var(--mute);padding:0 8px 4px 32px}
+.ta-l{display:flex;align-items:center;gap:6px;padding:3px 8px;height:24px;font:600 12.5px var(--sans)}.ta-l+.ta-l{border-top:1px solid var(--line)}
+.ta-l span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ta-l em{font-style:normal;font-family:var(--display);font-size:13px}
+.ta-l .emb{margin:0}.ta-l.v{background:color-mix(in oklab,var(--acc) 14%,var(--panel))}.ta-l.v span{font-weight:800}.ta-l.p{opacity:.5}.ta-l.eu span{text-decoration:underline;text-underline-offset:2px}
+.ta-l.tbd{color:var(--mute);font-weight:500}
+.ta-c.camp{display:flex;align-items:center;gap:6px;padding:0 8px;height:50px;border:2px solid var(--t3);background:color-mix(in oklab,var(--t3) 18%,var(--panel))}
+.ta-c.camp b{font-family:var(--display);font-weight:400;font-size:15px}.ta-taca{font-size:22px}.ta-c.camp .emb{margin:0}
+</style>`);
