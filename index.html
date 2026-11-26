@@ -60,11 +60,20 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @keyframes screenIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ---------- início ---------- */
-.brand{display:flex;align-items:center;gap:10px;margin:8px 0 4px}
-.brand img{width:42px;height:42px;flex:none;border-radius:11px;box-shadow:var(--shadow)}
-.brand h1{font-family:var(--display);font-weight:400;font-size:31px;margin:0;line-height:1}
-.brand h1 em{font-style:normal;color:var(--red)}
-.tag{color:var(--mute);margin:10px 0 18px;font-size:15px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* topo do início: a fita métrica com o nome e a bola a sair dela (como no ícone) */
+.topo{margin:-4px -16px 4px;overflow:hidden}
+.topo svg{display:block;width:100%;height:auto;max-height:190px}
+@media (min-width:560px){.topo{-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}}
+.topo-bola{transform:translate(262px,52px);animation:topoEntra 1s cubic-bezier(.2,.9,.3,1.15) both}
+.topo-gira{animation:topoGira 9s linear infinite;transform-origin:0 0}
+.topo-rastos{animation:topoRasto 1s .15s ease-out both}
+.topo-fita{animation:topoFita .6s ease-out both}
+@keyframes topoEntra{from{transform:translate(40px,96px) scale(.55)}to{transform:translate(262px,52px) scale(1)}}
+@keyframes topoGira{to{transform:rotate(360deg)}}
+@keyframes topoRasto{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:none}}
+@keyframes topoFita{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.topo-bola,.topo-gira,.topo-rastos,.topo-fita{animation:none}}
 .tag b{color:var(--ink)}
 .hero{position:relative;border-radius:var(--r);overflow:hidden;background:var(--panel);border:1px solid var(--line);margin-bottom:14px}
 .hero svg{display:block;width:100%;height:auto}
@@ -494,12 +503,32 @@ dialog .tiers b{width:52px}
 
   <!-- ===================== INÍCIO ===================== -->
   <div id="s-home" class="screen">
-    <div class="brand">
-      <img src="icones/icone-180.png" alt="">
-      <h1>Fora da <em>Caixa</em></h1>
-    </div>
-    <div class="mebar" id="meBar" hidden></div>
-    <p class="tag">O óbvio não marca. Responde certo, mas <b>com a resposta que mais ninguém se lembra</b>: quanto mais rara, mais longe o remate e mais pontos.</p>
+    <header class="topo">
+      <h1 class="sr">Fora da Caixa</h1>
+      <svg viewBox="0 14 360 160" aria-hidden="true">
+        <defs>
+          <pattern id="fitaMin" width="7" height="46" patternUnits="userSpaceOnUse"><path d="M0 0v7M0 46v-7" stroke="#1d2b22" stroke-width="1.6"/></pattern>
+          <pattern id="fitaMai" width="35" height="46" patternUnits="userSpaceOnUse"><path d="M0 0v14M0 46v-14" stroke="#1d2b22" stroke-width="2.4"/></pattern>
+          <linearGradient id="fitaBrilho" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".1"/></linearGradient>
+        </defs>
+        <g class="topo-rastos" stroke-linecap="round">
+          <path d="M120 44H226" stroke="var(--ink)" stroke-width="8"/>
+          <path d="M92 64H218" stroke="var(--ink)" stroke-width="7" opacity=".55"/>
+          <path d="M140 82H222" stroke="var(--ink)" stroke-width="6" opacity=".3"/>
+        </g>
+        <g transform="rotate(-9 180 108)">
+          <g class="topo-fita">
+            <rect x="-30" y="86" width="430" height="46" fill="#e8b33a"/>
+            <rect x="-30" y="86" width="430" height="46" fill="url(#fitaMin)"/>
+            <rect x="-30" y="86" width="430" height="46" fill="url(#fitaMai)"/>
+            <rect x="-30" y="86" width="430" height="46" fill="url(#fitaBrilho)"/>
+            <path d="M-30 86H400M-30 132H400" stroke="#1d2b22" stroke-width="3.5"/>
+            <text x="180" y="119.5" text-anchor="middle" font-family="'Alfa Slab One',Georgia,serif" font-size="27" letter-spacing="1.5" fill="#1d2b22">FORA DA <tspan fill="#d6452f">CAIXA</tspan></text>
+          </g>
+        </g>
+        <g class="topo-bola"><g class="topo-gira"><use href="#ballsym" x="-34" y="-34" width="68" height="68"/></g></g>
+      </svg>
+    </header>
 
     <div class="hero" aria-hidden="true">
       <svg id="heroPitch" viewBox="0 0 360 230" preserveAspectRatio="xMidYMin slice"></svg>
@@ -794,7 +823,7 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261126002625';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const APP_VER = '20261126004720';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
 const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"216539b6ae","visual.js":"38e5569fd3","historia.json":"89e1cf1f72","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
