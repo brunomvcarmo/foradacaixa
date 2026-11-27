@@ -182,11 +182,21 @@ function podio() {
 }
 
 // ---------- imagem do resultado de qualquer jogo ----------
+// "Partilhar" no fim do jogo: escolhe entre a imagem do resultado e a capa do jornal (os duelos têm a imagem deles)
 function resImgBotao() {
-  let b = $('#endImg');
-  if (!b) { $('#share').insertAdjacentHTML('afterend', '<button class="st-btn du-img" id="endImg" type="button">📸 Imagem do resultado</button>'); b = $('#endImg'); b.onclick = resImagem; }
-  b.hidden = !S || !S.shots?.length || !!S.duelo;   // os duelos têm a imagem deles
+  const b = $('#endPart'), sh = $('#share'); if (!b) return;
+  b.hidden = !S || !S.shots?.length || !!S.duelo;
+  b.onclick = () => $('#partDlg').showModal();
+  // o "Partilhar" de texto (liga e Sem fim) passa para dentro deste menu: não ficam dois botões "Partilhar"
+  const t = sh.textContent.trim(), txt = !S?.duelo && t === 'Partilhar';
+  sh.hidden = txt; $('#partTxt').hidden = !txt;
+  if (t === 'Desafiar amigo') sh.innerHTML = '<span>🤝</span>Desafiar';
 }
+$('#partTxt').onclick = () => { $('#partDlg').close(); share(); };
+$('#partImg').onclick = () => { $('#partDlg').close(); resImagem(); };
+$('#partJornal').onclick = () => { $('#partDlg').close(); jornalImagem(); };
+$('#partX').onclick = () => $('#partDlg').close();
+$('#partDlg').addEventListener('click', e => { if (e.target === $('#partDlg')) $('#partDlg').close(); });
 async function resImagem() {
   if (!S?.shots?.length) return;
   const quem = ME || (typeof CONVIDADO !== 'undefined' && CONVIDADO) || '', lbl = $('#endLbl').textContent || 'Jogo', shots = S.shots;
@@ -355,13 +365,12 @@ function jornalRender() {
   if (!el) { $('#recap').insertAdjacentHTML('beforebegin', '<div class="jornal" id="endJornal"></div>'); el = $('#endJornal'); }
   if (!S?.shots?.length) { el.hidden = true; return; }
   const J = jornalDados(); el.hidden = false;
-  el.innerHTML = `<div class="jn-top"><span>N.º ${J.num}</span><b>Diário Fora da Caixa</b><span>0,90 €</span></div>
+  el.innerHTML = `<details class="jn-d"><summary><span class="jn-k">📰 Diário Fora da Caixa</span><b>${esc(J.tit)}</b><em>ver a capa ›</em></summary>
+    <div class="jn-top"><span>N.º ${J.num}</span><b>Diário Fora da Caixa</b><span>0,90 €</span></div>
     <div class="jn-data">${esc(J.data)} · ${esc(J.modo)}</div>
     <div class="jn-ante">${esc(J.ante)}</div><h3 class="jn-tit">${esc(J.tit)}</h3>
     <div class="jn-cols"><p class="jn-lead">${esc(J.lead)}</p><div class="jn-ficha"><b>FICHA</b><span>${J.golos}/${J.n} golos</span><span>${J.m ? J.m + ' m' : '—'} remate mais longo</span><span>${S.score} pontos</span></div></div>
-    <p class="jn-outra">${esc(J.outra)}</p>
-    <button class="st-btn" id="jnPart" type="button">📰 Partilhar a capa</button>`;
-  $('#jnPart').onclick = jornalImagem;
+    <p class="jn-outra">${esc(J.outra)}</p></details>`;
 }
 async function partilharCanvas(c, ficheiro, texto) {
   const blob = await new Promise(res => c.toBlob(res, 'image/png')), f = new File([blob], ficheiro, {type: 'image/png'});
@@ -450,6 +459,12 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .rp-tag button{border:0;background:rgba(255,255,255,.16);color:#fff;font:700 11px var(--sans);letter-spacing:0;padding:3px 7px;border-radius:6px;cursor:pointer}
 @keyframes rpPisca{50%{opacity:.2}}
 /* capa do jornal */
+.jn-d summary{list-style:none;cursor:pointer;display:grid;gap:2px}
+.jn-d summary::-webkit-details-marker{display:none}
+.jn-d summary .jn-k{font:700 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#6c6a58}
+.jn-d summary b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.15}
+.jn-d summary em{font:600 12.5px var(--sans);font-style:normal;color:#1e5a37}
+.jn-d[open] summary{display:none}
 .jornal{margin:16px 0 6px;padding:14px 16px 12px;background:#efe6d2;color:#1d2b22;border:2px solid var(--dark);box-shadow:var(--shadow);border-radius:6px;font-family:Georgia,'Times New Roman',serif;transform:rotate(-.6deg)}
 .jn-top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px double #1d2b22;padding-bottom:6px;font:700 11px var(--sans)}
 .jn-top b{font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.01em}
@@ -497,7 +512,8 @@ function comentario(tier, p, timeout) {
 }
 renderReveal = (orig => function (q, p, tier, pts, timeout) {
   const r = orig.apply(this, arguments);
-  try { const rv = $('#reveal'); if (rv && !rv.querySelector('.coment')) rv.insertAdjacentHTML('afterbegin', `<div class="coment"><span>🎙️</span><q>${esc(comentario(tier, p, timeout))}</q></div>`); } catch (e) {}
+  // o comentário fica numa linha só, logo por baixo do resultado (sem caixa à parte)
+  try { const rv = $('#reveal'), rh = rv?.querySelector('.rhead'); if (rh && !rv.querySelector('.coment')) rh.insertAdjacentHTML('afterend', `<div class="coment"><span>🎙️</span><q>${esc(comentario(tier, p, timeout))}</q></div>`); } catch (e) {}
   return r;
 })(renderReveal);
 
@@ -525,6 +541,7 @@ inicioExtra = (orig => function () {
         <div class="cz-titulo">HOJE HÁ JOGO</div>
         <div class="cz-vs"><div>${emb(ME, 52)}<b>${esc(ME)}</b></div><span class="cz-x">VS</span><div>${emb(t.op, 52)}<b>${esc(t.op)}</b></div></div>
         <div class="cz-pe"><small>${estado || '🏠 casa e ✈️ fora'}</small>${temBotao ? '<button class="du-btn" id="tcMiniPlay">Jogar ›</button>' : ''}</div>`;
+      const ag = $('#agora'); if (ag) { ag.prepend(tm); $('#playBtn')?.classList.add('sec'); }   // dia de jogo: o cartaz sobe para o topo
     } else tm?.classList.remove('cartaz');
   } catch (e) {}
   try { domingoMini(); } catch (e) {}
@@ -603,9 +620,8 @@ function abrirDomingo() {
 
 document.head.insertAdjacentHTML('beforeend', `<style>
 /* comentário */
-.coment{display:flex;gap:8px;align-items:flex-start;background:var(--dark);color:#fffaf0;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:15px;line-height:1.35;box-shadow:var(--shadow);animation:qIn .35s both}
-:root[data-theme="dark"] .coment{background:#0c120e;border:1px solid var(--line)}
-.coment q{font-style:italic;quotes:'«' '»'}.coment span{font-size:18px;line-height:1.2}
+.coment{display:flex;gap:6px;align-items:flex-start;color:var(--ink);margin:8px 0 0;font-size:14px;line-height:1.35;animation:qIn .35s both}
+.coment q{font-style:italic;quotes:'«' '»'}.coment span{font-size:14px;line-height:1.35}
 /* cartaz do dia de jogo */
 .tc-mini.cartaz{display:block;padding:0;overflow:hidden;border:2px solid var(--dark);box-shadow:var(--shadow);background:linear-gradient(180deg,#1e5a37,#174a2c);color:#fffaf0}
 .cartaz .cz-topo{display:flex;justify-content:space-between;padding:7px 12px;background:rgba(0,0,0,.22);font:800 11.5px var(--sans);text-transform:uppercase;letter-spacing:.08em}

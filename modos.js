@@ -172,7 +172,7 @@ const MX_HTML = `
   <div id="mmBody"></div>
 </div>
 <div id="s-duelo" class="screen">
-  <div class="lg-head"><button class="iconbtn" id="duBack" aria-label="Voltar">‹</button><h2>⚔️ Duelos</h2><button class="iconbtn" id="duRefresh" aria-label="Atualizar">↻</button></div>
+  <div class="lg-head"><button class="iconbtn" id="duBack" aria-label="Voltar">‹</button><h2>⚔️ Duelos</h2></div>
   <div id="duBody"></div>
 </div>`;
 (() => {
@@ -1220,7 +1220,7 @@ function inicioExtra() {
     tm.hidden = false; tm.innerHTML = `<span class="ic">🏆</span><span class="tx"><b>${esc(TC.id || TC.ant ? tacaNome(TC.id || TC.ant) : 'Taça dos Amigos')}</b><small>${linha}</small></span>${botao || '<span class="go">›</span>'}`;
     tm.onclick = e => { if (e.target.closest('#tcMiniPlay')) { e.stopPropagation(); startTaca(); } else openTaca(); };
   }
-  if (LG.dados && LIGA.db) { const ev = muralEventos().slice(0, 3); mm.hidden = false;
+  if (LG.dados && LIGA.db) { const ev = muralEventos().slice(0, 1); mm.hidden = false;   // só o mais recente: o resto em "ver tudo"
     mm.innerHTML = `<div class="mu-top"><b>📰 Mural</b><button class="linkbtn" id="muVer">ver tudo ›</button></div>${ev.length ? ev.map(muralItem).join('') : '<p class="lg-note" style="margin:4px 0">Ainda não aconteceu nada esta semana.</p>'}`;
     $('#muVer').onclick = () => { LTAB = 'mural'; openLiga(); }; }
 }
@@ -1376,7 +1376,6 @@ $('#m-quem').onclick = startQuem;
 $('#m-mm').onclick = openMM;
 $('#m-duelo').onclick = () => { if (!ME) { askWho(); return; } openDuelo(); };
 $('#duBack').onclick = mxSair;
-$('#duRefresh').onclick = duRefresh;
 setInterval(() => { if (LIGA.db && ME && document.visibilityState === 'visible' && ($('#s-home').classList.contains('on') || $('#s-duelo').classList.contains('on'))) duRefresh(); }, 20000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') duRefresh(); });
 duRefresh();
