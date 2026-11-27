@@ -11,7 +11,8 @@ from playwright.sync_api import sync_playwright
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 SAIDA = RAIZ / 'icones' / 'emblemas'
-NOMES = ['Bruno', 'Freitas', 'CC', 'Viegas', 'Manel']
+NOMES = ['Bruno', 'Freitas', 'CC', 'Viegas', 'Manel', 'Vigário']
+FICH = {'Vigário': 'vigario'}   # nomes dos ficheiros sem acentos (como em PNG no emblemas.js)
 TAM = {'g': (300, 375), 'p': (120, 150)}
 PAGINA = """<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
@@ -28,14 +29,14 @@ def main():
             except Exception: b = pw.chromium.launch(executable_path='/opt/pw-browsers/chromium', args=['--headless', '--no-sandbox'])
             pg = b.new_page(viewport={'width': 600, 'height': 600})
             pg.goto(tmp.as_uri()); pg.wait_for_timeout(1500)
-            for nome in NOMES:
+            for nome in [n for n in NOMES if not os.environ.get('SO') or n == os.environ['SO']]:
                 for k, (w, h) in TAM.items():
                     pg.evaluate("""([nome, k, w, h]) => {
                       let svg = emblemaSVG(nome);
                       if (k === 'p') svg = svg.replace(/<text[\\s\\S]*?<\\/text>/g, '').replace(/ filter="url\\([^)]*\\)"/g, '');
                       const c = document.getElementById('c'); c.style.width = w + 'px'; c.style.height = h + 'px'; c.innerHTML = svg; }""", [nome, k, w, h])
                     pg.wait_for_timeout(150)
-                    pg.locator('#c').screenshot(path=str(SAIDA / f'{nome.lower()}-{k}.png'), omit_background=True)
+                    pg.locator('#c').screenshot(path=str(SAIDA / f'{FICH.get(nome, nome.lower())}-{k}.png'), omit_background=True)
                     print('feito', nome, k)
             b.close()
     finally:
