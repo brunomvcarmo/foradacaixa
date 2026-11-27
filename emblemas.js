@@ -2,7 +2,7 @@
 // Fora da Caixa — emblemas dos amigos da liga (paródias dos símbolos dos clubes que cada um apoia).
 // Carregado ANTES do script principal. Expõe: emblemaSVG(nome), emblemaURL(nome), emblemaPNG(nome, grande), emb(nome, px).
 // Todos usam a versão AVACALHADA (2) — o utilizador não quer escolha. A versão 1 (quase igual) fica no código, sem uso.
-// Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United · Manel = Leicester City. Outros nomes: círculo com as iniciais.
+// Bruno = Liverpool · Freitas = Chelsea · CC = Arsenal · Viegas = Manchester United · Manel = Leicester City · Vigário = Ipswich Town. Outros nomes: círculo com as iniciais.
 // =====================================================================================
 (function () {
 'use strict';
@@ -301,7 +301,55 @@ function leicester(nome, v) {
   </g>
   <text x="100" y="195.5" text-anchor="middle" font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="${v === 1 ? 13 : 12.5}" fill="#041d52">${nome.toUpperCase()}CESTER CITY</text></svg>`;
 }
-const CLUBE_DE = {Bruno: liverpool, Freitas: chelsea, CC: arsenal, Viegas: united, Manel: leicester};
+// ---------- Ipswich Town: cavalo Suffolk Punch de pata levantada, portão de Wolsey vermelho em cima, ondas do rio Orwell em baixo ----------
+function CAVALO(opt = {}) {
+  const u = 'cv' + (UID++), dk = '#0b1f4d';
+  const L = (d, w) => `<path d="${d}" stroke="${dk}" stroke-width="${w + 3.4}" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="url(#${u}g)" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `<g><defs><linearGradient id="${u}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f1ece0"/><stop offset="1" stop-color="#cfc6b2"/></linearGradient></defs>
+  ${L('M36 -4 C50 0 54 16 46 34', 7)}
+  ${L('M26 16 C28 26 26 34 28 44', 7.5)}${L('M34 12 C40 24 36 34 38 44', 7.5)}
+  ${L('M-20 18 C-21 28 -22 36 -22 44', 7.5)}${L('M-12 16 C-20 22 -30 22 -36 28 C-38 32 -34 36 -32 38', 7)}
+  <g fill="${dk}"><rect x="23" y="42" width="10" height="5" rx="1.5"/><rect x="33" y="42" width="10" height="5" rx="1.5"/><rect x="-27" y="42" width="10" height="5" rx="1.5"/><rect x="-37" y="36" width="9" height="5" rx="1.5" transform="rotate(30 -32 38)"/></g>
+  <path d="M-28 -8 C-20 -18 20 -18 32 -10 C42 -4 42 14 32 20 C16 26 -16 26 -26 18 C-34 12 -34 0 -28 -8Z" fill="url(#${u}g)" stroke="${dk}" stroke-width="2"/>
+  <path d="M-30 -4 C-36 -20 -40 -40 -41 -52 L-25 -55 C-23 -38 -16 -22 -10 -12Z" fill="url(#${u}g)" stroke="${dk}" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M-36 -60 C-48 -56 -62 -44 -72 -32 C-76 -27 -74 -20 -67 -19 C-61 -18 -55 -23 -49 -27 C-43 -31 -36 -36 -29 -44 C-26 -50 -28 -58 -36 -60Z" fill="url(#${u}g)" stroke="${dk}" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M-35 -59 L-33 -72 L-27 -57Z M-41 -57 L-43 -69 L-35 -59Z" fill="url(#${u}g)" stroke="${dk}" stroke-width="1.6" stroke-linejoin="round"/>
+  <g fill="none" stroke="#8a6a3a" stroke-width="3.2" stroke-linecap="round"><path d="M-28 -58 C-22 -44 -18 -30 -12 -15"/><path d="M-24 -54 C-19 -42 -14 -30 -9 -16" opacity=".65"/><path d="M-36 -60 C-40 -64 -44 -62 -44 -58"/></g>
+  <circle cx="-70" cy="-27" r="1.6" fill="${dk}"/><path d="M-62 -21 Q-58 -23 -55 -22" fill="none" stroke="${dk}" stroke-width="1.2"/>
+  ${opt.pisca ? `<path d="M-50 -48 Q-46 -45 -42 -48" fill="none" stroke="${dk}" stroke-width="2.2" stroke-linecap="round"/>`
+              : `<circle cx="-46" cy="-48" r="2.6" fill="${dk}"/><circle cx="-45.3" cy="-48.7" r=".8" fill="#fff"/>`}
+  ${opt.lingua ? `<path d="M-69 -20 C-73 -12 -65 -11 -64 -19Z" fill="#e8577a" stroke="#7a1f33" stroke-width="1"/>` : ''}
+  ${opt.palha ? `<g><path d="M-62 -21 L-82 -12" stroke="#e8c25a" stroke-width="2.4" stroke-linecap="round"/><path d="M-82 -12 l-5 0 M-82 -12 l-3 4 M-82 -12 l-4 -3" stroke="#e8c25a" stroke-width="1.4" stroke-linecap="round"/></g>` : ''}</g>`;
+}
+function ipswich(nome, v) {
+  const u = 'Ip' + (UID++), azul = '#1458b8', dk = '#0b1f4d';
+  const SH = 'M100 12 C130 12 160 18 176 30 L176 116 C176 176 140 212 100 234 C60 212 24 176 24 116 L24 30 C40 18 70 12 100 12Z';
+  const ameias = (x, y, w, n) => Array.from({length: n}, (_, i) => `<rect x="${x + i * w / n + w / n * .18}" y="${y - 6}" width="${w / n * .64}" height="7"/>`).join('');
+  const curto = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').slice(0, 3).toUpperCase();
+  return `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">${FX(u)}<defs><clipPath id="${u}c"><path d="${SH}"/></clipPath>
+    <radialGradient id="${u}az" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#3b82e6"/><stop offset=".6" stop-color="${azul}"/><stop offset="1" stop-color="#062a66"/></radialGradient>
+    <linearGradient id="${u}vm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0473a"/><stop offset="1" stop-color="#9c1410"/></linearGradient></defs>
+  <g filter="url(#${u}som)">
+    <path d="${SH}" fill="url(#${u}az)"/>
+    <g clip-path="url(#${u}c)">
+      <g fill="none" stroke-width="6">${[0, 1, 2].map(i => `<path d="M10 ${178 + i * 14} q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="${i % 2 ? '#fffaf0' : '#0d3f8f'}"/>`).join('')}</g>
+      <path d="M20 176 Q100 160 180 176 L180 168 Q100 152 20 168Z" fill="#2f8f3e" stroke="#14521f" stroke-width="1.5"/>
+    </g>
+    <g filter="url(#${u}rel)" fill="url(#${u}vm)" stroke="#5c0a07" stroke-width="1.6">
+      <rect x="60" y="38" width="20" height="42"/>${ameias(60, 38, 20, 3)}<rect x="116" y="38" width="20" height="42"/>${ameias(116, 38, 20, 3)}
+      <rect x="80" y="50" width="36" height="30"/>${ameias(80, 50, 36, 4)}
+      <path d="M89 80 L89 68 Q98 58 107 68 L107 80Z" fill="#3a0604"/>
+      <rect x="67" y="50" width="6" height="10" rx="3" fill="#3a0604"/><rect x="123" y="50" width="6" height="10" rx="3" fill="#3a0604"/>
+    </g>
+    <g filter="url(#${u}rel)" transform="translate(106 128) scale(.9)">${CAVALO({pisca: v === 2, lingua: v === 2, palha: v === 2})}</g>
+    <path d="${SH}" fill="none" stroke="url(#${u}ouro)" stroke-width="6"/><path d="${SH}" fill="none" stroke="${dk}" stroke-width="1.5"/>
+    <path d="M14 196 L186 196 L177 210 L186 224 L14 224 L23 210Z" fill="url(#${u}ouro)" stroke="${dk}" stroke-width="2.4"/>
+    ${v === 2 ? `<g transform="rotate(-14 154 46)"><rect x="112" y="36" width="84" height="20" rx="4" fill="#fffaf0" stroke="${dk}" stroke-width="2"/><text x="154" y="50.3" text-anchor="middle" font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="10" fill="#c8102e">TRACTOR BOY</text></g>` : ''}
+    <g clip-path="url(#${u}c)"><path d="M0 0 L200 0 L200 100 Q100 84 0 112Z" fill="url(#${u}verniz)"/></g>
+  </g>
+  <text x="100" y="215.5" text-anchor="middle" font-family="Alfa Slab One, Rockwell, Georgia, serif" font-weight="700" font-size="13" fill="${dk}">${curto}SWICH TOWN</text></svg>`;
+}
+const CLUBE_DE = {Bruno: liverpool, Freitas: chelsea, CC: arsenal, Viegas: united, Manel: leicester, 'Vigário': ipswich};
 function generico(nome) {
   const ini = String(nome || '?').slice(0, 2).toUpperCase();
   return `<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="125" r="94" fill="#1e5a37" stroke="#1d2b22" stroke-width="6"/><text x="100" y="152" text-anchor="middle" font-family="${'Alfa Slab One, Georgia, serif'}" font-weight="700" font-size="80" fill="#f3ead6">${ini}</text></svg>`;
@@ -312,7 +360,7 @@ const cache = {};
 window.emblemaURL = (nome, v) => { v = v || VERSAO; const k = nome + '|' + v; return cache[k] || (cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(emblemaSVG(nome, v))); };
 // PNGs feitos por scripts/emblemas_png.py (o SVG com efeitos fica desfocado em tamanho pequeno no iPhone):
 // -p = mini (sem letras nem efeitos) para listas; -g = completo para tamanhos grandes
-const PNG = {Bruno:'bruno', Freitas:'freitas', CC:'cc', Viegas:'viegas', Manel:'manel'};
+const PNG = {Bruno:'bruno', Freitas:'freitas', CC:'cc', Viegas:'viegas', Manel:'manel', 'Vigário':'vigario'};
 window.emblemaPNG = (nome, grande) => PNG[nome] ? `icones/emblemas/${PNG[nome]}-${grande ? 'g' : 'p'}.png?v=${typeof APP_VER !== 'undefined' ? APP_VER : ''}` : emblemaURL(nome);
 window.emb = (nome, px = 22, cls = '') => `<img class="emb ${cls}" src="${emblemaPNG(nome, px > 32)}" width="${px}" height="${Math.round(px * 1.25)}" alt="" decoding="async">`;
 })();

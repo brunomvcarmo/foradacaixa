@@ -872,7 +872,7 @@ dialog .tiers b{width:52px}
 <script src="perguntas.js?v=1fe52bfba2"></script>
 <script src="perguntas2.js?v=7a22234356"></script>
 <script src="perguntas3.js?v=dc057a634c"></script>
-<script src="emblemas.js?v=b076c185d3"></script>
+<script src="emblemas.js?v=3f407901ce"></script>
 <script>
 'use strict';
 // ======================================================================
@@ -882,8 +882,8 @@ dialog .tiers b{width:52px}
 // ======================================================================
 const $ = s => document.querySelector(s);
 // ---------- versão: o iPhone (sobretudo com o ícone no ecrã principal) mantém a página antiga aberta; ver se há nova e recarregar ----------
-const APP_VER = '20261127221620';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
-const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"b076c185d3","modos.js":"d58ec4d8a4","visual.js":"c3d610ef68","historia.json":"d229fccee5","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"26632cc7f1","carreiras10.json":"746643692e","listas.json":"a33a6a83fd","finais.json":"2ff09fba79","custozero.json":"4214080220"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
+const APP_VER = '20261127222117';   // escrita por scripts/versao.py a cada publicação (igual a versao.txt)
+const FV = {"perguntas.js":"1fe52bfba2","perguntas2.js":"7a22234356","perguntas3.js":"dc057a634c","emblemas.js":"3f407901ce","modos.js":"d58ec4d8a4","visual.js":"c3d610ef68","historia.json":"d229fccee5","selecoes.json":"d8b1b75825","nacionalidades.json":"ae399a5b87","transferencias.json":"117d1782e9","carreiras.json":"192dba77dc","maisoumenos.json":"4a1c38d565","bolaouro.json":"d7888051e0","estatisticas.json":"78a8012988","mercado2.json":"26632cc7f1","carreiras10.json":"746643692e","listas.json":"a33a6a83fd","finais.json":"2ff09fba79","custozero.json":"4214080220"};   // impressão digital de cada ficheiro grande (scripts/versao.py): só se descarregam de novo quando mudam
 const fvUrl = f => `${f}?v=${FV[f] || APP_VER}`;
 let novaVersao = false;
 async function verVersao() {
