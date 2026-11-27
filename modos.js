@@ -931,7 +931,7 @@ const tacaNome = id => dowDe(id) === 1 ? 'Taça de segunda' : 'Taça de quinta';
 const diaCurto = ds => new Date(ds + 'T12:00:00Z').toLocaleDateString('pt-PT', {weekday:'short', day:'numeric', timeZone:'UTC'});
 const tcCatsNome = c => !c ? '' : c === 'tudo' ? 'todos os tipos' : c.split(',').map(x => CATS[x] || x).join(' · ');
 function tacaSorteio(id) {
-  const J = [...LIGA.jogadores], r = rng(hashStr(`taca:${LIGA.id}:${id}`));
+  const J = LIGA.jogadores.filter(n => !LIGA.desde?.[n] || LIGA.desde[n] <= id), r = rng(hashStr(`taca:${LIGA.id}:${id}`));   // quem entrou depois de a taça começar fica para a seguinte
   for (let i = J.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [J[i], J[j]] = [J[j], J[i]]; }
   let P = 1; while (P < J.length) P *= 2;
   const n1 = J.length - P / 2, byes = J.slice(0, J.length - 2 * n1), r1 = J.slice(J.length - 2 * n1);
@@ -984,7 +984,7 @@ async function tacaGet() {
 // o meu jogo de hoje: adversário, o que já joguei e as mãos que faltam
 function tacaMeuJogo() {
   if (!ME || !TC.id) return null;
-  const e = tacaEst('id'), hoje = lisDate(), r = e.rondas.find(x => x.dia === hoje); if (!r) return null;
+  const e = tacaEst('id'), hoje = lisDate(), r = e.rondas.find(x => x.dia === hoje); if (!r || (e.sor?.J && !e.sor.J.includes(ME))) return null;
   const m = r.jogos.find(x => x.a === ME || x.b === ME);
   if (!m) { const fora = !e.rondas.slice(0, r.k - 1).some(x => x.jogos.some(y => y.venc === ME)) && !e.rondas[0].byes.includes(ME); return {r, m:null, fora, e}; }
   const op = m.a === ME ? m.b : m.a, eu = m.a === ME ? m.ja : m.jb;
