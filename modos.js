@@ -784,26 +784,19 @@ function renderStatsModo() {
     const rows = LIGA.jogadores.map(n => { const g = por(n); return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.pontos || 0), media:mxMedia(g, x => x.pontos || 0),
       resp:mxMedia(g, x => x.respostas || 0), pctr:mxMedia(g, x => x.total ? x.respostas / x.total : 0), raras:g.length ? g.reduce((s, x) => s + (x.raras || 0), 0) : null, erros:mxMedia(g, x => x.erros || 0)}; });
     h += barCard('Melhor rajada', 'pontos num só jogo', rows, 'melhor', v => v ?? '—');
-    h += barCard('Pontos por rajada', 'média', rows, 'media', fmt1);
-    h += barCard('Respostas por rajada', 'média de respostas certas em 60 s', rows, 'resp', fmt1);
-    h += barCard('Respostas encontradas', '% das respostas certas de cada pergunta', rows, 'pctr', pct);
-    h += barCard('Golos de longe', 'respostas de 50 m ou de baliza a baliza', rows, 'raras', v => v ?? '—');
-    h += barCard('Erros por rajada', 'menos é melhor', rows, 'erros', fmt1, true);
-    h += barCard('Rajadas', '', rows, 'jogos', v => v ?? '—');
+    h += numTabela(rows, [['Pontos por rajada', 'média', 'media', fmt1], ['Respostas por rajada', 'certas em 60 s', 'resp', fmt1],
+      ['Respostas encontradas', '% das certas', 'pctr', pct], ['Golos de longe', '50 m ou 100 m', 'raras', v => v], ['Erros por rajada', 'menos é melhor', 'erros', fmt1, true], ['Rajadas', '', 'jogos', v => v]]);
   } else if (m === 'quem') {
     const rows = LIGA.jogadores.map(n => { const g = por(n), ac = g.reduce((s, x) => s + (x.acertos || 0), 0), jog = g.reduce((s, x) => s + (x.jogadores || 0), 0);
       return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.pontos || 0), media:mxMedia(g, x => x.pontos || 0), acerto: jog ? ac / jog : null, pistas: ac ? g.reduce((s, x) => s + (x.pistas || 0), 0) / ac : null}; });
     h += barCard('Melhor jogo', 'pontos em 7 jogadores', rows, 'melhor', v => v ?? '—');
-    h += barCard('Pontos por jogo', 'média', rows, 'media', fmt1);
-    h += barCard('Jogadores acertados', '% dos jogadores', rows, 'acerto', pct);
-    h += barCard('Pistas por acerto', 'quantos clubes precisou de ver (menos é melhor)', rows, 'pistas', fmt1, true);
-    h += barCard('Jogos', '', rows, 'jogos', v => v ?? '—');
+    h += numTabela(rows, [['Pontos por jogo', 'média', 'media', fmt1], ['Jogadores acertados', '% dos jogadores', 'acerto', pct],
+      ['Pistas por acerto', 'clubes vistos (menos é melhor)', 'pistas', fmt1, true], ['Jogos', '', 'jogos', v => v]]);
   } else {
     const temas = (MMD?.temas || []).map(t => [t.id, t.nome]);
     const rows = LIGA.jogadores.map(n => { const g = por(n); return {nome:n, jogos:g.length || null, melhor:mxMax(g, x => x.serie || 0), media:mxMedia(g, x => x.serie || 0)}; });
     h += barCard('Melhor série', 'em qualquer tema', rows, 'melhor', v => v ?? '—');
-    h += barCard('Série média', '', rows, 'media', fmt1);
-    h += barCard('Jogos', '', rows, 'jogos', v => v ?? '—');
+    h += numTabela(rows, [['Série média', '', 'media', fmt1], ['Jogos', '', 'jogos', v => v]]);
     const ids = [...new Set(js.map(g => g.tema))], nomeT = id => (temas.find(t => t[0] === id) || [id, {fee:'Transferências'}[id] || id.replace(/^g/, 'Golos ')])[1];
     h += `<div class="sc"><div class="sc-h"><b>Melhor série por tema</b></div><div class="ct-w"><table class="ct"><thead><tr><th></th>${LIGA.jogadores.map(n => `<th>${emb(n, 18)}<br>${esc(n)}</th>`).join('')}</tr></thead>
       <tbody>${ids.map(id => { const vals = LIGA.jogadores.map(n => mxMax(por(n).filter(g => g.tema === id), x => x.serie || 0)), mx = Math.max(...vals.filter(v => v != null));
@@ -826,9 +819,7 @@ function renderStatsDuelos() {
   }
   const rows = J.map(n => ({nome:n, vit:r[n].n ? r[n].v : null, pctv:r[n].n ? r[n].v / r[n].n : null, media:r[n].n ? r[n].pts / r[n].n : null, jogos:r[n].n || null}));
   let h = barCard('Vitórias', 'duelos ganhos', rows, 'vit', v => v ?? '—');
-  h += barCard('% de vitórias', '', rows, 'pctv', pct);
-  h += barCard('Pontos por duelo', 'média', rows, 'media', fmt1);
-  h += barCard('Duelos', '', rows, 'jogos', v => v ?? '—');
+  h += numTabela(rows, [['% de vitórias', '', 'pctv', pct], ['Pontos por duelo', 'média', 'media', fmt1], ['Duelos', '', 'jogos', v => v]]);
   h += `<div class="sc"><div class="sc-h"><b>Frente a frente</b><span>vitórias – derrotas de quem está na linha contra quem está na coluna</span></div><div class="ct-w"><table class="ct"><thead><tr><th></th>${J.map(n => `<th>${emb(n, 18)}<br>${esc(n)}</th>`).join('')}</tr></thead>
     <tbody>${J.map(a => `<tr><th>${esc(a)}</th>${J.map(b => { if (a === b) return '<td class="ct-e">·</td>'; const [v, e, d] = h2h[a][b]; if (!v && !e && !d) return '<td class="ct-e">—</td>';
       return `<td style="${v > d ? 'background:#1e5a37;color:#fffaf0' : v < d ? 'background:color-mix(in oklab, var(--red) 24%, var(--panel))' : ''}">${v}–${d}${e ? `<small>${e} emp.</small>` : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>`;
